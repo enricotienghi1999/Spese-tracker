@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0f1117">
+<title>Spese Tracker</title>
+<style>
+  :root{
+    --bg:#0f1117; --card:#1a1d26; --card2:#222633; --text:#e8eaf0; --muted:#8b90a0;
+    --accent:#e0b15c; --red:#e0605c; --green:#5cb87a; --blue:#5ca8e0; --line:#2c3140;
+  }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
+  body{background:var(--bg); color:var(--text); font-family:-apple-system,'Segoe UI',Roboto,sans-serif; padding-bottom:90px;}
+  header{padding:18px 16px 8px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;}
+  h1{font-size:1.15rem; letter-spacing:.5px;}
+  .month-nav{display:flex; align-items:center; gap:10px; background:var(--card); border-radius:12px; padding:6px 10px;}
+  .month-nav button{background:none; border:none; color:var(--accent); font-size:1.2rem; cursor:pointer; padding:4px 8px;}
+  .month-nav span{font-weight:600; min-width:110px; text-align:center; text-transform:capitalize;}
+  .kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; padding:10px 16px;}
+  .kpi{background:var(--card); border-radius:14px; padding:12px 14px;}
+  .kpi .lbl{font-size:.72rem; color:var(--muted); text-transform:uppercase; letter-spacing:.6px;}
+  .kpi .val{font-size:1.35rem; font-weight:700; font-variant-numeric:tabular-nums; margin-top:2px;}
+  .kpi.neg .val{color:var(--red);} .kpi.pos .val{color:var(--green);} .kpi.acc .val{color:var(--accent);}
+  .card{background:var(--card); border-radius:14px; margin:12px 16px; padding:14px;}
+  .card h2{font-size:.8rem; color:var(--muted); text-transform:uppercase; letter-spacing:.6px; margin-bottom:12px;}
+  .bar-row{display:flex; align-items:center; gap:10px; margin-bottom:9px;}
+  .bar-row .cat{flex:0 0 145px; font-size:.78rem; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .bar-wrap{flex:1; background:var(--card2); border-radius:8px; height:20px; overflow:hidden;}
+  .bar{height:100%; border-radius:8px; transition:width .4s;}
+  .bar-row .amt{font-size:.8rem; font-variant-numeric:tabular-nums; width:80px; text-align:right;}
+  .trend{display:flex; align-items:flex-end; gap:8px; height:130px; padding-top:10px;}
+  .trend-col{flex:1; display:flex; flex-direction:column; align-items:center; gap:6px; height:100%; justify-content:flex-end;}
+  .trend-bar{width:100%; max-width:46px; border-radius:6px 6px 0 0; background:var(--accent); min-height:3px;}
+  .trend-col .m{font-size:.68rem; color:var(--muted); text-transform:uppercase;}
+  .trend-col .v{font-size:.68rem; font-variant-numeric:tabular-nums;}
+  .tx{display:flex; align-items:center; gap:12px; padding:11px 4px; border-bottom:1px solid var(--line);}
+  .tx:last-child{border-bottom:none;}
+  .dot{width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.05rem; flex-shrink:0; background:var(--card2);}
+  .tx .info{flex:1; min-width:0;}
+  .tx .cat-name{font-size:.9rem; font-weight:600;}
+  .tx .note{font-size:.75rem; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .tx .date{font-size:.7rem; color:var(--muted);}
+  .tx .amount{font-weight:700; font-variant-numeric:tabular-nums;}
+  .tx .amount.out{color:var(--red);} .tx .amount.in{color:var(--green);}
+  .tx .del{background:none; border:none; color:var(--muted); font-size:1rem; cursor:pointer; padding:6px;}
+  .trip-badge{display:inline-block; font-size:.68rem; background:#5ca8e022; color:#7db8ec; border-radius:6px; padding:1px 7px; margin-left:6px;}
+  .split{display:flex; height:14px; border-radius:7px; overflow:hidden; background:var(--card2); margin-top:8px;}
+  .split div{height:100%;}
+  .split-legend{display:flex; gap:16px; margin-top:8px; font-size:.75rem; color:var(--muted);}
+  .split-legend b{color:var(--text);}
+  form{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  form .full{grid-column:1/-1;}
+  label{font-size:.7rem; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; display:block; margin-bottom:4px;}
+  input,select,textarea{width:100%; background:var(--card2); border:1px solid var(--line); color:var(--text); border-radius:10px; padding:11px 12px; font-size:1rem;}
+  input:focus,select:focus{outline:none; border-color:var(--accent);}
+  .btn{background:var(--accent); color:#14161d; border:none; border-radius:12px; padding:14px; font-size:1rem; font-weight:700; cursor:pointer; width:100%;}
+  .btn.ghost{background:var(--card2); color:var(--text); font-weight:500; padding:10px; font-size:.85rem;}
+  .toolbar{display:flex; gap:10px; margin:12px 16px; flex-wrap:wrap;}
+  .toolbar .btn{width:auto; flex:1; min-width:110px;}
+  .empty{text-align:center; color:var(--muted); padding:24px 0; font-size:.85rem;}
+  .type-toggle{display:grid; grid-template-columns:1fr 1fr; background:var(--card2); border-radius:10px; padding:4px; gap:4px;}
+  .type-toggle button{border:none; border-radius:8px; padding:10px; font-weight:600; background:none; color:var(--muted); cursor:pointer;}
+  .type-toggle button.active-out{background:var(--red); color:#fff;}
+  .type-toggle button.active-in{background:var(--green); color:#fff;}
+  .trip-card{background:var(--card2); border-radius:12px; padding:12px 14px; margin-bottom:10px; cursor:pointer;}
+  .trip-card .trip-head{display:flex; align-items:center; justify-content:space-between;}
+  .trip-card .trip-name{font-weight:700; font-size:.95rem;}
+  .trip-card .trip-total{font-weight:700; color:var(--accent); font-variant-numeric:tabular-nums;}
+  .trip-card .trip-meta{font-size:.72rem; color:var(--muted); margin-top:3px;}
+  .trip-detail{display:none; margin-top:10px; border-top:1px solid var(--line); padding-top:8px;}
+  .trip-card.open .trip-detail{display:block;}
+  .trip-detail .row{display:flex; justify-content:space-between; font-size:.8rem; padding:4px 0; color:var(--muted);}
+  .trip-detail .row b{color:var(--text); font-variant-numeric:tabular-nums;}
+  .trip-filter-bar{display:flex; align-items:center; gap:8px; background:var(--card2); border-radius:10px; padding:8px 12px; margin-bottom:10px; font-size:.8rem;}
+  .trip-filter-bar button{background:none; border:none; color:var(--red); font-size:1rem; cursor:pointer;}
+  .trip-del{float:right; background:none; border:none; color:var(--muted); font-size:.7rem; cursor:pointer; padding:2px 4px;}
+  .toast{position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px); background:var(--green); color:#fff; padding:10px 22px; border-radius:24px; font-weight:600; transition:transform .3s; z-index:99;}
+  .toast.show{transform:translateX(-50%) translateY(0);}
+  .sync-status{display:flex; align-items:center; gap:8px; font-size:.78rem; color:var(--muted);}
+  .sync-dot{width:9px; height:9px; border-radius:50%; background:var(--muted);}
+  .sync-dot.on{background:var(--green); box-shadow:0 0 8px var(--green);}
+  .sync-dot.off{background:var(--accent);}
+  .auth-form{display:grid; gap:8px;}
+  .auth-actions{display:flex; gap:8px; margin-top:2px;}
+  .auth-actions .btn{flex:1; padding:11px; font-size:.85rem;}
+  .auth-logged{font-size:.85rem; display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>💸 Spese Tracker</h1>
+  <div style="display:flex; align-items:center; gap:12px;">
+    <div class="sync-status"><span class="sync-dot off" id="syncDot"></span><span id="syncLabel">solo locale</span></div>
+    <div class="month-nav">
+      <button onclick="shiftMonth(-1)">‹</button>
+      <span id="monthLabel"></span>
+      <button onclick="shiftMonth(1)">›</button>
+    </div>
+  </div>
+</header>
+
+<div class="card" id="authCard">
+  <h2>☁️ Sincronizzazione</h2>
+  <div id="authBox"></div>
+</div>
+
+<div class="kpis">
+  <div class="kpi acc"><div class="lbl">Spese mese</div><div class="val" id="kpiMonth">—</div></div>
+  <div class="kpi pos"><div class="lbl">Entrate mese</div><div class="val" id="kpiIn">—</div></div>
+  <div class="kpi"><div class="lbl">Saldo mese</div><div class="val" id="kpiSaldo">—</div></div>
+  <div class="kpi neg"><div class="lbl">Spese anno</div><div class="val" id="kpiYear">—</div></div>
+</div>
+
+<div class="card">
+  <h2>➕ Aggiungi movimento</h2>
+  <form onsubmit="return addTx(event)">
+    <div class="full">
+      <div class="type-toggle">
+        <button type="button" id="btnOut" class="active-out" onclick="setType('uscita')">Uscita</button>
+        <button type="button" id="btnIn" onclick="setType('entrata')">Entrata</button>
+      </div>
+    </div>
+    <div>
+      <label>Importo €</label>
+      <input type="number" id="fAmount" step="0.01" min="0.01" inputmode="decimal" required placeholder="0.00">
+    </div>
+    <div>
+      <label>Data</label>
+      <input type="date" id="fDate" required>
+    </div>
+    <div class="full">
+      <label>Categoria</label>
+      <select id="fCat"></select>
+    </div>
+    <div class="full">
+      <label>🏷️ Tag (viaggio / progetto — opzionale)</label>
+      <input type="text" id="fTrip" list="tripList" placeholder="es. Bali, Weekend montagna...">
+      <datalist id="tripList"></datalist>
+    </div>
+    <div class="full">
+      <label>Nota (opzionale)</label>
+      <input type="text" id="fNote" placeholder="es. cena con amici">
+    </div>
+    <div class="full"><button class="btn" type="submit">Salva</button></div>
+  </form>
+</div>
+
+<div class="card">
+  <h2>✈️ Viaggi & progetti</h2>
+  <div id="tripsList"></div>
+</div>
+
+<div class="card">
+  <h2>📊 Per categoria — <span id="catMonth"></span></h2>
+  <div id="catBars"></div>
+</div>
+
+<div class="card">
+  <h2>📈 Trend spese — ultimi 6 mesi</h2>
+  <div class="trend" id="trend"></div>
+</div>
+
+<div class="card">
+  <h2>⚖️ Fisse vs variabili — <span id="splitMonth"></span></h2>
+  <div class="split" id="splitBar"></div>
+  <div class="split-legend">
+    <span>🏠 Fisse: <b id="splitFixed"></b></span>
+    <span>🎲 Variabili: <b id="splitVar"></b></span>
+  </div>
+</div>
+
+<div class="card">
+  <h2>🧾 Movimenti</h2>
+  <div id="tripFilterBar" style="display:none" class="trip-filter-bar">
+    🏷️ Filtro attivo: <b id="tripFilterName"></b> <button onclick="clearTripFilter()">✕</button>
+  </div>
+  <div id="txList"></div>
+</div>
+
+<div class="toolbar">
+  <button class="btn ghost" onclick="exportCSV()">📥 Esporta CSV</button>
+  <button class="btn ghost" onclick="exportJSON()">💾 Backup JSON</button>
+  <button class="btn ghost" onclick="document.getElementById('importFile').click()">📂 Ripristina</button>
+  <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(this)">
+  <button class="btn ghost" onclick="wipeAll()">🗑️ Cancella tutto</button>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA3KHBaBTFk_rMbPzKihthEdVXBm3iTOSk",
+  authDomain: "spese-tracker-6699b.firebaseapp.com",
+  projectId: "spese-tracker-6699b",
+  storageBucket: "spese-tracker-6699b.firebasestorage.app",
+  messagingSenderId: "743054445943",
+  appId: "1:743054445943:web:2774fffb61d2eccf966572"
+};
+
+const CATS = {
+  "AFFITTO & BOLLETTE":"🏠","SPESA (SUPER)":"🛒","PRANZI & CENE":"🍽️","BAR & COLAZIONE":"🥐","CAFFÈ":"☕",
+  "GELATI & SNACK":"🍦","FOOD DELIVERY":"🛵","DRINK & APERITIVI":"🍹","BENZINA":"⛽","UBER / TAXI":"🚕",
+  "TRASPORTI PUBBLICI":"🚇","PARCHEGGI & PEDAGGI":"🅿️","ABBONAMENTI":"🔁","SIGARETTE":"🚬","VESTITI":"👕",
+  "ENTRATE DISCO":"🎟️","REGALI":"🎁","MEDICINE & VISITE":"💊","VIAGGI":"✈️","DEBITI":"📋","ALTRO":"📦"
+};
+const FISSE = new Set(["AFFITTO & BOLLETTE","ABBONAMENTI"]);
+const PALETTE = ["#e0b15c","#5cb87a","#e0605c","#5ca8e0","#b85ce0","#e0955c","#5ce0c8","#e05c9a","#a8b85c","#8b90e0"];
+const catNames = Object.keys(CATS);
+const catColor = c => PALETTE[Math.max(0, catNames.indexOf(c)) % PALETTE.length];
+const fmt = new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR'});
+const MESI = ["gennaio","febbraio","marzo","aprile","maggio","giugno","luglio","agosto","settembre","ottobre","novembre","dicembre"];
+
+// ---------- stato locale ----------
+let tx = [];
+let tomb = []; // id eliminati (per sincronizzare le cancellazioni)
+let openTrips = new Set();
+try { tx = JSON.parse(localStorage.getItem('speseTx') || '[]'); } catch(e){ tx = []; }
+try { tomb = JSON.parse(localStorage.getItem('speseTomb') || '[]'); } catch(e){ tomb = []; }
+try { openTrips = new Set(JSON.parse(localStorage.getItem('speseOpenTrips') || '[]')); } catch(e){}
+let cur = new Date(); cur = {y: cur.getFullYear(), m: cur.getMonth()};
+let tipo = 'uscita';
+let tripFilter = null;
+
+function saveLocal(){
+  localStorage.setItem('speseTx', JSON.stringify(tx));
+  localStorage.setItem('speseTomb', JSON.stringify(tomb));
+  localStorage.setItem('speseOpenTrips', JSON.stringify([...openTrips]));
+}
+function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
+
+// ---------- firebase ----------
+const fbApp = initializeApp(firebaseConfig);
+const auth = getAuth(fbApp);
+const db = getFirestore(fbApp);
+let unsub = null;
+let lastPushJson = '';
+
+function setSync(on, label){
+  document.getElementById('syncDot').className = 'sync-dot ' + (on ? 'on' : 'off');
+  document.getElementById('syncLabel').textContent = label;
+}
+function dataJson(){ return JSON.stringify({tx, tomb}); }
+
+function pushCloud(){
+  if(!auth.currentUser) return;
+  lastPushJson = dataJson();
+  setDoc(doc(db, 'users', auth.currentUser.uid), {tx, tomb, updatedAt: Date.now()})
+    .catch(err => { console.warn('Sync error', err); setSync(false, 'errore sync'); });
+}
+function mergeCloud(cloudTx, cloudTomb){
+  const dead = new Set(cloudTomb || []);
+  tx = tx.filter(t => !dead.has(t.id));
+  tomb = [...new Set([...tomb, ...cloudTomb])].slice(-500);
+  const cIds = new Set(cloudTx.map(t => t.id));
+  const localOnly = tx.filter(t => !cIds.has(t.id));
+  tx = [...cloudTx, ...localOnly];
+}
+
+const authBox = document.getElementById('authBox');
+function renderAuth(user){
+  if(user){
+    authBox.innerHTML = `<div class="auth-logged">
+      <span>✅ Connesso come <b>${esc(user.email)}</b> — i dati si sincronizzano su tutti i dispositivi</span>
+      <button class="btn ghost" style="width:auto" onclick="doSignOut()">Esci</button></div>`;
+  } else {
+    authBox.innerHTML = `<div class="auth-form">
+      <div><label>Email</label><input type="email" id="aEmail" autocomplete="email" placeholder="tua@email.com"></div>
+      <div><label>Password</label><input type="password" id="aPass" autocomplete="current-password" placeholder="••••••••"></div>
+      <div class="auth-actions">
+        <button class="btn" onclick="doLogin()">Accedi</button>
+        <button class="btn ghost" onclick="doRegister()">Crea account</button>
+      </div>
+      <div id="authErr" style="color:var(--red); font-size:.78rem;"></div>
+    </div>`;
+  }
+}
+window.doLogin = async () => {
+  const err = document.getElementById('authErr'); err.textContent = '';
+  try {
+    await signInWithEmailAndPassword(auth, document.getElementById('aEmail').value.trim(), document.getElementById('aPass').value);
+  } catch(e){ err.textContent = mapAuthErr(e); }
+};
+window.doRegister = async () => {
+  const err = document.getElementById('authErr'); err.textContent = '';
+  try {
+    await createUserWithEmailAndPassword(auth, document.getElementById('aEmail').value.trim(), document.getElementById('aPass').value);
+  } catch(e){ err.textContent = mapAuthErr(e); }
+};
+window.doSignOut = async () => { await signOut(auth); };
+function mapAuthErr(e){
+  const m = {
+    'auth/invalid-email': 'Email non valida',
+    'auth/user-not-found': 'Account non trovato — usa "Crea account"',
+    'auth/wrong-password': 'Password errata',
+    'auth/invalid-credential': 'Credenziali errate',
+    'auth/email-already-in-use': 'Email già registrata — usa "Accedi"',
+    'auth/weak-password': 'Password troppo corta (min. 6 caratteri)',
+    'auth/too-many-requests': 'Troppi tentativi, riprova tra poco',
+    'auth/network-request-failed': 'Problema di rete'
+  };
+  return m[e.code] || ('Errore: ' + e.code);
+}
+
+onAuthStateChanged(auth, user => {
+  renderAuth(user);
+  if(unsub){ unsub(); unsub = null; }
+  if(user){
+    setSync(false, 'connessione...');
+    unsub = onSnapshot(doc(db, 'users', user.uid), snap => {
+      if(!snap.exists()){
+        // primo accesso: carico quello che ho in locale sul cloud
+        pushCloud(); setSync(true, 'sincronizzato'); render(); return;
+      }
+      const d = snap.data();
+      if(JSON.stringify({tx: d.tx||[], tomb: d.tomb||[]}) === lastPushJson && lastPushJson !== ''){
+        setSync(true, 'sincronizzato'); return; // mio stesso push
+      }
+      mergeCloud(d.tx || [], d.tomb || []);
+      saveLocal(); setSync(true, 'sincronizzato'); render(); pushCloud();
+    }, err => { console.warn(err); setSync(false, 'errore sync'); });
+  } else {
+    setSync(false, 'solo locale');
+    render();
+  }
+});
+
+// ---------- UI ----------
+const sel = document.getElementById('fCat');
+catNames.forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = CATS[c] + ' ' + c; sel.appendChild(o); });
+document.getElementById('fDate').value = new Date().toISOString().slice(0,10);
+
+function toast(msg){
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t);
+  requestAnimationFrame(()=>t.classList.add('show'));
+  setTimeout(()=>{ t.classList.remove('show'); setTimeout(()=>t.remove(), 400); }, 1600);
+}
+window.setType = function(t){
+  tipo = t;
+  document.getElementById('btnOut').className = t==='uscita' ? 'active-out' : '';
+  document.getElementById('btnIn').className  = t==='entrata' ? 'active-in' : '';
+};
+window.shiftMonth = function(d){
+  cur.m += d;
+  if(cur.m < 0){ cur.m = 11; cur.y--; }
+  if(cur.m > 11){ cur.m = 0; cur.y++; }
+  render();
+};
+window.addTx = function(e){
+  e.preventDefault();
+  const a = parseFloat(document.getElementById('fAmount').value);
+  const d = document.getElementById('fDate').value;
+  const c = sel.value;
+  const n = document.getElementById('fNote').value.trim();
+  const tr = document.getElementById('fTrip').value.trim();
+  if(!(a > 0) || !d) return false;
+  tx.push({id: Date.now() + Math.random(), date: d, amount: a, cat: c, note: n, tipo, trip: tr || undefined});
+  saveLocal(); pushCloud();
+  document.getElementById('fAmount').value = '';
+  document.getElementById('fNote').value = '';
+  document.getElementById('fTrip').value = '';
+  const [y,m] = d.split('-').map(Number); cur = {y, m: m-1};
+  render();
+  toast(tipo === 'uscita' ? '−' + fmt.format(a) + ' salvato ✓' : '+' + fmt.format(a) + ' salvato ✓');
+  return false;
+};
+window.delTx = function(id){
+  if(confirm('Eliminare questo movimento?')){
+    tx = tx.filter(t => t.id !== id);
+    tomb.push(id); tomb = tomb.slice(-500);
+    saveLocal(); pushCloud(); render();
+  }
+};
+function inMonth(t, y, m){ const [yy,mm] = t.date.split('-').map(Number); return yy===y && mm-1===m; }
+function tripTotals(){
+  const trips = {};
+  tx.filter(t => t.trip && t.tipo==='uscita').forEach(t => {
+    if(!trips[t.trip]) trips[t.trip] = {total:0, count:0, byCat:{}, min:t.date, max:t.date};
+    const o = trips[t.trip];
+    o.total += t.amount; o.count++;
+    o.byCat[t.cat] = (o.byCat[t.cat]||0) + t.amount;
+    if(t.date < o.min) o.min = t.date;
+    if(t.date > o.max) o.max = t.date;
+  });
+  return trips;
+}
+
+function render(){
+  document.getElementById('monthLabel').textContent = MESI[cur.m] + ' ' + cur.y;
+  const mt = tx.filter(t => inMonth(t, cur.y, cur.m));
+  const outM = mt.filter(t=>t.tipo==='uscita').reduce((s,t)=>s+t.amount,0);
+  const inM  = mt.filter(t=>t.tipo==='entrata').reduce((s,t)=>s+t.amount,0);
+  const yearOut = tx.filter(t=>{const [yy]=t.date.split('-').map(Number); return yy===cur.y && t.tipo==='uscita';}).reduce((s,t)=>s+t.amount,0);
+
+  document.getElementById('kpiMonth').textContent = fmt.format(outM);
+  document.getElementById('kpiIn').textContent = fmt.format(inM);
+  const saldo = inM - outM;
+  document.getElementById('kpiSaldo').textContent = (saldo>=0?'+':'') + fmt.format(saldo);
+  document.getElementById('kpiSaldo').style.color = saldo>=0 ? 'var(--green)' : 'var(--red)';
+  document.getElementById('kpiYear').textContent = fmt.format(yearOut);
+
+  const trips = tripTotals();
+  document.getElementById('tripList').innerHTML = Object.keys(trips).map(t=>`<option value="${esc(t)}">`).join('');
+
+  const tEntries = Object.entries(trips).sort((a,b)=>b[1].total-a[1].total);
+  document.getElementById('tripsList').innerHTML = tEntries.length ? tEntries.map(([name, o]) => {
+    const open = openTrips.has(name) ? ' open' : '';
+    const rows = Object.entries(o.byCat).sort((a,b)=>b[1]-a[1]).map(([c,v]) =>
+      `<div class="row"><span>${CATS[c]||'📦'} ${c}</span><b>${fmt.format(v)}</b></div>`).join('');
+    const period = o.min === o.max ? fmtDate(o.min) : fmtDate(o.min) + ' → ' + fmtDate(o.max);
+    return `<div class="trip-card${open}" id="trip-${hash(name)}">
+      <button class="trip-del" onclick="delTrip(event,'${esc(name)}')" title="Rimuovi tag da tutte le spese">rimuovi tag</button>
+      <div class="trip-head" onclick="toggleTrip('${esc(name)}')">
+        <span class="trip-name">🏷️ ${esc(name)}</span>
+        <span class="trip-total">${fmt.format(o.total)}</span>
+      </div>
+      <div class="trip-meta">${o.count} spese · ${period}</div>
+      <div class="trip-detail">${rows}
+        <div class="row" style="margin-top:6px"><button class="btn ghost" style="font-size:.75rem;padding:6px" onclick="filterTrip(event,'${esc(name)}')">🔍 Vedi nel bilancio</button></div>
+      </div></div>`;
+  }).join('') : '<div class="empty">Nessun viaggio ancora — aggiungi un tag quando inserisci una spesa ✈️</div>';
+
+  document.getElementById('catMonth').textContent = MESI[cur.m];
+  const byCat = {};
+  mt.filter(t=>t.tipo==='uscita').forEach(t => byCat[t.cat] = (byCat[t.cat]||0) + t.amount);
+  const entries = Object.entries(byCat).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  const max = entries.length ? entries[0][1] : 1;
+  document.getElementById('catBars').innerHTML = entries.length ? entries.map(([c,v]) =>
+    `<div class="bar-row"><span class="cat" title="${c}">${CATS[c]||'📦'} ${c}</span>
+     <div class="bar-wrap"><div class="bar" style="width:${(v/max*100).toFixed(1)}%;background:${catColor(c)}"></div></div>
+     <span class="amt">${fmt.format(v)}</span></div>`).join('') : '<div class="empty">Nessuna spesa questo mese</div>';
+
+  let trendHtml = '';
+  const maxM = Math.max(...Array.from({length:6},(_,i)=>{const d=new Date(cur.y,cur.m-i,1); return tx.filter(t=>inMonth(t,d.getFullYear(),d.getMonth())&&t.tipo==='uscita').reduce((s,t)=>s+t.amount,0);}), 1);
+  for(let i=5;i>=0;i--){
+    let d = new Date(cur.y, cur.m - i, 1);
+    const tot = tx.filter(t=>inMonth(t,d.getFullYear(),d.getMonth()) && t.tipo==='uscita').reduce((s,t)=>s+t.amount,0);
+    trendHtml += `<div class="trend-col" title="${fmt.format(tot)}">
+      <span class="v">${tot>0 ? '€'+Math.round(tot) : ''}</span>
+      <div class="trend-bar" style="height:${tot>0 ? Math.max(4, tot/maxM*100) : 3}px; opacity:${i===0?1:.55}"></div>
+      <span class="m">${MESI[d.getMonth()].slice(0,3)}</span></div>`;
+  }
+  document.getElementById('trend').innerHTML = trendHtml;
+
+  document.getElementById('splitMonth').textContent = MESI[cur.m];
+  const fixed = mt.filter(t=>t.tipo==='uscita' && FISSE.has(t.cat)).reduce((s,t)=>s+t.amount,0);
+  const variable = outM - fixed;
+  const pct = outM>0 ? (fixed/outM*100).toFixed(1) : 0;
+  document.getElementById('splitBar').innerHTML =
+    `<div style="width:${pct}%;background:#5ca8e0"></div><div style="width:${100-pct}%;background:#e0b15c"></div>`;
+  document.getElementById('splitFixed').textContent = fmt.format(fixed);
+  document.getElementById('splitVar').textContent = fmt.format(variable);
+
+  let list = [...mt].sort((a,b)=> b.date.localeCompare(a.date) || b.id - a.id);
+  const bar = document.getElementById('tripFilterBar');
+  if(tripFilter){
+    bar.style.display = 'flex';
+    document.getElementById('tripFilterName').textContent = tripFilter;
+    list = list.filter(t => t.trip === tripFilter);
+  } else bar.style.display = 'none';
+
+  document.getElementById('txList').innerHTML = list.length ? list.map(t => {
+    const d = new Date(t.date + 'T00:00:00');
+    return `<div class="tx">
+      <div class="dot">${CATS[t.cat]||'📦'}</div>
+      <div class="info"><div class="cat-name">${t.cat}${t.trip ? `<span class="trip-badge">🏷️ ${esc(t.trip)}</span>` : ''}</div>
+        ${t.note ? `<div class="note">${esc(t.note)}</div>` : ''}
+        <div class="date">${d.getDate()} ${MESI[d.getMonth()].slice(0,3)} ${d.getFullYear()}</div></div>
+      <span class="amount ${t.tipo==='uscita'?'out':'in'}">${t.tipo==='uscita'?'−':'+'}${fmt.format(t.amount)}</span>
+      <button class="del" onclick="delTx(${JSON.stringify(t.id)})">✕</button></div>`;
+  }).join('') : '<div class="empty">Nessun movimento' + (tripFilter ? ' per questo tag' : ' in questo mese') + '</div>';
+}
+
+function hash(s){ let h=0; for(let i=0;i<s.length;i++){ h=(h*31 + s.charCodeAt(i))|0; } return 'h' + Math.abs(h); }
+function fmtDate(iso){ const d = new Date(iso+'T00:00:00'); return d.getDate() + ' ' + MESI[d.getMonth()].slice(0,3) + ' ' + d.getFullYear(); }
+window.toggleTrip = function(name){
+  openTrips.has(name) ? openTrips.delete(name) : openTrips.add(name);
+  saveLocal();
+  document.getElementById('trip-' + hash(name)).classList.toggle('open');
+};
+window.filterTrip = function(e, name){
+  e.stopPropagation();
+  tripFilter = name;
+  render();
+  document.querySelectorAll('.card')[6].scrollIntoView({behavior:'smooth'});
+};
+window.clearTripFilter = function(){ tripFilter = null; render(); };
+window.delTrip = function(e, name){
+  e.stopPropagation();
+  if(confirm(`Rimuovere il tag "${name}" da tutte le spese? (Le spese restano nel bilancio)`)){
+    tx.forEach(t => { if(t.trip === name) delete t.trip; });
+    if(tripFilter === name) tripFilter = null;
+    openTrips.delete(name);
+    saveLocal(); pushCloud(); render();
+  }
+};
+
+window.exportCSV = function(){
+  const rows = [['Data','Tipo','Categoria','Importo','Tag','Nota'],
+    ...tx.map(t=>[t.date, t.tipo, t.cat, t.amount.toFixed(2).replace('.',','), t.trip||'', t.note||''])];
+  const csv = rows.map(r=>r.map(c=>`"${c}"`).join(';')).join('\n');
+  download(new Blob(['\ufeff'+csv],{type:'text/csv'}), 'spese.csv');
+};
+window.exportJSON = function(){ download(new Blob([JSON.stringify(tx,null,1)],{type:'application/json'}), 'spese-backup.json'); };
+function download(blob, name){ const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click(); }
+window.importJSON = function(inp){
+  const f = inp.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = () => { try {
+      const d = JSON.parse(r.result);
+      if(!Array.isArray(d)) throw 0;
+      if(confirm(`Importare ${d.length} movimenti? Sostituiranno quelli attuali.`)){ tx = d; saveLocal(); pushCloud(); render(); }
+    } catch(e){ alert('File non valido'); } };
+  r.readAsText(f); inp.value = '';
+};
+window.wipeAll = function(){
+  if(confirm('Cancellare TUTTI i dati? Questa azione è irreversibile.') && confirm('Sei proprio sicuro?')){
+    tx = []; tomb = [];
+    saveLocal(); pushCloud(); render();
+  }
+};
+
+renderAuth(null);
+render();
+</script>
+</body>
+</html>
