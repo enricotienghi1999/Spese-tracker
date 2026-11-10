@@ -63,6 +63,7 @@
   .sync-dot{width:8px; height:8px; border-radius:50%; background:var(--muted);}
   .sync-dot.on{background:var(--green); box-shadow:0 0 8px var(--green);}
   .sync-dot.off{background:var(--gold);}
+  .sync-dot.demo{background:var(--accent); box-shadow:0 0 8px var(--accent);}
   .link-btn{background:none; border:none; color:var(--muted); font-size:.7rem; cursor:pointer; text-decoration:underline;}
   .month-btn{display:inline-flex; align-items:center; gap:7px; background:var(--card); border:1px solid var(--line); color:var(--text);
     border-radius:20px; padding:8px 14px; font-weight:600; font-size:.88rem; cursor:pointer; text-transform:capitalize;
@@ -170,13 +171,13 @@
   .proj-card .p-name{font-weight:600; font-size:.95rem; display:flex; align-items:center; gap:8px;}
   .proj-card .p-name .ti{color:var(--accent); font-size:1.1rem;}
   .proj-card .p-total{font-weight:700; font-variant-numeric:tabular-nums; font-size:1.02rem;}
-  .proj-card .p-meta{font-size:.72rem; color:var(--muted); margin-top:4px;}
+  .proj-card .p-meta{font-size:.72rem; color:var(--muted); margin-top:4px; display:flex; align-items:center; justify-content:space-between; gap:10px;}
   .proj-detail{display:none; margin-top:11px; border-top:1px solid var(--line); padding-top:9px;}
   .proj-card.open .proj-detail{display:block;}
   .proj-detail .row{display:flex; justify-content:space-between; align-items:center; font-size:.8rem; padding:4px 0; color:var(--muted);}
   .proj-detail .row span{display:flex; align-items:center; gap:7px;}
   .proj-detail .row b{color:var(--text); font-variant-numeric:tabular-nums; font-weight:600;}
-  .proj-del{float:right; background:none; border:none; color:var(--red); font-size:.7rem; cursor:pointer; padding:2px 4px 2px 12px; font-family:inherit; opacity:.8;}
+  .proj-del{background:none; border:none; color:var(--red); font-size:.7rem; cursor:pointer; padding:2px 0 2px 8px; font-family:inherit; opacity:.8; flex-shrink:0;}
   .trip-filter-bar{display:flex; align-items:center; gap:8px; background:var(--accent-dk); border:1px solid color-mix(in srgb,var(--accent) 40%,transparent);
     border-radius:12px; padding:9px 13px; margin-bottom:11px; font-size:.8rem; color:var(--text);}
   .trip-filter-bar .ti-tag{color:var(--accent);}
@@ -422,7 +423,7 @@ const firebaseConfig = {
 
 // categoria -> icona Tabler (elenco completo: https://tabler.io/icons)
 const CATS = {
-  "AFFITTO & BOLLETTE":"home","SPESA (SUPER)":"shopping-cart","PRANZI & CENE":"tools-kitchen-2","BAR & COLAZIONE":"bread","CAFFÈ":"coffee",
+  "AFFITTO & BOLLETTE":"home","SPESA (SUPER)":"shopping-cart","PRANZI & CENE":"tools-kitchen-2","BAR & COLAZIONE":"baguette","CAFFÈ":"coffee",
   "GELATI & SNACK":"ice-cream","FOOD DELIVERY":"moped","DRINK & APERITIVI":"glass-cocktail","BENZINA":"gas-station","UBER / TAXI":"car",
   "TRASPORTI PUBBLICI":"train","PARCHEGGI & PEDAGGI":"parking","ABBONAMENTI":"repeat","SIGARETTE":"smoking","VESTITI":"shirt",
   "ENTRATE DISCO":"ticket","REGALI":"gift","MEDICINE & VISITE":"pill","VIAGGI":"plane","DEBITI":"receipt-2","ALTRO":"package"
@@ -435,12 +436,110 @@ const label = c => c.charAt(0) + c.slice(1).toLowerCase();
 const fmt = new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR'});
 const MESI = ["gennaio","febbraio","marzo","aprile","maggio","giugno","luglio","agosto","settembre","ottobre","novembre","dicembre"];
 
+// ---------- modalità demo ----------
+// Apri il sito con ?demo in fondo all'indirizzo (es. .../Spese-tracker/?demo):
+// carica spese di esempio per tutto l'anno, NON legge e NON salva nulla
+// (né sul telefono né su Firebase). I tuoi dati veri restano intatti.
+const DEMO = new URLSearchParams(location.search).has('demo');
+
+function demoData(){
+  // numeri "casuali" ma con seme fisso: a ogni apertura escono gli stessi dati
+  let s = 20261110;
+  const rnd = () => { s = s + 0x6D2B79F5 | 0; let t = Math.imul(s ^ s >>> 15, 1 | s);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+  const between = (a, b) => Math.round((a + rnd() * (b - a)) * 100) / 100;
+  const nr = (a, b) => a + Math.floor(rnd() * (b - a + 1));
+  const pick = arr => arr[Math.floor(rnd() * arr.length)];
+  const today = new Date(), Y = today.getFullYear();
+  const iso = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  const todayIso = iso(today);
+  const day = (m, d) => iso(new Date(Y, m, d));
+  const out = []; let id = 1;
+  const add = (date, cat, amount, note = '', tipo = 'uscita', trip) => {
+    if(date > todayIso) return; // niente spese nel futuro
+    out.push({id: id++, date, amount: Math.round(amount * 100) / 100, cat, note, tipo, ...(trip ? {trip} : {})});
+  };
+  // n spese della stessa categoria in giorni casuali del mese m
+  const times = (m, n, cat, min, max, notes) => {
+    const last = new Date(Y, m + 1, 0).getDate();
+    for(let i = 0; i < n; i++) add(day(m, nr(1, last)), cat, between(min, max), notes ? pick(notes) : '');
+  };
+
+  for(let m = 0; m <= today.getMonth(); m++){
+    const summer = m >= 5 && m <= 8, winter = m <= 2 || m >= 10;
+    // entrate
+    add(day(m, 3), 'ALTRO', 2150, 'Stipendio', 'entrata');
+    if(rnd() < .3) add(day(m, nr(5, 25)), 'ALTRO', between(20, 80), pick(['Rimborso Splitwise','Vendita su Vinted','Rimborso spese']), 'entrata');
+    // fisse
+    add(day(m, 1), 'AFFITTO & BOLLETTE', 650, 'Affitto');
+    add(day(m, 5), 'AFFITTO & BOLLETTE', 29.90, 'Internet fibra');
+    if(m % 2 === 1) add(day(m, 18), 'AFFITTO & BOLLETTE', winter ? between(110, 160) : between(60, 95), 'Bolletta luce e gas');
+    add(day(m, 2), 'ABBONAMENTI', 49, 'Palestra');
+    add(day(m, 3), 'ABBONAMENTI', 11.99, 'Spotify');
+    add(day(m, 8), 'ABBONAMENTI', 13.99, 'Netflix');
+    add(day(m, 1), 'TRASPORTI PUBBLICI', 39, 'Abbonamento ATM');
+    // variabili
+    times(m, nr(5, 7), 'SPESA (SUPER)', 18, 75, ['Esselunga','Carrefour','Lidl','Pam','Esselunga']);
+    times(m, nr(4, 7), 'PRANZI & CENE', 12, 48, ['pranzo ufficio','sushi','pizza con amici','cena fuori','poke','pranzo ufficio']);
+    times(m, nr(5, 9), 'BAR & COLAZIONE', 2.5, 7.5, ['cornetto e cappuccino','colazione al bar','']);
+    times(m, nr(4, 8), 'CAFFÈ', 1.2, 2.5);
+    times(m, summer ? nr(3, 6) : nr(0, 2), 'GELATI & SNACK', 2.5, 6);
+    times(m, nr(1, 3), 'FOOD DELIVERY', 16, 34, ['Deliveroo','Glovo','Just Eat']);
+    times(m, summer ? nr(4, 7) : nr(2, 5), 'DRINK & APERITIVI', 8, 32, ['aperitivo Navigli','spritz','drink con colleghi','birra']);
+    times(m, nr(1, 2), 'BENZINA', 45, 65);
+    times(m, nr(0, 2), 'UBER / TAXI', 11, 26, ['taxi','Uber notte']);
+    times(m, nr(0, 2), 'PARCHEGGI & PEDAGGI', 3, 14, ['parcheggio','strisce blu']);
+    times(m, (m === 0 || m === 6) ? nr(2, 3) : nr(0, 1), 'VESTITI', 25, 110, ['Zara','saldi','scarpe','Uniqlo']);
+    times(m, nr(0, 2), 'ENTRATE DISCO', 15, 25);
+    times(m, rnd() < .4 ? 1 : 0, 'REGALI', 20, 60, ['regalo compleanno']);
+    times(m, rnd() < .35 ? 1 : 0, 'MEDICINE & VISITE', 8, 45, ['farmacia','visita']);
+    times(m, nr(0, 2), 'ALTRO', 9, 45, ['Amazon','barbiere','lavanderia']);
+  }
+
+  // progetti: 2 viaggi + 2 weekend in montagna  [mese (0 = gennaio), giorno, categoria, importo, nota]
+  const trip = (name, items) => items.forEach(([m, d, cat, amount, note]) => add(day(m, d), cat, amount, note, 'uscita', name));
+  trip('Weekend Cervinia', [
+    [1, 7, 'BENZINA', 58, 'pieno per Cervinia'], [1, 7, 'PARCHEGGI & PEDAGGI', 21.40, 'autostrada A5'],
+    [1, 7, 'VIAGGI', 128, 'skipass 2 giorni'], [1, 7, 'ALTRO', 35, 'noleggio sci'],
+    [1, 7, 'PRANZI & CENE', 32, 'polenta in baita'], [1, 7, 'DRINK & APERITIVI', 18, 'après-ski'],
+    [1, 7, 'VIAGGI', 140, 'hotel mezza pensione'], [1, 8, 'PRANZI & CENE', 28, 'pranzo in quota'],
+    [1, 8, 'PARCHEGGI & PEDAGGI', 21.40, 'autostrada ritorno']]);
+  trip('Viaggio Lisbona', [
+    [1, 12, 'VIAGGI', 168, 'volo A/R Malpensa–Lisbona'], [2, 3, 'VIAGGI', 342, 'Airbnb Alfama (3 notti)'],
+    [3, 23, 'UBER / TAXI', 14.50, 'Uber aeroporto'], [3, 23, 'PRANZI & CENE', 38, 'cena Bairro Alto'],
+    [3, 24, 'BAR & COLAZIONE', 6.40, 'pastéis de nata'], [3, 24, 'TRASPORTI PUBBLICI', 6.80, 'tram 28'],
+    [3, 24, 'PRANZI & CENE', 22, 'Time Out Market'], [3, 24, 'DRINK & APERITIVI', 18, 'drink al Miradouro'],
+    [3, 25, 'VIAGGI', 15, 'Torre di Belém'], [3, 25, 'GELATI & SNACK', 4.50, 'gelato'],
+    [3, 25, 'PRANZI & CENE', 46, 'cena di pesce'], [3, 26, 'REGALI', 24, 'souvenir'],
+    [3, 26, 'UBER / TAXI', 16, 'Uber aeroporto']]);
+  trip('Viaggio Grecia', [
+    [4, 20, 'VIAGGI', 236, 'volo A/R Milano–Atene'], [5, 2, 'VIAGGI', 588, 'hotel Milos (7 notti)'],
+    [7, 8, 'TRASPORTI PUBBLICI', 68, 'traghetto Pireo–Milos'], [7, 9, 'ALTRO', 135, 'noleggio scooter'],
+    [7, 9, 'PRANZI & CENE', 42, 'cena in taverna'], [7, 10, 'VIAGGI', 55, 'giro in barca Kleftiko'],
+    [7, 10, 'PRANZI & CENE', 19, 'gyros e pita'], [7, 11, 'BENZINA', 14, 'benzina scooter'],
+    [7, 11, 'DRINK & APERITIVI', 24, 'cocktail al tramonto'], [7, 12, 'PRANZI & CENE', 51, 'cena di pesce'],
+    [7, 12, 'GELATI & SNACK', 5, 'frozen yogurt'], [7, 13, 'PRANZI & CENE', 23, 'pranzo in spiaggia'],
+    [7, 13, 'DRINK & APERITIVI', 16, 'birre'], [7, 14, 'PRANZI & CENE', 44, 'ultima cena'],
+    [7, 14, 'REGALI', 30, 'souvenir'], [7, 15, 'TRASPORTI PUBBLICI', 68, 'traghetto ritorno']]);
+  trip('Weekend Dolomiti', [
+    [8, 19, 'BENZINA', 62, 'pieno'], [8, 19, 'PARCHEGGI & PEDAGGI', 28.60, 'autostrada A22'],
+    [8, 19, 'PARCHEGGI & PEDAGGI', 10, 'parcheggio Ortisei'], [8, 19, 'PRANZI & CENE', 24, 'canederli al rifugio'],
+    [8, 19, 'VIAGGI', 75, 'rifugio mezza pensione'], [8, 19, 'DRINK & APERITIVI', 9, 'birra al rifugio'],
+    [8, 20, 'BAR & COLAZIONE', 6, 'strudel e caffè'], [8, 20, 'VIAGGI', 46, 'funivia Seceda'],
+    [8, 20, 'PRANZI & CENE', 27, 'pranzo in malga'], [8, 20, 'PARCHEGGI & PEDAGGI', 28.60, 'autostrada ritorno']]);
+  return out;
+}
+
 // ---------- stato ----------
 let tx = [], tomb = [], projects = [];
 let openTrips = new Set();
-try { tx = JSON.parse(localStorage.getItem('speseTx') || '[]'); } catch(e){}
-try { tomb = JSON.parse(localStorage.getItem('speseTomb') || '[]'); } catch(e){}
-try { openTrips = new Set(JSON.parse(localStorage.getItem('speseOpenTrips') || '[]')); } catch(e){}
+if(DEMO){
+  tx = demoData();
+} else {
+  try { tx = JSON.parse(localStorage.getItem('speseTx') || '[]'); } catch(e){}
+  try { tomb = JSON.parse(localStorage.getItem('speseTomb') || '[]'); } catch(e){}
+  try { openTrips = new Set(JSON.parse(localStorage.getItem('speseOpenTrips') || '[]')); } catch(e){}
+}
 new Set(tx.filter(t=>t.trip).map(t=>t.trip)).forEach(p => { if(!projects.includes(p)) projects.push(p); });
 
 let cur = new Date(); cur = {y: cur.getFullYear(), m: cur.getMonth()};
@@ -450,6 +549,7 @@ let tripFilter = null;
 let tab = 'mese';
 
 function saveLocal(){
+  if(DEMO) return; // in demo non si salva nulla
   localStorage.setItem('speseTx', JSON.stringify(tx));
   localStorage.setItem('speseTomb', JSON.stringify(tomb));
   localStorage.setItem('speseProjects', JSON.stringify(projects));
@@ -472,7 +572,7 @@ function setSync(on, label){
 }
 function dataJson(){ return JSON.stringify({tx, tomb, projects}); }
 function pushCloud(){
-  if(!auth.currentUser) return;
+  if(DEMO || !auth.currentUser) return; // in demo non tocca mai Firebase
   lastPushJson = dataJson();
   setDoc(doc(db, 'users', auth.currentUser.uid), {tx, tomb, projects, updatedAt: Date.now()})
     .catch(err => { console.warn('Sync error', err); setSync(false, 'errore sync'); });
@@ -523,7 +623,7 @@ function mapAuthErr(e){
   return m[e.code] || ('Errore: ' + e.code);
 }
 
-onAuthStateChanged(auth, user => {
+if(!DEMO) onAuthStateChanged(auth, user => {
   renderAuth(user);
   if(unsub){ unsub(); unsub = null; }
   if(user){
@@ -797,20 +897,19 @@ function renderProjs(){
   document.getElementById('projList').innerHTML = all.length ? all.map(name => {
     const o = trips[name];
     const open = openTrips.has(name) ? ' open' : '';
+    const del = `<button class="proj-del" onclick="delProject(event,'${esc(name)}')">elimina</button>`;
     if(!o) return `<div class="proj-card" id="proj-${hash(name)}">
-        <button class="proj-del" onclick="delProject(event,'${esc(name)}')">elimina</button>
         <div class="p-head"><span class="p-name"><i class="ti ti-luggage"></i>${esc(name)}</span></div>
-        <div class="p-meta">Nessuna spesa ancora</div></div>`;
+        <div class="p-meta"><span>Nessuna spesa ancora</span>${del}</div></div>`;
     const rows = Object.entries(o.byCat).sort((a,b)=>b[1]-a[1]).map(([c,v]) =>
       `<div class="row"><span>${ico(c)} ${label(c)}</span><b>${fmt.format(v)}</b></div>`).join('');
     const period = o.min === o.max ? fmtDate(o.min) : fmtDate(o.min) + ' → ' + fmtDate(o.max);
     return `<div class="proj-card${open}" id="proj-${hash(name)}">
-      <button class="proj-del" onclick="delProject(event,'${esc(name)}')">elimina</button>
       <div class="p-head" onclick="toggleTrip('${esc(name)}')">
         <span class="p-name"><i class="ti ti-luggage"></i>${esc(name)}</span>
         <span class="p-total">${fmt.format(o.total)}</span>
       </div>
-      <div class="p-meta">${o.count} spese · ${period}</div>
+      <div class="p-meta"><span>${o.count} spese · ${period}</span>${del}</div>
       <div class="proj-detail">${rows}
         <div class="row" style="margin-top:6px"><button class="btn ghost" style="font-size:.75rem;padding:6px" onclick="filterTrip(event,'${esc(name)}')"><i class="ti ti-search"></i> Vedi tutte le spese</button></div>
       </div></div>`;
@@ -839,7 +938,14 @@ window.importJSON = function(inp){
   r.readAsText(f); inp.value = '';
 };
 
-renderAuth(null);
+if(DEMO){
+  document.getElementById('authCard').style.display = 'none';
+  document.getElementById('syncDot').className = 'sync-dot demo';
+  document.getElementById('syncLabel').textContent = 'demo';
+  document.getElementById('syncOut').innerHTML = ` · <a class="link-btn" href="${location.pathname}">esci</a>`;
+} else {
+  renderAuth(null);
+}
 showTab('mese');
 </script>
 </body>
