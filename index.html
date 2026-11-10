@@ -125,8 +125,12 @@
   .trend{display:flex; align-items:flex-end; gap:8px; height:140px; padding-top:10px;}
   #dTrend{gap:5px;}
   /* grafico annuale: tocchi un mese e vedi l'importo */
-  #dTrend .trend-col{cursor:pointer;}
-  #dTrend .trend-col:not(.cur):hover .trend-bar{opacity:.55;}
+  #dTrend .trend-col,#trend .trend-col{cursor:pointer;}
+  #dTrend .trend-col:not(.cur):hover .trend-bar,#trend .trend-col:not(.cur):hover .trend-bar{opacity:.55;}
+  .mini-nav{display:flex; gap:4px;}
+  .mini-nav button{background:var(--card2); border:1px solid var(--line); color:var(--muted); width:32px; height:32px; border-radius:9px;
+    cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:1rem;}
+  .mini-nav button:hover{color:var(--accent); border-color:color-mix(in srgb,var(--accent) 45%,var(--line));}
   .trend-info{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:12px; padding-top:11px;
     border-top:1px solid var(--line); font-size:.84rem; color:var(--muted);}
   .trend-info b{color:var(--text); font-weight:600; font-variant-numeric:tabular-nums;}
@@ -513,7 +517,13 @@
     <div id="catBars"></div>
   </div>
   <div class="card">
-    <h2><i class="ti ti-chart-bar"></i> Trend ultimi 6 mesi</h2>
+    <div class="card-head">
+      <h2><i class="ti ti-chart-bar"></i> Trend ultimi 6 mesi</h2>
+      <div class="mini-nav">
+        <button onclick="stepMonth(-1)" aria-label="Mese precedente"><i class="ti ti-chevron-left"></i></button>
+        <button onclick="stepMonth(1)" aria-label="Mese successivo"><i class="ti ti-chevron-right"></i></button>
+      </div>
+    </div>
     <div class="trend" id="trend"></div>
   </div>
   <div class="card">
@@ -1009,6 +1019,12 @@ window.showTab = function(t){
   render();
 };
 window.shiftYear = function(d){ cur = {y: cur.y + d, m: cur.m}; dSel = null; render(); };
+// pagina Mese: frecce mese prima/dopo e tocco su una barra del trend = vai a quel mese
+window.stepMonth = function(d){ const n = new Date(cur.y, cur.m + d, 1); cur = {y: n.getFullYear(), m: n.getMonth()}; dSel = null; render(); };
+document.getElementById('trend').addEventListener('click', e => {
+  const col = e.target.closest('.trend-col'); if(!col) return;
+  cur = {y: +col.dataset.y, m: +col.dataset.m}; dSel = null; render();
+});
 // grafico "Spese per mese" in Dashboard: tocco su un mese = mostra il suo importo
 let dSel = null;
 document.getElementById('dTrend').addEventListener('click', e => {
@@ -1288,18 +1304,20 @@ function renderMese(){
     ? entries.map(([c,v]) => barRow(c, v, max, catPct ? pctFmt.format(v / outM) : undefined)).join('')
     : '<div class="empty">Nessuna spesa questo mese</div>';
 
-  let trendHtml = '';
-  const monthTotals = Array.from({length:6},(_,i)=>{const d=new Date(cur.y,cur.m-i,1); return tx.filter(t=>inMonth(t,d.getFullYear(),d.getMonth())&&t.tipo==='uscita').reduce((s,t)=>s+t.amount,0);});
-  const maxM = Math.max(...monthTotals, 1);
-  for(let i=5;i>=0;i--){
-    let d = new Date(cur.y, cur.m - i, 1);
-    const tot = monthTotals[i]; // i = mesi fa (0 = mese selezionato)
-    trendHtml += `<div class="trend-col${i===0?' cur':''}" title="${fmt.format(tot)}">
+  // trend 6 mesi: la finestra resta ferma sugli ultimi 6 mesi finché il mese scelto ci sta dentro,
+  // così toccando le barre si sposta solo l'evidenziazione
+  const nowD = new Date(), nowI = monIdx(nowD.getFullYear(), nowD.getMonth()), curI = monIdx(cur.y, cur.m);
+  const endI = (curI <= nowI && curI > nowI - 6) ? nowI : curI;
+  const win = Array.from({length:6}, (_,k) => { const ix = endI - 5 + k; return {y: Math.floor(ix / 12), m: ix % 12}; });
+  const winTot = win.map(({y,m}) => tx.filter(t => inMonth(t,y,m) && t.tipo==='uscita').reduce((s,t)=>s+t.amount,0));
+  const maxM = Math.max(...winTot, 1);
+  document.getElementById('trend').innerHTML = win.map(({y,m}, k) => {
+    const tot = winTot[k], sel = y === cur.y && m === cur.m;
+    return `<div class="trend-col${sel?' cur':''}" data-y="${y}" data-m="${m}" title="${MESI[m]} ${y}: ${fmt.format(tot)} · tocca per aprire">
       <span class="v">${tot>0 ? '€'+Math.round(tot) : ''}</span>
       <div class="trend-bar" style="height:${tot>0 ? Math.max(4, tot/maxM*100) : 3}px"></div>
-      <span class="m">${MESI[d.getMonth()].slice(0,3)}</span></div>`;
-  }
-  document.getElementById('trend').innerHTML = trendHtml;
+      <span class="m">${MESI[m].slice(0,3)}${y !== cur.y ? " '" + String(y).slice(2) : ''}</span></div>`;
+  }).join('');
 
   document.getElementById('splitMonth').textContent = MESI[cur.m];
   const fixed = mt.filter(t=>t.tipo==='uscita' && (FISSE.has(t.cat) || t.rid)).reduce((s,t)=>s+t.amount,0);
