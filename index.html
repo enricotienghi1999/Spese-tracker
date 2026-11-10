@@ -819,7 +819,7 @@ const firebaseConfig = {
 
 // categoria -> icona Tabler (elenco completo: https://tabler.io/icons)
 const CATS = {
-  "AFFITTO & BOLLETTE":"home","SPESA (SUPER)":"shopping-cart","PRANZI & CENE":"tools-kitchen-2","BAR & COLAZIONE":"baguette","CAFFÈ":"coffee",
+  "AFFITTO & BOLLETTE":"home","BOLLETTE":"bolt","SPESA (SUPER)":"shopping-cart","PRANZI & CENE":"tools-kitchen-2","BAR & COLAZIONE":"baguette","CAFFÈ":"coffee",
   "GELATI & SNACK":"ice-cream","FOOD DELIVERY":"moped","DRINK & APERITIVI":"glass-cocktail","BENZINA":"gas-station","UBER / TAXI":"car",
   "TRASPORTI PUBBLICI":"train","PARCHEGGI & PEDAGGI":"parking","ABBONAMENTI":"repeat","SIGARETTE":"smoking","VESTITI":"shirt",
   "ENTRATE DISCO":"ticket","REGALI":"gift","MEDICINE & VISITE":"pill","VIAGGI":"plane","DEBITI":"receipt-2","ALTRO":"package"
@@ -840,9 +840,11 @@ const ICONS = {...CATS, ...CATS_IN};
 const DEFAULT_SETTINGS = {theme: 'smeraldo', currency: 'EUR', startDay: 1, catMeta: {}};
 let settings = {...DEFAULT_SETTINGS, catMeta: {}};
 const meta = c => settings.catMeta[c] || {};
-const defLabel = c => c.charAt(0) + c.slice(1).toLowerCase();
+// nomi di serie diversi dal nome interno (il nome interno resta per non toccare i movimenti già salvati)
+const BUILTIN_LABELS = {"AFFITTO & BOLLETTE": "Affitto / mutuo"};
+const defLabel = c => BUILTIN_LABELS[c] || (c.charAt(0) + c.slice(1).toLowerCase());
 const ico = c => `<i class="ti ti-${meta(c).icon || ICONS[c] || 'package'}"></i>`;
-// "AFFITTO & BOLLETTE" -> "Affitto & bollette" (o il nome che hai scelto tu)
+// "PRANZI & CENE" -> "Pranzi & cene" (o il nome che hai scelto tu)
 const label = c => meta(c).label || defLabel(c);
 const isFixed = c => meta(c).fixed ?? FISSE.has(c);
 const catTipo = c => meta(c).tipo || (CATS_IN[c] ? 'entrata' : 'uscita');
@@ -941,7 +943,7 @@ function demoData(){
     if(rnd() < .3){ const [cat, note] = pick([['RIMBORSI','Rimborso Splitwise'],['VENDITE','Vendita su Vinted'],['RIMBORSI','Rimborso spese']]);
       add(day(m, nr(5, 25)), cat, between(20, 80), note, 'entrata'); }
     // fisse
-    if(m % 2 === 1) add(day(m, 18), 'AFFITTO & BOLLETTE', winter ? between(110, 160) : between(60, 95), 'Bolletta luce e gas');
+    if(m % 2 === 1) add(day(m, 18), 'BOLLETTE', winter ? between(110, 160) : between(60, 95), 'Bolletta luce e gas');
     // variabili
     times(m, nr(5, 7), 'SPESA (SUPER)', 18, 75, ['Esselunga','Carrefour','Lidl','Pam','Esselunga']);
     times(m, nr(4, 7), 'PRANZI & CENE', 12, 48, ['pranzo ufficio','sushi','pizza con amici','cena fuori','poke','pranzo ufficio']);
@@ -995,7 +997,7 @@ function demoData(){
   const st = `${Y}-01`;
   const recurring = [
     ['STIPENDIO', 2150, 3, 'entrata', 'Stipendio'], ['AFFITTO & BOLLETTE', 650, 1, 'uscita', 'Affitto'],
-    ['AFFITTO & BOLLETTE', 29.90, 5, 'uscita', 'Internet fibra'], ['ABBONAMENTI', 49, 2, 'uscita', 'Palestra'],
+    ['BOLLETTE', 29.90, 5, 'uscita', 'Internet fibra'], ['ABBONAMENTI', 49, 2, 'uscita', 'Palestra'],
     ['ABBONAMENTI', 11.99, 3, 'uscita', 'Spotify'], ['ABBONAMENTI', 13.99, 8, 'uscita', 'Netflix'],
     ['TRASPORTI PUBBLICI', 39, 1, 'uscita', 'Abbonamento ATM']
   ].map(([cat, amount, d, tipo, note], i) => ({id: 'rdemo' + i, cat, amount, day: d, tipo, note, start: st, since: st}));
@@ -2021,7 +2023,7 @@ window.deleteCatEdit = function(){
 
 window.exportCSV = function(){
   const rows = [['Data','Tipo','Categoria','Importo','Progetto','Nota'],
-    ...tx.map(t=>[t.date, t.tipo, t.cat, t.amount.toFixed(2).replace('.',','), t.trip||'', t.note||''])];
+    ...tx.map(t=>[t.date, t.tipo, label(t.cat), t.amount.toFixed(2).replace('.',','), t.trip||'', t.note||''])];
   const csv = rows.map(r=>r.map(c=>`"${c}"`).join(';')).join('\n');
   download(new Blob(['\ufeff'+csv],{type:'text/csv'}), 'spese.csv');
 };
