@@ -5,9 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#0b0e14">
 <title>Spese Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.51.0/dist/tabler-icons.min.css">
 <style>
   /* ================================================================
      PALETTE — scegli quella che ti piace commentando/decommentando
+     Regola: UN solo colore d'accento (--accent / --grad).
+     Verde e rosso solo per entrate e saldo, oro solo per "solo locale".
      ================================================================ */
   :root{
     /* 🌲 TEMA SMERALDO (default) */
@@ -15,7 +21,7 @@
     --card:#151a24; --card2:#1c2330; --line:#232c3b;
     --text:#eef1f6; --muted:#8a93a6;
     --accent:#2dd4a7; --accent-dk:#0e2b23;
-    --red:#f26d6d; --green:#3ddc97; --blue:#5ea8ff; --gold:#f0b357;
+    --red:#f26d6d; --green:#3ddc97; --gold:#f0b357;
     --grad:linear-gradient(135deg,#2dd4a7,#1fa881);
   }
   /* 🌅 TEMA SUNSET — decommenta questo blocco e commenta quello sopra
@@ -24,7 +30,7 @@
     --card:#1d1524; --card2:#271c31; --line:#33253f;
     --text:#f4eef8; --muted:#9a8aa8;
     --accent:#ff7a59; --accent-dk:#33150e;
-    --red:#ff6b6b; --green:#4ade80; --blue:#6ea8ff; --gold:#ffc95e;
+    --red:#ff6b6b; --green:#4ade80; --gold:#ffc95e;
     --grad:linear-gradient(135deg,#ff7a59,#ff5e8a);
   } */
   /* 🌊 TEMA OCEAN — decommenta questo blocco e commenta gli altri
@@ -33,16 +39,24 @@
     --card:#131e30; --card2:#1a2940; --line:#22344e;
     --text:#edf3fa; --muted:#8aa0bd;
     --accent:#58c4f6; --accent-dk:#0d2434;
-    --red:#ff7b7b; --green:#43d9a3; --blue:#58c4f6; --gold:#ffd166;
+    --red:#ff7b7b; --green:#43d9a3; --gold:#ffd166;
     --grad:linear-gradient(135deg,#58c4f6,#3a8fd9);
   } */
+  :root{ --fixed:color-mix(in srgb,var(--muted) 45%,var(--card2)); }
 
   *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
   body{background:linear-gradient(180deg,var(--bg1),var(--bg2) 60%); background-attachment:fixed;
-    color:var(--text); font-family:-apple-system,'Segoe UI',Roboto,sans-serif; padding-bottom:110px; min-height:100vh;}
+    color:var(--text); font-family:'Inter',-apple-system,'Segoe UI',Roboto,sans-serif; -webkit-font-smoothing:antialiased;
+    padding-bottom:120px; min-height:100vh;}
+  .wrap{max-width:760px; margin:0 auto;}
+  .ti{line-height:1;}
+  button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+
+  /* header */
   header{padding:16px; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;}
-  h1{font-size:1.2rem; letter-spacing:.3px; font-weight:800;}
-  h1 .emoji{filter:drop-shadow(0 2px 6px rgba(0,0,0,.4));}
+  h1{font-size:1.15rem; letter-spacing:-.01em; font-weight:700; display:flex; align-items:center; gap:10px;}
+  .logo{width:34px; height:34px; border-radius:11px; background:var(--grad); color:#0a0f0c;
+    display:flex; align-items:center; justify-content:center; font-size:1.15rem;}
   .hdr-right{display:flex; align-items:center; gap:10px;}
   .sync-status{display:flex; align-items:center; gap:6px; font-size:.7rem; color:var(--muted);
     background:var(--card); border:1px solid var(--line); border-radius:20px; padding:6px 12px;}
@@ -50,108 +64,148 @@
   .sync-dot.on{background:var(--green); box-shadow:0 0 8px var(--green);}
   .sync-dot.off{background:var(--gold);}
   .link-btn{background:none; border:none; color:var(--muted); font-size:.7rem; cursor:pointer; text-decoration:underline;}
-  .month-btn{background:var(--card); border:1px solid var(--line); color:var(--text); border-radius:20px;
-    padding:8px 16px; font-weight:700; font-size:.9rem; cursor:pointer; text-transform:capitalize;
-    transition:border-color .2s;}
-  .month-btn:active{border-color:var(--accent);}
+  .month-btn{display:inline-flex; align-items:center; gap:7px; background:var(--card); border:1px solid var(--line); color:var(--text);
+    border-radius:20px; padding:8px 14px; font-weight:600; font-size:.88rem; cursor:pointer; text-transform:capitalize;
+    font-family:inherit; transition:border-color .2s;}
+  .month-btn .ti{font-size:1rem; color:var(--muted);}
+  .month-btn .ti:first-child{color:var(--accent);}
+  .month-btn:hover,.month-btn:active{border-color:var(--accent);}
+
+  /* KPI */
   .kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; padding:6px 16px;}
-  .kpi{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:13px 15px;
-    position:relative; overflow:hidden;}
-  .kpi::after{content:''; position:absolute; top:0; left:0; right:0; height:3px; background:var(--grad); opacity:.85;}
-  .kpi .lbl{font-size:.68rem; color:var(--muted); text-transform:uppercase; letter-spacing:.8px; font-weight:600;}
-  .kpi .val{font-size:1.32rem; font-weight:800; font-variant-numeric:tabular-nums; margin-top:3px;}
-  .kpi.neg::after{background:linear-gradient(90deg,var(--red),transparent);}
-  .kpi.pos::after{background:linear-gradient(90deg,var(--green),transparent);}
-  .kpi.acc::after{background:var(--grad);}
-  .kpi.neg .val{color:var(--red);} .kpi.pos .val{color:var(--green);} .kpi.acc .val{color:var(--gold);}
+  .kpi{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:13px 15px;}
+  .kpi .lbl{font-size:.66rem; color:var(--muted); text-transform:uppercase; letter-spacing:.8px; font-weight:600;}
+  .kpi .val{font-size:1.35rem; font-weight:700; font-variant-numeric:tabular-nums; margin-top:4px; letter-spacing:-.02em;}
+  .kpi.pos .val{color:var(--green);}
+  .kpi.hero{background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 14%,var(--card)),var(--card) 75%);
+    border-color:color-mix(in srgb,var(--accent) 35%,var(--line));}
+
+  /* card */
   .card{background:var(--card); border:1px solid var(--line); border-radius:18px; margin:12px 16px; padding:16px;
     box-shadow:0 4px 14px rgba(0,0,0,.18);}
-  .card h2{font-size:.74rem; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:13px; font-weight:700;}
-  .bar-row{display:flex; align-items:center; gap:10px; margin-bottom:10px;}
-  .bar-row .cat{flex:0 0 145px; font-size:.78rem; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-  .bar-wrap{flex:1; background:var(--card2); border-radius:10px; height:20px; overflow:hidden;}
-  .bar{height:100%; border-radius:10px; transition:width .4s;}
-  .bar-row .amt{font-size:.8rem; font-variant-numeric:tabular-nums; width:80px; text-align:right; font-weight:600;}
-  .trend{display:flex; align-items:flex-end; gap:8px; height:135px; padding-top:10px;}
-  .trend-col{flex:1; display:flex; flex-direction:column; align-items:center; gap:6px; height:100%; justify-content:flex-end;}
-  .trend-bar{width:100%; max-width:44px; border-radius:7px 7px 0 0; background:var(--grad); min-height:3px;}
-  .trend-col .m{font-size:.66rem; color:var(--muted); text-transform:uppercase; font-weight:600;}
-  .trend-col .v{font-size:.68rem; font-variant-numeric:tabular-nums; font-weight:600;}
-  .tx{display:flex; align-items:center; gap:12px; padding:12px 4px; border-bottom:1px solid var(--line);}
+  .card h2{font-size:.7rem; color:var(--muted); text-transform:uppercase; letter-spacing:.9px; margin-bottom:14px;
+    font-weight:600; display:flex; align-items:center; gap:7px;}
+  .card h2 .ti{font-size:1rem; color:var(--accent);}
+  .card h2 span{color:var(--text);}
+
+  /* barre categorie: nome + importo sopra, barra sotto */
+  .bar-row{margin-bottom:13px;}
+  .bar-row:last-child{margin-bottom:0;}
+  .bar-head{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:6px;}
+  .bar-row .cat{display:flex; align-items:center; gap:8px; min-width:0; font-size:.84rem;}
+  .bar-row .cat .ti{font-size:1.05rem; color:var(--muted); flex-shrink:0;}
+  .bar-row .cat span{white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .bar-row .amt{font-size:.84rem; font-variant-numeric:tabular-nums; font-weight:600; flex-shrink:0;}
+  .bar-wrap{background:var(--card2); border-radius:6px; height:8px; overflow:hidden;}
+  .bar{height:100%; border-radius:6px; background:var(--grad); transition:width .4s;}
+
+  /* trend */
+  .trend{display:flex; align-items:flex-end; gap:8px; height:140px; padding-top:10px;}
+  #dTrend{gap:5px;}
+  .trend-col{flex:1; min-width:0; display:flex; flex-direction:column; align-items:center; gap:6px; height:100%; justify-content:flex-end;}
+  .trend-bar{width:100%; max-width:40px; border-radius:7px 7px 3px 3px; background:var(--grad); min-height:3px; transition:height .4s;}
+  .trend-col:not(.cur) .trend-bar{opacity:.3;}
+  .trend-col .m{font-size:.64rem; color:var(--muted); text-transform:uppercase; font-weight:600;}
+  .trend-col .v{font-size:.64rem; color:var(--muted); font-variant-numeric:tabular-nums; font-weight:600; white-space:nowrap;}
+  .trend-col.cur .m,.trend-col.cur .v{color:var(--text);}
+
+  /* movimenti */
+  .tx{display:flex; align-items:center; gap:12px; padding:12px 2px; border-bottom:1px solid var(--line);}
   .tx:last-child{border-bottom:none;}
-  .dot{width:38px; height:38px; border-radius:12px; display:flex; align-items:center; justify-content:center;
-    font-size:1.15rem; flex-shrink:0; background:var(--card2); border:1px solid var(--line);}
+  .dot{width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center;
+    font-size:1.2rem; flex-shrink:0; background:var(--accent-dk); color:var(--accent);}
+  .dot.in{background:color-mix(in srgb,var(--green) 14%,transparent); color:var(--green);}
   .tx .info{flex:1; min-width:0;}
   .tx .cat-name{font-size:.92rem; font-weight:600;}
-  .tx .note{font-size:.75rem; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-  .tx .date{font-size:.7rem; color:var(--muted);}
-  .tx .amount{font-weight:800; font-variant-numeric:tabular-nums;}
-  .tx .amount.out{color:var(--red);} .tx .amount.in{color:var(--green);}
-  .tx .del{background:var(--card2); border:1px solid var(--line); color:var(--muted); border-radius:10px;
-    width:32px; height:32px; font-size:.85rem; cursor:pointer;}
-  .tx .del:active{border-color:var(--red); color:var(--red);}
-  .trip-badge{display:inline-block; font-size:.68rem; background:var(--accent-dk); color:var(--accent);
-    border-radius:8px; padding:2px 8px; margin-left:6px; font-weight:600;}
-  .split{display:flex; height:16px; border-radius:9px; overflow:hidden; background:var(--card2); margin-top:8px;}
+  .tx .note{font-size:.76rem; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .tx .date{font-size:.7rem; color:var(--muted); margin-top:1px;}
+  .tx .amount{font-weight:700; font-variant-numeric:tabular-nums; white-space:nowrap;}
+  .tx .amount.out{color:var(--text);} .tx .amount.in{color:var(--green);}
+  .tx .del{background:none; border:none; color:var(--muted); border-radius:10px; width:32px; height:32px;
+    font-size:1rem; cursor:pointer; opacity:.55; transition:all .15s; flex-shrink:0;}
+  .tx .del:hover,.tx .del:active{opacity:1; background:var(--card2); color:var(--red);}
+  .trip-badge{display:inline-flex; align-items:center; gap:3px; font-size:.66rem; background:var(--accent-dk); color:var(--accent);
+    border-radius:6px; padding:2px 7px; margin-left:6px; font-weight:600; vertical-align:2px;}
+
+  /* fisse vs variabili */
+  .split{display:flex; gap:3px; height:10px; border-radius:6px; overflow:hidden; margin-top:2px;}
   .split div{height:100%;}
-  .split-legend{display:flex; gap:16px; margin-top:9px; font-size:.75rem; color:var(--muted);}
-  .split-legend b{color:var(--text);}
+  .split.empty-split{background:var(--card2);}
+  .fx{background:var(--fixed);} .vr{background:var(--grad);}
+  .split-legend{display:flex; gap:18px; margin-top:12px; font-size:.78rem; color:var(--muted); flex-wrap:wrap;}
+  .split-legend b{color:var(--text); font-weight:600; font-variant-numeric:tabular-nums;}
+  .sw{display:inline-block; width:9px; height:9px; border-radius:3px; margin-right:6px;}
+
+  /* form */
   form{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
   form .full{grid-column:1/-1;}
-  label{font-size:.66rem; color:var(--muted); text-transform:uppercase; letter-spacing:.8px; display:block; margin-bottom:5px; font-weight:700;}
+  label{font-size:.66rem; color:var(--muted); text-transform:uppercase; letter-spacing:.8px; display:block; margin-bottom:5px; font-weight:600;}
   input,select,textarea{width:100%; background:var(--card2); border:1px solid var(--line); color:var(--text);
-    border-radius:12px; padding:12px 13px; font-size:1rem; transition:border-color .2s;}
+    border-radius:12px; padding:12px 13px; font-size:1rem; font-family:inherit; transition:border-color .2s;}
+  input[type=date]{color-scheme:dark;}
   input:focus,select:focus{outline:none; border-color:var(--accent); box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 15%, transparent);}
   select{appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238a93a6' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
     background-repeat:no-repeat; background-position:right 14px center;}
-  .btn{background:var(--grad); color:#0a0f0c; border:none; border-radius:14px; padding:14px; font-size:1rem; font-weight:800;
-    cursor:pointer; width:100%; box-shadow:0 4px 14px color-mix(in srgb,var(--accent) 30%, transparent); transition:transform .1s;}
+  .btn{background:var(--grad); color:#0a0f0c; border:none; border-radius:14px; padding:14px; font-size:1rem; font-weight:700;
+    font-family:inherit; cursor:pointer; width:100%; box-shadow:0 4px 14px color-mix(in srgb,var(--accent) 30%, transparent);
+    transition:transform .1s; display:inline-flex; align-items:center; justify-content:center; gap:7px;}
   .btn:active{transform:scale(.98);}
-  .btn.ghost{background:var(--card2); color:var(--text); font-weight:600; padding:10px; font-size:.85rem;
+  .btn.ghost{background:var(--card2); color:var(--text); font-weight:500; padding:10px; font-size:.85rem;
     box-shadow:none; border:1px solid var(--line);}
+  .btn.ghost .ti{color:var(--muted); font-size:1.05rem;}
+  .btn.ghost:hover{border-color:color-mix(in srgb,var(--accent) 50%,var(--line));}
   .toolbar{display:flex; gap:10px; margin:12px 16px; flex-wrap:wrap;}
   .toolbar .btn{width:auto; flex:1; min-width:100px;}
   .empty{text-align:center; color:var(--muted); padding:26px 0; font-size:.85rem;}
   .type-toggle{display:grid; grid-template-columns:1fr 1fr; background:var(--card2); border-radius:12px; padding:4px; gap:4px;
     border:1px solid var(--line);}
-  .type-toggle button{border:none; border-radius:9px; padding:11px; font-weight:700; background:none; color:var(--muted); cursor:pointer; transition:all .15s;}
-  .type-toggle button.active-out{background:var(--red); color:#fff; box-shadow:0 2px 8px rgba(0,0,0,.3);}
-  .type-toggle button.active-in{background:var(--green); color:#06281a; box-shadow:0 2px 8px rgba(0,0,0,.3);}
+  .type-toggle button{border:none; border-radius:9px; padding:11px; font-weight:600; font-family:inherit; font-size:.92rem;
+    background:none; color:var(--muted); cursor:pointer; transition:all .15s;}
+  .type-toggle button.active-out{background:var(--card); color:var(--text); box-shadow:0 2px 8px rgba(0,0,0,.3); outline:1px solid var(--line);}
+  .type-toggle button.active-in{background:color-mix(in srgb,var(--green) 16%,var(--card)); color:var(--green); box-shadow:0 2px 8px rgba(0,0,0,.3);}
+
+  /* progetti */
   .proj-card{background:var(--card2); border:1px solid var(--line); border-radius:14px; padding:13px 15px; margin-bottom:10px; cursor:pointer;}
-  .proj-card .p-head{display:flex; align-items:center; justify-content:space-between;}
-  .proj-card .p-name{font-weight:700; font-size:.95rem;}
-  .proj-card .p-total{font-weight:800; color:var(--gold); font-variant-numeric:tabular-nums; font-size:1.02rem;}
+  .proj-card .p-head{display:flex; align-items:center; justify-content:space-between; gap:10px;}
+  .proj-card .p-name{font-weight:600; font-size:.95rem; display:flex; align-items:center; gap:8px;}
+  .proj-card .p-name .ti{color:var(--accent); font-size:1.1rem;}
+  .proj-card .p-total{font-weight:700; font-variant-numeric:tabular-nums; font-size:1.02rem;}
   .proj-card .p-meta{font-size:.72rem; color:var(--muted); margin-top:4px;}
   .proj-detail{display:none; margin-top:11px; border-top:1px solid var(--line); padding-top:9px;}
   .proj-card.open .proj-detail{display:block;}
-  .proj-detail .row{display:flex; justify-content:space-between; font-size:.8rem; padding:4px 0; color:var(--muted);}
-  .proj-detail .row b{color:var(--text); font-variant-numeric:tabular-nums;}
-  .proj-del{float:right; background:none; border:none; color:var(--red); font-size:.7rem; cursor:pointer; padding:2px 4px;}
-  .trip-filter-bar{display:flex; align-items:center; gap:8px; background:var(--accent-dk); border:1px solid var(--accent);
+  .proj-detail .row{display:flex; justify-content:space-between; align-items:center; font-size:.8rem; padding:4px 0; color:var(--muted);}
+  .proj-detail .row span{display:flex; align-items:center; gap:7px;}
+  .proj-detail .row b{color:var(--text); font-variant-numeric:tabular-nums; font-weight:600;}
+  .proj-del{float:right; background:none; border:none; color:var(--red); font-size:.7rem; cursor:pointer; padding:2px 4px 2px 12px; font-family:inherit; opacity:.8;}
+  .trip-filter-bar{display:flex; align-items:center; gap:8px; background:var(--accent-dk); border:1px solid color-mix(in srgb,var(--accent) 40%,transparent);
     border-radius:12px; padding:9px 13px; margin-bottom:11px; font-size:.8rem; color:var(--text);}
-  .trip-filter-bar button{background:none; border:none; color:var(--red); font-size:1rem; cursor:pointer;}
+  .trip-filter-bar .ti-tag{color:var(--accent);}
+  .trip-filter-bar button{margin-left:auto; background:none; border:none; color:var(--muted); font-size:1rem; cursor:pointer;}
   .toast{position:fixed; bottom:118px; left:50%; transform:translateX(-50%) translateY(80px); background:var(--grad);
-    color:#0a0f0c; padding:11px 24px; border-radius:24px; font-weight:800; transition:transform .3s; z-index:99;
-    box-shadow:0 6px 20px rgba(0,0,0,.4);}
+    color:#0a0f0c; padding:11px 24px; border-radius:24px; font-weight:700; transition:transform .3s; z-index:99;
+    box-shadow:0 6px 20px rgba(0,0,0,.4); white-space:nowrap;}
   .toast.show{transform:translateX(-50%) translateY(0);}
   .auth-form{display:grid; gap:10px;}
   .auth-actions{display:flex; gap:8px; margin-top:2px;}
   .auth-actions .btn{flex:1; padding:12px; font-size:.88rem;}
+
   /* bottom nav con FAB centrale */
-  .bottomnav{position:fixed; bottom:14px; left:12px; right:12px; background:color-mix(in srgb,var(--card) 92%, transparent);
-    backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+  .bottomnav{position:fixed; bottom:14px; left:12px; right:12px; max-width:520px; margin:0 auto;
+    background:color-mix(in srgb,var(--card) 92%, transparent); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
     border:1px solid var(--line); border-radius:24px; display:grid; grid-template-columns:1fr 1fr 1.25fr 1fr;
     z-index:50; box-shadow:0 10px 30px rgba(0,0,0,.45); overflow:visible;}
-  .bottomnav button{background:none; border:none; color:var(--muted); padding:12px 4px 12px; font-size:.64rem; font-weight:700;
-    cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:3px; border-radius:18px; margin:4px;}
-  .bottomnav button .ico{font-size:1.2rem; transition:transform .15s;}
+  .bottomnav button{background:none; border:none; color:var(--muted); padding:10px 4px; font-size:.64rem; font-weight:600;
+    font-family:inherit; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:4px; border-radius:18px; margin:4px;}
+  .bottomnav button .ico{font-size:1.4rem; transition:transform .15s;}
+  .bottomnav button:hover{color:var(--text);}
   .bottomnav button.active{color:var(--accent);}
   .bottomnav button.active .ico{transform:translateY(-2px);}
   #nav-add{border-radius:20px; position:relative;}
   #nav-add .fab{width:52px; height:52px; border-radius:50%; background:var(--grad); display:flex; align-items:center;
-    justify-content:center; font-size:1.5rem; color:#0a0f0c; margin-top:-30px; margin-bottom:-6px;
-    box-shadow:0 8px 20px color-mix(in srgb,var(--accent) 45%, transparent); border:4px solid var(--bg1);}
-  #nav-add.active .fab{transform:scale(1.05);}
+    justify-content:center; font-size:1.6rem; color:#0a0f0c; margin-top:-30px; margin-bottom:-6px;
+    box-shadow:0 8px 20px color-mix(in srgb,var(--accent) 45%, transparent); border:4px solid var(--bg1); transition:transform .15s;}
+  #nav-add.active .fab{transform:scale(1.06);}
+
   /* month picker */
   .modal{display:none; position:fixed; inset:0; background:rgba(4,6,10,.72); backdrop-filter:blur(4px);
     z-index:100; align-items:center; justify-content:center; padding:24px;}
@@ -159,34 +213,53 @@
   .modal-box{background:var(--card); border:1px solid var(--line); border-radius:22px; padding:22px; width:100%; max-width:350px;
     box-shadow:0 20px 60px rgba(0,0,0,.6);}
   .year-nav{display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;}
-  .year-nav button{background:var(--card2); border:1px solid var(--line); color:var(--accent); font-size:1.1rem;
-    cursor:pointer; width:44px; height:44px; border-radius:14px; font-weight:800;}
-  .year-nav span{font-size:1.3rem; font-weight:800; font-variant-numeric:tabular-nums;}
+  .year-nav button{background:var(--card2); border:1px solid var(--line); color:var(--accent); font-size:1.2rem;
+    cursor:pointer; width:44px; height:44px; border-radius:14px; display:flex; align-items:center; justify-content:center;}
+  .year-nav span{font-size:1.3rem; font-weight:700; font-variant-numeric:tabular-nums;}
   .months-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:9px; margin-bottom:16px;}
   .months-grid button{background:var(--card2); border:1px solid var(--line); color:var(--text); border-radius:12px;
-    padding:13px 4px; font-size:.88rem; font-weight:700; cursor:pointer; text-transform:capitalize; transition:all .15s;}
+    padding:13px 4px; font-size:.88rem; font-weight:600; font-family:inherit; cursor:pointer; text-transform:capitalize; transition:all .15s;}
+  .months-grid button:hover{border-color:color-mix(in srgb,var(--accent) 50%,var(--line));}
   .months-grid button:active{transform:scale(.96);}
   .months-grid button.sel{background:var(--grad); color:#0a0f0c; border-color:transparent; box-shadow:0 4px 12px color-mix(in srgb,var(--accent) 40%, transparent);}
+
+  /* tabella mesi (dashboard) */
   .mtable{width:100%; border-collapse:separate; border-spacing:0;}
+  .mtable th{font-size:.62rem; color:var(--muted); text-transform:uppercase; letter-spacing:.8px; font-weight:600;
+    text-align:right; padding:0 8px 8px; border-bottom:1px solid var(--line);}
+  .mtable th:first-child{text-align:left;}
   .mtable td{padding:11px 8px; border-bottom:1px solid var(--line); font-size:.86rem; cursor:pointer;}
-  .mtable tr:last-child td{border-bottom:none;}
-  .mtable .mn{text-transform:capitalize; font-weight:700;}
-  .mtable .num{text-align:right; font-variant-numeric:tabular-nums; font-weight:600;}
-  .mtable .out{color:var(--red);} .mtable .in{color:var(--green);}
-  .mtable tr.cur td{background:var(--accent-dk); color:var(--accent);}
-  .mtable tr.cur td:first-child{border-radius:10px 0 0 10px;}
-  .mtable tr.cur td:last-child{border-radius:0 10px 10px 0;}
+  .mtable tbody tr:last-child td{border-bottom:none;}
+  .mtable tbody tr:hover td{background:var(--card2);}
+  .mtable .mn{text-transform:capitalize; font-weight:600;}
+  .mtable .num{text-align:right; font-variant-numeric:tabular-nums; font-weight:500;}
+  .mtable .out{color:var(--text);} .mtable .in{color:var(--green);}
+  .mtable tr.cur td{background:var(--accent-dk);}
+  .mtable tr.cur .mn{color:var(--accent);}
+  .mtable tr td:first-child{border-radius:10px 0 0 10px;}
+  .mtable tr td:last-child{border-radius:0 10px 10px 0;}
+
   .newproj{display:flex; gap:8px; margin-bottom:14px;}
   .newproj input{flex:1;}
   .newproj .btn{width:auto; padding:12px 18px;}
   .tab{display:none;} .tab.active{display:block; animation:fadein .25s ease;}
   @keyframes fadein{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;}}
+
+  /* schermi piccoli: nel trend annuale mostra solo il valore del mese selezionato */
+  .mtable td{white-space:nowrap;}
+  @media (max-width:520px){
+    #dTrend .trend-col:not(.cur) .v{visibility:hidden;}
+    .sync-status{padding:5px 10px;}
+    .mtable td{padding:10px 4px; font-size:.78rem;}
+    .mtable th{padding:0 4px 8px; font-size:.58rem;}
+  }
 </style>
 </head>
 <body>
+<div class="wrap">
 
 <header>
-  <h1><span class="emoji">💸</span> Spese Tracker</h1>
+  <h1><span class="logo"><i class="ti ti-wallet"></i></span> Spese Tracker</h1>
   <div class="hdr-right">
     <div class="sync-status"><span class="sync-dot off" id="syncDot"></span><span id="syncLabel">solo locale</span><span id="syncOut"></span></div>
     <button class="month-btn" id="monthBtn" onclick="openPicker()">—</button>
@@ -195,28 +268,28 @@
 
 <!-- AUTH (visibile solo se non loggato) -->
 <div class="card" id="authCard">
-  <h2>☁️ Sincronizzazione</h2>
+  <h2><i class="ti ti-cloud"></i> Sincronizzazione</h2>
   <div id="authBox"></div>
 </div>
 
 <!-- ============ TAB DASHBOARD ============ -->
 <div class="tab" id="tab-dash">
   <div class="kpis">
-    <div class="kpi neg"><div class="lbl">Spese anno</div><div class="val" id="dYearOut">—</div></div>
+    <div class="kpi hero"><div class="lbl">Spese anno</div><div class="val" id="dYearOut">—</div></div>
     <div class="kpi pos"><div class="lbl">Entrate anno</div><div class="val" id="dYearIn">—</div></div>
     <div class="kpi"><div class="lbl">Saldo anno</div><div class="val" id="dYearSaldo">—</div></div>
-    <div class="kpi acc"><div class="lbl">Media mensile</div><div class="val" id="dAvg">—</div></div>
+    <div class="kpi"><div class="lbl">Media mensile</div><div class="val" id="dAvg">—</div></div>
   </div>
   <div class="card">
-    <h2>🗓️ I tuoi mesi — <span id="dYearLabel"></span></h2>
+    <h2><i class="ti ti-calendar-stats"></i> I tuoi mesi · <span id="dYearLabel"></span></h2>
     <table class="mtable" id="dMonths"></table>
   </div>
   <div class="card">
-    <h2>📈 Spese per mese</h2>
+    <h2><i class="ti ti-chart-bar"></i> Spese per mese</h2>
     <div class="trend" id="dTrend"></div>
   </div>
   <div class="card">
-    <h2>📊 Top categorie dell'anno</h2>
+    <h2><i class="ti ti-category"></i> Top categorie dell'anno</h2>
     <div id="dCats"></div>
   </div>
 </div>
@@ -224,30 +297,31 @@
 <!-- ============ TAB MESE ============ -->
 <div class="tab" id="tab-mese">
   <div class="kpis">
-    <div class="kpi acc"><div class="lbl">Spese mese</div><div class="val" id="kpiMonth">—</div></div>
+    <div class="kpi hero"><div class="lbl">Spese mese</div><div class="val" id="kpiMonth">—</div></div>
     <div class="kpi pos"><div class="lbl">Entrate mese</div><div class="val" id="kpiIn">—</div></div>
     <div class="kpi"><div class="lbl">Saldo mese</div><div class="val" id="kpiSaldo">—</div></div>
   </div>
   <div class="card">
-    <h2>📊 Per categoria — <span id="catMonth"></span></h2>
+    <h2><i class="ti ti-category"></i> Per categoria · <span id="catMonth"></span></h2>
     <div id="catBars"></div>
   </div>
   <div class="card">
-    <h2>📈 Trend — ultimi 6 mesi</h2>
+    <h2><i class="ti ti-chart-bar"></i> Trend ultimi 6 mesi</h2>
     <div class="trend" id="trend"></div>
   </div>
   <div class="card">
-    <h2>⚖️ Fisse vs variabili — <span id="splitMonth"></span></h2>
+    <h2><i class="ti ti-scale"></i> Fisse vs variabili · <span id="splitMonth"></span></h2>
     <div class="split" id="splitBar"></div>
     <div class="split-legend">
-      <span>🏠 Fisse: <b id="splitFixed"></b></span>
-      <span>🎲 Variabili: <b id="splitVar"></b></span>
+      <span><i class="sw fx"></i>Fisse <b id="splitFixed"></b></span>
+      <span><i class="sw vr"></i>Variabili <b id="splitVar"></b></span>
     </div>
   </div>
   <div class="card">
-    <h2>🧾 Movimenti</h2>
+    <h2><i class="ti ti-receipt"></i> Movimenti</h2>
     <div id="tripFilterBar" style="display:none" class="trip-filter-bar">
-      🏷️ Progetto: <b id="tripFilterName"></b> <span style="opacity:.7">(tutti i mesi)</span> <button onclick="clearTripFilter()">✕</button>
+      <i class="ti ti-tag"></i> Progetto: <b id="tripFilterName"></b> <span style="color:var(--muted)">(tutti i mesi)</span>
+      <button onclick="clearTripFilter()" aria-label="Togli filtro"><i class="ti ti-x"></i></button>
     </div>
     <div id="txList"></div>
   </div>
@@ -256,7 +330,7 @@
 <!-- ============ TAB AGGIUNGI ============ -->
 <div class="tab" id="tab-add">
   <div class="card">
-    <h2>➕ Aggiungi movimento</h2>
+    <h2><i class="ti ti-plus"></i> Aggiungi movimento</h2>
     <form onsubmit="return addTx(event)">
       <div class="full">
         <div class="type-toggle">
@@ -277,14 +351,14 @@
         <select id="fCat"></select>
       </div>
       <div class="full">
-        <label>🧳 Progetto / viaggio (opzionale)</label>
+        <label>Progetto / viaggio (opzionale)</label>
         <select id="fTrip"><option value="">— nessuno —</option></select>
       </div>
       <div class="full">
         <label>Nota (opzionale)</label>
         <input type="text" id="fNote" placeholder="es. cena con amici">
       </div>
-      <div class="full"><button class="btn" type="submit">Salva</button></div>
+      <div class="full"><button class="btn" type="submit"><i class="ti ti-check"></i> Salva</button></div>
     </form>
   </div>
 </div>
@@ -292,7 +366,7 @@
 <!-- ============ TAB PROGETTI ============ -->
 <div class="tab" id="tab-projs">
   <div class="card">
-    <h2>✈️ I tuoi progetti</h2>
+    <h2><i class="ti ti-luggage"></i> I tuoi progetti</h2>
     <div class="newproj">
       <input type="text" id="pNew" placeholder="Nome nuovo progetto...">
       <button class="btn" onclick="addProject()">Crea</button>
@@ -303,27 +377,29 @@
 
 <!-- toolbar (backup) -->
 <div class="toolbar" id="toolbar">
-  <button class="btn ghost" onclick="exportCSV()">📥 CSV</button>
-  <button class="btn ghost" onclick="exportJSON()">💾 Backup</button>
-  <button class="btn ghost" onclick="document.getElementById('importFile').click()">📂 Ripristina</button>
+  <button class="btn ghost" onclick="exportCSV()"><i class="ti ti-file-spreadsheet"></i> CSV</button>
+  <button class="btn ghost" onclick="exportJSON()"><i class="ti ti-device-floppy"></i> Backup</button>
+  <button class="btn ghost" onclick="document.getElementById('importFile').click()"><i class="ti ti-folder-open"></i> Ripristina</button>
   <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(this)">
 </div>
 
+</div><!-- /wrap -->
+
 <!-- bottom nav -->
 <nav class="bottomnav">
-  <button id="nav-dash" onclick="showTab('dash')"><span class="ico">📊</span>Dashboard</button>
-  <button id="nav-mese" onclick="showTab('mese')"><span class="ico">📅</span>Mese</button>
-  <button id="nav-add" onclick="showTab('add')"><span class="fab">＋</span></button>
-  <button id="nav-projs" onclick="showTab('projs')"><span class="ico">🧳</span>Progetti</button>
+  <button id="nav-dash" onclick="showTab('dash')"><i class="ti ti-layout-dashboard ico"></i>Dashboard</button>
+  <button id="nav-mese" onclick="showTab('mese')"><i class="ti ti-calendar-month ico"></i>Mese</button>
+  <button id="nav-add" onclick="showTab('add')" aria-label="Aggiungi movimento"><span class="fab"><i class="ti ti-plus"></i></span></button>
+  <button id="nav-projs" onclick="showTab('projs')"><i class="ti ti-luggage ico"></i>Progetti</button>
 </nav>
 
 <!-- month picker -->
 <div class="modal" id="pickerModal" onclick="if(event.target===this)closePicker()">
   <div class="modal-box">
     <div class="year-nav">
-      <button onclick="shiftPickerYear(-1)">‹</button>
+      <button onclick="shiftPickerYear(-1)" aria-label="Anno precedente"><i class="ti ti-chevron-left"></i></button>
       <span id="pickerYear"></span>
-      <button onclick="shiftPickerYear(1)">›</button>
+      <button onclick="shiftPickerYear(1)" aria-label="Anno successivo"><i class="ti ti-chevron-right"></i></button>
     </div>
     <div class="months-grid" id="pickerMonths"></div>
     <button class="btn ghost" onclick="closePicker()">Annulla</button>
@@ -344,16 +420,18 @@ const firebaseConfig = {
   appId: "1:743054445943:web:2774fffb61d2eccf966572"
 };
 
+// categoria -> icona Tabler (elenco completo: https://tabler.io/icons)
 const CATS = {
-  "AFFITTO & BOLLETTE":"🏠","SPESA (SUPER)":"🛒","PRANZI & CENE":"🍽️","BAR & COLAZIONE":"🥐","CAFFÈ":"☕",
-  "GELATI & SNACK":"🍦","FOOD DELIVERY":"🛵","DRINK & APERITIVI":"🍹","BENZINA":"⛽","UBER / TAXI":"🚕",
-  "TRASPORTI PUBBLICI":"🚇","PARCHEGGI & PEDAGGI":"🅿️","ABBONAMENTI":"🔁","SIGARETTE":"🚬","VESTITI":"👕",
-  "ENTRATE DISCO":"🎟️","REGALI":"🎁","MEDICINE & VISITE":"💊","VIAGGI":"✈️","DEBITI":"📋","ALTRO":"📦"
+  "AFFITTO & BOLLETTE":"home","SPESA (SUPER)":"shopping-cart","PRANZI & CENE":"tools-kitchen-2","BAR & COLAZIONE":"bread","CAFFÈ":"coffee",
+  "GELATI & SNACK":"ice-cream","FOOD DELIVERY":"moped","DRINK & APERITIVI":"glass-cocktail","BENZINA":"gas-station","UBER / TAXI":"car",
+  "TRASPORTI PUBBLICI":"train","PARCHEGGI & PEDAGGI":"parking","ABBONAMENTI":"repeat","SIGARETTE":"smoking","VESTITI":"shirt",
+  "ENTRATE DISCO":"ticket","REGALI":"gift","MEDICINE & VISITE":"pill","VIAGGI":"plane","DEBITI":"receipt-2","ALTRO":"package"
 };
 const FISSE = new Set(["AFFITTO & BOLLETTE","ABBONAMENTI"]);
-const PALETTE = ["#2dd4a7","#5ea8ff","#f26d6d","#f0b357","#b07ff0","#43d9c7","#ff8fa3","#a3d94d","#7c9eff","#e0a15c"];
 const catNames = Object.keys(CATS);
-const catColor = c => PALETTE[Math.max(0, catNames.indexOf(c)) % PALETTE.length];
+const ico = c => `<i class="ti ti-${CATS[c]||'package'}"></i>`;
+// "AFFITTO & BOLLETTE" -> "Affitto & bollette" (solo visualizzazione, i dati restano uguali)
+const label = c => c.charAt(0) + c.slice(1).toLowerCase();
 const fmt = new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR'});
 const MESI = ["gennaio","febbraio","marzo","aprile","maggio","giugno","luglio","agosto","settembre","ottobre","novembre","dicembre"];
 
@@ -467,7 +545,11 @@ onAuthStateChanged(auth, user => {
 
 // ---------- UI ----------
 const sel = document.getElementById('fCat');
-catNames.forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = CATS[c] + ' ' + c; sel.appendChild(o); });
+catNames.forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = label(c); sel.appendChild(o); });
+// riga "categoria + importo" con barra sotto (usata in Mese e Dashboard)
+const barRow = (c, v, max) => `<div class="bar-row">
+  <div class="bar-head"><span class="cat" title="${label(c)}">${ico(c)}<span>${label(c)}</span></span><span class="amt">${fmt.format(v)}</span></div>
+  <div class="bar-wrap"><div class="bar" style="width:${(v/max*100).toFixed(1)}%"></div></div></div>`;
 document.getElementById('fDate').value = new Date().toISOString().slice(0,10);
 
 function toast(msg){
@@ -584,10 +666,11 @@ function tripTotals(){
 
 // ---------- render ----------
 function render(){
-  document.getElementById('monthBtn').textContent = '📅 ' + MESI[cur.m].slice(0,3) + ' ' + cur.y;
+  document.getElementById('monthBtn').innerHTML =
+    `<i class="ti ti-calendar-month"></i>${MESI[cur.m].slice(0,3)} ${cur.y}<i class="ti ti-chevron-down"></i>`;
 
   document.getElementById('fTrip').innerHTML = '<option value="">— nessuno —</option>' +
-    projects.map(p => `<option value="${esc(p)}">🧳 ${esc(p)}</option>`).join('');
+    projects.map(p => `<option value="${esc(p)}">${esc(p)}</option>`).join('');
 
   renderMese();
   renderDash();
@@ -609,10 +692,8 @@ function renderMese(){
   mt.filter(t=>t.tipo==='uscita').forEach(t => byCat[t.cat] = (byCat[t.cat]||0) + t.amount);
   const entries = Object.entries(byCat).sort((a,b)=>b[1]-a[1]).slice(0,10);
   const max = entries.length ? entries[0][1] : 1;
-  document.getElementById('catBars').innerHTML = entries.length ? entries.map(([c,v]) =>
-    `<div class="bar-row"><span class="cat" title="${c}">${CATS[c]||'📦'} ${c}</span>
-     <div class="bar-wrap"><div class="bar" style="width:${(v/max*100).toFixed(1)}%;background:${catColor(c)}"></div></div>
-     <span class="amt">${fmt.format(v)}</span></div>`).join('') : '<div class="empty">Nessuna spesa questo mese</div>';
+  document.getElementById('catBars').innerHTML = entries.length ? entries.map(([c,v]) => barRow(c, v, max)).join('')
+    : '<div class="empty">Nessuna spesa questo mese</div>';
 
   let trendHtml = '';
   const monthTotals = Array.from({length:6},(_,i)=>{const d=new Date(cur.y,cur.m-i,1); return tx.filter(t=>inMonth(t,d.getFullYear(),d.getMonth())&&t.tipo==='uscita').reduce((s,t)=>s+t.amount,0);});
@@ -620,9 +701,9 @@ function renderMese(){
   for(let i=5;i>=0;i--){
     let d = new Date(cur.y, cur.m - i, 1);
     const tot = monthTotals[5-i];
-    trendHtml += `<div class="trend-col" title="${fmt.format(tot)}">
+    trendHtml += `<div class="trend-col${i===0?' cur':''}" title="${fmt.format(tot)}">
       <span class="v">${tot>0 ? '€'+Math.round(tot) : ''}</span>
-      <div class="trend-bar" style="height:${tot>0 ? Math.max(4, tot/maxM*100) : 3}px; opacity:${i===0?1:.55}"></div>
+      <div class="trend-bar" style="height:${tot>0 ? Math.max(4, tot/maxM*100) : 3}px"></div>
       <span class="m">${MESI[d.getMonth()].slice(0,3)}</span></div>`;
   }
   document.getElementById('trend').innerHTML = trendHtml;
@@ -630,9 +711,12 @@ function renderMese(){
   document.getElementById('splitMonth').textContent = MESI[cur.m];
   const fixed = mt.filter(t=>t.tipo==='uscita' && FISSE.has(t.cat)).reduce((s,t)=>s+t.amount,0);
   const variable = outM - fixed;
-  const pct = outM>0 ? (fixed/outM*100).toFixed(1) : 0;
-  document.getElementById('splitBar').innerHTML =
-    `<div style="width:${pct}%;background:var(--blue)"></div><div style="width:${100-pct}%;background:var(--gold)"></div>`;
+  const pct = outM>0 ? fixed/outM*100 : 0;
+  const splitBar = document.getElementById('splitBar');
+  splitBar.classList.toggle('empty-split', outM===0);
+  splitBar.innerHTML = outM===0 ? '' :
+    (fixed>0 ? `<div class="fx" style="width:${pct.toFixed(1)}%"></div>` : '') +
+    (variable>0 ? `<div class="vr" style="flex:1"></div>` : '');
   document.getElementById('splitFixed').textContent = fmt.format(fixed);
   document.getElementById('splitVar').textContent = fmt.format(variable);
 
@@ -650,12 +734,12 @@ function renderMese(){
   document.getElementById('txList').innerHTML = list.length ? list.map(t => {
     const d = new Date(t.date + 'T00:00:00');
     return `<div class="tx">
-      <div class="dot">${CATS[t.cat]||'📦'}</div>
-      <div class="info"><div class="cat-name">${t.cat}${t.trip ? `<span class="trip-badge">🏷️ ${esc(t.trip)}</span>` : ''}</div>
+      <div class="dot${t.tipo==='entrata'?' in':''}">${ico(t.cat)}</div>
+      <div class="info"><div class="cat-name">${label(t.cat)}${t.trip ? `<span class="trip-badge"><i class="ti ti-tag"></i>${esc(t.trip)}</span>` : ''}</div>
         ${t.note ? `<div class="note">${esc(t.note)}</div>` : ''}
         <div class="date">${d.getDate()} ${MESI[d.getMonth()].slice(0,3)} ${d.getFullYear()}</div></div>
       <span class="amount ${t.tipo==='uscita'?'out':'in'}">${t.tipo==='uscita'?'−':'+'}${fmt.format(t.amount)}</span>
-      <button class="del" onclick="delTx(${JSON.stringify(t.id)})">✕</button></div>`;
+      <button class="del" onclick="delTx(${JSON.stringify(t.id)})" aria-label="Elimina"><i class="ti ti-trash"></i></button></div>`;
   }).join('') : '<div class="empty">Nessun movimento' + (tripFilter ? ' per questo progetto' : ' in questo mese') + '</div>';
 }
 
@@ -686,25 +770,24 @@ function renderDash(){
       <td class="num in">${i>0?'+'+fmt.format(i):'—'}</td>
       <td class="num" style="color:${s>=0?'var(--green)':'var(--red)'}">${(s>=0?'+':'')+fmt.format(s)}</td></tr>`;
   }
-  document.getElementById('dMonths').innerHTML = rows ||
-    '<tr><td class="empty">Nessun movimento in ' + y + '</td></tr>';
+  document.getElementById('dMonths').innerHTML = rows
+    ? '<thead><tr><th>Mese</th><th>Spese</th><th>Entrate</th><th>Saldo</th></tr></thead><tbody>' + rows + '</tbody>'
+    : '<tr><td class="empty">Nessun movimento in ' + y + '</td></tr>';
 
   const mTotals = Array.from({length:12},(_,m)=> yt.filter(t=>inMonth(t,y,m)&&t.tipo==='uscita').reduce((s,t)=>s+t.amount,0));
   const tMax = Math.max(...mTotals, 1);
   document.getElementById('dTrend').innerHTML = mTotals.map((v,m) =>
-    `<div class="trend-col" title="${MESI[m]}: ${fmt.format(v)}">
+    `<div class="trend-col${m===cur.m?' cur':''}" title="${MESI[m]}: ${fmt.format(v)}">
       <span class="v">${v>0?'€'+Math.round(v):''}</span>
-      <div class="trend-bar" style="height:${v>0?Math.max(4,v/tMax*100):3}px; opacity:${m===cur.m?1:.55}"></div>
+      <div class="trend-bar" style="height:${v>0?Math.max(4,v/tMax*100):3}px"></div>
       <span class="m">${MESI[m].slice(0,3)}</span></div>`).join('');
 
   const byCat = {};
   yt.filter(t=>t.tipo==='uscita').forEach(t => byCat[t.cat] = (byCat[t.cat]||0) + t.amount);
   const entries = Object.entries(byCat).sort((a,b)=>b[1]-a[1]).slice(0,10);
   const cMax = entries.length ? entries[0][1] : 1;
-  document.getElementById('dCats').innerHTML = entries.length ? entries.map(([c,v]) =>
-    `<div class="bar-row"><span class="cat" title="${c}">${CATS[c]||'📦'} ${c}</span>
-     <div class="bar-wrap"><div class="bar" style="width:${(v/cMax*100).toFixed(1)}%;background:${catColor(c)}"></div></div>
-     <span class="amt">${fmt.format(v)}</span></div>`).join('') : '<div class="empty">—</div>';
+  document.getElementById('dCats').innerHTML = entries.length ? entries.map(([c,v]) => barRow(c, v, cMax)).join('')
+    : '<div class="empty">Nessuna spesa quest\'anno</div>';
 }
 window.gotoMonth = function(m){ cur = {y: cur.y, m}; showTab('mese'); };
 
@@ -716,22 +799,22 @@ function renderProjs(){
     const open = openTrips.has(name) ? ' open' : '';
     if(!o) return `<div class="proj-card" id="proj-${hash(name)}">
         <button class="proj-del" onclick="delProject(event,'${esc(name)}')">elimina</button>
-        <div class="p-head"><span class="p-name">🧳 ${esc(name)}</span></div>
+        <div class="p-head"><span class="p-name"><i class="ti ti-luggage"></i>${esc(name)}</span></div>
         <div class="p-meta">Nessuna spesa ancora</div></div>`;
     const rows = Object.entries(o.byCat).sort((a,b)=>b[1]-a[1]).map(([c,v]) =>
-      `<div class="row"><span>${CATS[c]||'📦'} ${c}</span><b>${fmt.format(v)}</b></div>`).join('');
+      `<div class="row"><span>${ico(c)} ${label(c)}</span><b>${fmt.format(v)}</b></div>`).join('');
     const period = o.min === o.max ? fmtDate(o.min) : fmtDate(o.min) + ' → ' + fmtDate(o.max);
     return `<div class="proj-card${open}" id="proj-${hash(name)}">
       <button class="proj-del" onclick="delProject(event,'${esc(name)}')">elimina</button>
       <div class="p-head" onclick="toggleTrip('${esc(name)}')">
-        <span class="p-name">🧳 ${esc(name)}</span>
+        <span class="p-name"><i class="ti ti-luggage"></i>${esc(name)}</span>
         <span class="p-total">${fmt.format(o.total)}</span>
       </div>
       <div class="p-meta">${o.count} spese · ${period}</div>
       <div class="proj-detail">${rows}
-        <div class="row" style="margin-top:6px"><button class="btn ghost" style="font-size:.75rem;padding:6px" onclick="filterTrip(event,'${esc(name)}')">🔍 Vedi tutte le spese</button></div>
+        <div class="row" style="margin-top:6px"><button class="btn ghost" style="font-size:.75rem;padding:6px" onclick="filterTrip(event,'${esc(name)}')"><i class="ti ti-search"></i> Vedi tutte le spese</button></div>
       </div></div>`;
-  }).join('') : '<div class="empty">Nessun progetto — creane uno qui sopra ✈️</div>';
+  }).join('') : '<div class="empty">Nessun progetto: creane uno qui sopra</div>';
 }
 
 function hash(s){ let h=0; for(let i=0;i<s.length;i++){ h=(h*31 + s.charCodeAt(i))|0; } return 'h' + Math.abs(h); }
