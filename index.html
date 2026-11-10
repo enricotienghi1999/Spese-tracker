@@ -378,12 +378,60 @@
     .mtable td{padding:10px 4px; font-size:.78rem;}
     .mtable th{padding:0 4px 8px; font-size:.58rem;}
   }
+  /* ================= PC: schermi da 1024px in su (sul telefono non cambia nulla) ================= */
+  .page-title{display:none;} .nav-lbl{display:none;}
+  @media (min-width:1024px){
+    body{padding-left:248px; padding-bottom:40px;}
+    .wrap{max-width:1180px; padding:0 20px;}
+    header{padding:30px 16px 20px;}
+    .page-title{display:block; font-size:1.65rem; font-weight:700; letter-spacing:-.02em; margin-right:auto;}
+    header h1{position:fixed; top:24px; left:24px; z-index:60;}
+    /* barra laterale al posto della barra in basso */
+    .bottomnav{top:0; bottom:0; left:0; right:auto; width:248px; max-width:none; margin:0; border-radius:0; border:none;
+      border-right:1px solid var(--line); background:color-mix(in srgb,var(--card) 60%,var(--bg1));
+      backdrop-filter:none; -webkit-backdrop-filter:none; box-shadow:none; display:flex; flex-direction:column; gap:3px; padding:98px 16px 0;}
+    .bottomnav button{flex-direction:row; justify-content:flex-start; gap:12px; margin:0; padding:11px 14px; border-radius:12px;
+      font-size:.92rem; font-weight:500;}
+    .bottomnav button .ico{font-size:1.25rem;}
+    .bottomnav button:hover{background:var(--card2); color:var(--text);}
+    .bottomnav button.active{background:var(--accent-dk); color:var(--accent);}
+    .bottomnav button.active .ico{transform:none;}
+    #nav-add{order:-1; border-radius:12px; background:var(--grad); color:#0a0f0c; font-weight:700; justify-content:center; margin-bottom:18px;
+      box-shadow:0 4px 14px color-mix(in srgb,var(--accent) 28%,transparent);}
+    #nav-add:hover,#nav-add.active{background:var(--grad); color:#0a0f0c; filter:brightness(1.05);}
+    #nav-add .fab{width:auto; height:auto; margin:0; border:none; background:none; box-shadow:none; color:inherit; font-size:1.2rem;}
+    #nav-add.active .fab{transform:none;}
+    .nav-lbl{display:inline;}
+    /* backup in fondo alla barra laterale */
+    .toolbar{position:fixed; left:16px; bottom:18px; width:216px; margin:0; z-index:60; flex-direction:column; gap:4px;}
+    .toolbar .btn{flex:none; width:100%; min-width:0; justify-content:flex-start; padding:9px 14px; font-size:.84rem;
+      background:transparent; border-color:transparent; color:var(--muted);}
+    .toolbar .btn:hover{background:var(--card2); border-color:var(--line); color:var(--text);}
+    /* contenuto: KPI larghi e card su due colonne */
+    .kpis{padding:0 16px 20px; gap:16px; grid-template-columns:repeat(auto-fit,minmax(200px,1fr));}
+    .kpi{padding:18px 20px;} .kpi .val{font-size:1.7rem;}
+    .cols{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:20px; padding:0 16px; align-items:start;}
+    .cols.wide-right{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);}
+    .cols .card{margin:0 0 20px;}
+    .tab > .card, #authCard{margin:0 16px 20px;}
+    .card{padding:20px 22px;}
+    #projList{display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:14px; align-items:start;}
+    .proj-card{margin:0;}
+    .tx{padding:12px 8px; border-radius:10px;} .tx:hover{background:var(--card2);}
+    .rec{padding:11px 8px; border-radius:10px;} .rec:hover{background:var(--card2);}
+    .toast{bottom:32px; left:calc(50% + 124px);}
+    .tx-tools select{max-width:230px;}
+    /* torta: legenda sotto il grafico, così i nomi non vengono tagliati */
+    .pie-wrap{flex-direction:column; align-items:stretch;}
+    .pie-legend{min-width:0;}
+  }
 </style>
 </head>
 <body>
 <div class="wrap">
 
 <header>
+  <div class="page-title" id="pageTitle"></div>
   <h1><span class="logo"><i class="ti ti-wallet"></i></span> Spese Tracker</h1>
   <div class="hdr-right">
     <div class="sync-status"><span class="sync-dot off" id="syncDot"></span><span id="syncLabel">solo locale</span><span id="syncOut"></span></div>
@@ -410,6 +458,7 @@
     <div class="kpi"><div class="lbl">Saldo anno</div><div class="val" id="dYearSaldo">—</div></div>
     <div class="kpi"><div class="lbl">Media mensile</div><div class="val" id="dAvg">—</div></div>
   </div>
+  <div class="cols"><div class="col">
   <div class="card">
     <h2><i class="ti ti-calendar-stats"></i> I tuoi mesi · <span id="dYearLabel"></span></h2>
     <table class="mtable" id="dMonths"></table>
@@ -419,6 +468,7 @@
     <div class="trend" id="dTrend"></div>
     <div class="trend-info" id="dTrendInfo"></div>
   </div>
+  </div><div class="col">
   <div class="card">
     <div class="card-head">
       <h2><i class="ti ti-category"></i> Top categorie dell'anno</h2>
@@ -441,6 +491,7 @@
     </div>
     <div class="pie-wrap" id="pieWrap"></div>
   </div>
+  </div></div><!-- /cols -->
 </div>
 
 <!-- ============ TAB MESE ============ -->
@@ -450,6 +501,7 @@
     <div class="kpi pos"><div class="lbl">Entrate mese</div><div class="val" id="kpiIn">—</div></div>
     <div class="kpi"><div class="lbl">Saldo mese</div><div class="val" id="kpiSaldo">—</div></div>
   </div>
+  <div class="cols wide-right"><div class="col">
   <div class="card">
     <div class="card-head">
       <h2><i class="ti ti-category"></i> Per categoria · <span id="catMonth"></span></h2>
@@ -472,6 +524,7 @@
       <span><i class="sw vr"></i>Variabili <b id="splitVar"></b></span>
     </div>
   </div>
+  </div><div class="col">
   <div class="card">
     <div class="card-head">
       <h2><i class="ti ti-receipt"></i> Movimenti</h2>
@@ -492,10 +545,12 @@
     </div>
     <div id="txList"></div>
   </div>
+  </div></div><!-- /cols -->
 </div>
 
 <!-- ============ TAB AGGIUNGI ============ -->
 <div class="tab" id="tab-add">
+  <div class="cols"><div class="col">
   <div class="card">
     <h2 id="formTitle"><i class="ti ti-plus"></i> Aggiungi movimento</h2>
     <form id="txForm" onsubmit="return submitTx(event)">
@@ -543,6 +598,7 @@
       </div>
     </form>
   </div>
+  </div><div class="col">
   <div class="card" id="recCard">
     <div class="card-head">
       <h2><i class="ti ti-repeat"></i> Ricorrenti</h2>
@@ -550,6 +606,7 @@
     </div>
     <div id="recList"></div>
   </div>
+  </div></div><!-- /cols -->
 </div>
 
 <!-- ============ TAB PROGETTI ============ -->
@@ -578,7 +635,7 @@
 <nav class="bottomnav">
   <button id="nav-dash" onclick="showTab('dash')"><i class="ti ti-layout-dashboard ico"></i>Dashboard</button>
   <button id="nav-mese" onclick="showTab('mese')"><i class="ti ti-calendar-month ico"></i>Mese</button>
-  <button id="nav-add" onclick="openAdd()" aria-label="Aggiungi movimento"><span class="fab"><i class="ti ti-plus"></i></span></button>
+  <button id="nav-add" onclick="openAdd()" aria-label="Aggiungi movimento"><span class="fab"><i class="ti ti-plus"></i></span><span class="nav-lbl">Nuovo movimento</span></button>
   <button id="nav-projs" onclick="showTab('projs')"><i class="ti ti-luggage ico"></i>Progetti</button>
 </nav>
 
@@ -947,6 +1004,7 @@ window.showTab = function(t){
   // calendario solo nella pagina Mese, selettore anno solo nella Dashboard
   document.getElementById('monthBtn').style.display = t === 'mese' ? '' : 'none';
   document.getElementById('yearSwitch').style.display = t === 'dash' ? '' : 'none';
+  document.getElementById('pageTitle').textContent = {dash:'Dashboard', mese:'Mese', add:'Aggiungi', projs:'Progetti'}[t];
   window.scrollTo(0,0);
   render();
 };
@@ -1235,7 +1293,7 @@ function renderMese(){
   const maxM = Math.max(...monthTotals, 1);
   for(let i=5;i>=0;i--){
     let d = new Date(cur.y, cur.m - i, 1);
-    const tot = monthTotals[5-i];
+    const tot = monthTotals[i]; // i = mesi fa (0 = mese selezionato)
     trendHtml += `<div class="trend-col${i===0?' cur':''}" title="${fmt.format(tot)}">
       <span class="v">${tot>0 ? '€'+Math.round(tot) : ''}</span>
       <div class="trend-bar" style="height:${tot>0 ? Math.max(4, tot/maxM*100) : 3}px"></div>
