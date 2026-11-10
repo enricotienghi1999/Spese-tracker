@@ -124,6 +124,15 @@
   /* trend */
   .trend{display:flex; align-items:flex-end; gap:8px; height:140px; padding-top:10px;}
   #dTrend{gap:5px;}
+  /* grafico annuale: tocchi un mese e vedi l'importo */
+  #dTrend .trend-col{cursor:pointer;}
+  #dTrend .trend-col:not(.cur):hover .trend-bar{opacity:.55;}
+  .trend-info{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:12px; padding-top:11px;
+    border-top:1px solid var(--line); font-size:.84rem; color:var(--muted);}
+  .trend-info b{color:var(--text); font-weight:600; font-variant-numeric:tabular-nums;}
+  .trend-info .mn{color:var(--text); font-weight:600; text-transform:capitalize;}
+  .trend-info button{background:var(--accent-dk); border:none; color:var(--accent); font-family:inherit; font-size:.78rem; font-weight:600;
+    padding:6px 10px; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:3px; flex-shrink:0;}
   .trend-col{flex:1; min-width:0; display:flex; flex-direction:column; align-items:center; gap:6px; height:100%; justify-content:flex-end;}
   .trend-bar{width:100%; max-width:40px; border-radius:7px 7px 3px 3px; background:var(--grad); min-height:3px; transition:height .4s;}
   .trend-col:not(.cur) .trend-bar{opacity:.3;}
@@ -159,12 +168,18 @@
   .sw{display:inline-block; width:9px; height:9px; border-radius:3px; margin-right:6px;}
 
   /* form */
-  form{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  form{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:12px;}
+  form > div{min-width:0;}
   form .full{grid-column:1/-1;}
   label{font-size:.66rem; color:var(--muted); text-transform:uppercase; letter-spacing:.8px; display:block; margin-bottom:5px; font-weight:600;}
   input,select,textarea{width:100%; background:var(--card2); border:1px solid var(--line); color:var(--text);
     border-radius:12px; padding:12px 13px; font-size:1rem; font-family:inherit; transition:border-color .2s;}
   input[type=date]{color-scheme:dark;}
+  /* stessa altezza e larghezza per importo e data (iPhone e Android disegnano la data più grande) */
+  form input:not([type=checkbox]), form select{height:50px; line-height:normal;}
+  input[type=date]{-webkit-appearance:none; appearance:none; display:block; min-width:0; max-width:100%; text-align:left;}
+  input[type=date]::-webkit-date-and-time-value{text-align:left; margin:0;}
+  input[type=date]::-webkit-calendar-picker-indicator{margin-left:4px; opacity:.7;}
   input:focus,select:focus{outline:none; border-color:var(--accent); box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 15%, transparent);}
   select{appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238a93a6' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
     background-repeat:no-repeat; background-position:right 14px center;}
@@ -402,6 +417,7 @@
   <div class="card">
     <h2><i class="ti ti-chart-bar"></i> Spese per mese</h2>
     <div class="trend" id="dTrend"></div>
+    <div class="trend-info" id="dTrendInfo"></div>
   </div>
   <div class="card">
     <div class="card-head">
@@ -492,7 +508,7 @@
       </div>
       <div>
         <label>Importo €</label>
-        <input type="number" id="fAmount" step="0.01" min="0.01" inputmode="decimal" required placeholder="0.00">
+        <input type="text" id="fAmount" inputmode="decimal" autocomplete="off" required placeholder="0,00">
       </div>
       <div id="dateBox">
         <label>Data</label>
@@ -632,6 +648,13 @@ const ico = c => `<i class="ti ti-${ICONS[c]||'package'}"></i>`;
 // "AFFITTO & BOLLETTE" -> "Affitto & bollette" (solo visualizzazione, i dati restano uguali)
 const label = c => c.charAt(0) + c.slice(1).toLowerCase();
 const fmt = new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR'});
+// "12,50" "12.50" "1.234,50" "€ 7" -> numero; 0 se non valido
+function parseAmount(v){
+  let t = String(v).replace(/[€\s]/g, '');
+  if(t.includes(',')) t = t.replace(/\./g, '').replace(',', '.');   // virgola = decimali, punti = migliaia
+  if(!/^(\d+\.?\d*|\.\d+)$/.test(t)) return 0;
+  return Math.round(parseFloat(t) * 100) / 100;
+}
 const MESI = ["gennaio","febbraio","marzo","aprile","maggio","giugno","luglio","agosto","settembre","ottobre","novembre","dicembre"];
 
 // ---------- modalità demo ----------
@@ -927,7 +950,13 @@ window.showTab = function(t){
   window.scrollTo(0,0);
   render();
 };
-window.shiftYear = function(d){ cur = {y: cur.y + d, m: cur.m}; render(); };
+window.shiftYear = function(d){ cur = {y: cur.y + d, m: cur.m}; dSel = null; render(); };
+// grafico "Spese per mese" in Dashboard: tocco su un mese = mostra il suo importo
+let dSel = null;
+document.getElementById('dTrend').addEventListener('click', e => {
+  const col = e.target.closest('.trend-col'); if(!col) return;
+  dSel = +col.dataset.m; renderDash();
+});
 
 // ---------- month picker ----------
 window.openPicker = function(){
@@ -943,7 +972,7 @@ function renderPicker(){
     `<button class="${pickerY===cur.y && i===cur.m ? 'sel' : ''}" onclick="pickMonth(${i})">${m.slice(0,3)}</button>`).join('');
 }
 window.pickMonth = function(m){
-  cur = {y: pickerY, m};
+  cur = {y: pickerY, m}; dSel = null;
   closePicker();
   showTab(tab === 'dash' ? 'mese' : tab);
 };
@@ -982,7 +1011,7 @@ function resetForm(){
 }
 function fillForm(o){
   setType(o.tipo, o.cat);
-  document.getElementById('fAmount').value = Number(o.amount).toFixed(2);
+  document.getElementById('fAmount').value = Number(o.amount).toFixed(2).replace('.', ',');
   document.getElementById('fNote').value = o.note || '';
   document.getElementById('fTrip').value = o.trip || '';
 }
@@ -1012,12 +1041,12 @@ window.cancelEdit = function(){ const back = returnTab; resetForm(); showTab(bac
 
 window.submitTx = function(e){
   e.preventDefault();
-  const a = Math.round(parseFloat(document.getElementById('fAmount').value) * 100) / 100;
+  const a = parseAmount(document.getElementById('fAmount').value);
   const d = document.getElementById('fDate').value;
   const c = sel.value;
   const n = document.getElementById('fNote').value.trim();
   const tr = document.getElementById('fTrip').value;
-  if(!(a > 0)) return false;
+  if(!(a > 0)){ toast('Importo non valido'); document.getElementById('fAmount').focus(); return false; }
   const withTrip = o => { if(tr) o.trip = tr; else delete o.trip; return o; };
 
   if(editMode && editMode.kind === 'rec'){
@@ -1096,9 +1125,24 @@ window.dangerEdit = function(){
   saveLocal(); pushCloud();
   resetForm(); render(); toast('Ricorrenza interrotta');
 };
-// se l'app resta aperta (es. da un giorno all'altro) controlla se è arrivata una ricorrente
+// se l'app resta aperta in sottofondo da un giorno all'altro:
+// - aggiunge le ricorrenti arrivate
+// - se è cambiato il mese e stavi guardando il mese corrente, passa al mese nuovo
+// - aggiorna la data proposta nel modulo
+let seenDay = isoDay(new Date());
 document.addEventListener('visibilitychange', () => {
-  if(document.visibilityState === 'visible' && applyRecurring()){ saveLocal(); pushCloud(); render(); }
+  if(document.visibilityState !== 'visible') return;
+  const today = isoDay(new Date());
+  let changed = applyRecurring() > 0;
+  if(changed){ saveLocal(); pushCloud(); }
+  if(today !== seenDay){
+    const was = {y: +seenDay.slice(0, 4), m: +seenDay.slice(5, 7) - 1};
+    if(cur.y === was.y && cur.m === was.m){ const n = new Date(); cur = {y: n.getFullYear(), m: n.getMonth()}; }
+    const fd = document.getElementById('fDate');
+    if(!editMode && fd.value === seenDay) fd.value = today;
+    seenDay = today; changed = true;
+  }
+  if(changed) render();
 });
 function inMonth(t, y, m){ const [yy,mm] = t.date.split('-').map(Number); return yy===y && mm-1===m; }
 
@@ -1417,11 +1461,15 @@ function renderDash(){
 
   const mTotals = Array.from({length:12},(_,m)=> yt.filter(t=>inMonth(t,y,m)&&t.tipo==='uscita').reduce((s,t)=>s+t.amount,0));
   const tMax = Math.max(...mTotals, 1);
+  const selM = dSel ?? cur.m; // mese toccato nel grafico (di default quello selezionato in alto)
   document.getElementById('dTrend').innerHTML = mTotals.map((v,m) =>
-    `<div class="trend-col${m===cur.m?' cur':''}" title="${MESI[m]}: ${fmt.format(v)}">
+    `<div class="trend-col${m===selM?' cur':''}" data-m="${m}" title="${MESI[m]}: ${fmt.format(v)}">
       <span class="v">${v>0?'€'+Math.round(v):''}</span>
       <div class="trend-bar" style="height:${v>0?Math.max(4,v/tMax*100):3}px"></div>
       <span class="m">${MESI[m].slice(0,3)}</span></div>`).join('');
+  const selIn = yt.filter(t => inMonth(t, y, selM) && t.tipo === 'entrata').reduce((s,t)=>s+t.amount,0);
+  document.getElementById('dTrendInfo').innerHTML = `<span><span class="mn">${MESI[selM]} ${y}</span> · spese <b>${fmt.format(mTotals[selM])}</b>${selIn ? ` · entrate <b>${fmt.format(selIn)}</b>` : ''}</span>
+    <button onclick="gotoMonth(${selM})">Apri <i class="ti ti-chevron-right"></i></button>`;
 
   const byCat = {};
   yt.filter(t=>t.tipo==='uscita').forEach(t => byCat[t.cat] = (byCat[t.cat]||0) + t.amount);
