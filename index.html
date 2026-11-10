@@ -5,6 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#0b0e14">
 <title>Spese Tracker</title>
+<!-- installabile come app (schermata Home) -->
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Spese">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
@@ -47,13 +55,13 @@
   *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
   body{background:linear-gradient(180deg,var(--bg1),var(--bg2) 60%); background-attachment:fixed;
     color:var(--text); font-family:'Inter',-apple-system,'Segoe UI',Roboto,sans-serif; -webkit-font-smoothing:antialiased;
-    padding-bottom:120px; min-height:100vh;}
+    padding-bottom:calc(120px + env(safe-area-inset-bottom)); min-height:100vh;}
   .wrap{max-width:760px; margin:0 auto;}
   .ti{line-height:1;}
   button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
 
   /* header */
-  header{padding:16px; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;}
+  header{padding:16px; padding-top:max(16px, env(safe-area-inset-top)); display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;}
   h1{font-size:1.15rem; letter-spacing:-.01em; font-weight:700; display:flex; align-items:center; gap:10px;}
   .logo{width:34px; height:34px; border-radius:11px; background:var(--grad); color:#0a0f0c;
     display:flex; align-items:center; justify-content:center; font-size:1.15rem;}
@@ -204,7 +212,7 @@
   .auth-actions .btn{flex:1; padding:12px; font-size:.88rem;}
 
   /* bottom nav con FAB centrale */
-  .bottomnav{position:fixed; bottom:14px; left:12px; right:12px; max-width:520px; margin:0 auto;
+  .bottomnav{position:fixed; bottom:calc(14px + env(safe-area-inset-bottom)); left:12px; right:12px; max-width:520px; margin:0 auto;
     background:color-mix(in srgb,var(--card) 92%, transparent); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
     border:1px solid var(--line); border-radius:24px; display:grid; grid-template-columns:1fr 1fr 1.25fr 1fr;
     z-index:50; box-shadow:0 10px 30px rgba(0,0,0,.45); overflow:visible;}
@@ -259,9 +267,49 @@
   .tab{display:none;} .tab.active{display:block; animation:fadein .25s ease;}
   @keyframes fadein{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;}}
 
+  /* confronto col mese prima */
+  .kpi .cmp{font-size:.72rem; margin-top:5px; display:flex; align-items:center; gap:4px; color:var(--muted); font-weight:500; flex-wrap:wrap;}
+  .kpi .cmp b{font-weight:700;} .kpi .cmp .up{color:var(--red);} .kpi .cmp .down{color:var(--green);}
+  /* modulo: modifica, ricorrenza */
+  .edit-info{font-size:.8rem; color:var(--muted); background:var(--card2); border:1px solid var(--line); border-radius:12px;
+    padding:10px 12px; display:flex; gap:9px; align-items:flex-start; line-height:1.45;}
+  .edit-info .ti{color:var(--accent); font-size:1.1rem; flex-shrink:0;}
+  .switch-row{display:flex; align-items:center; gap:12px; background:var(--card2); border:1px solid var(--line); border-radius:12px;
+    padding:12px 13px; cursor:pointer; text-transform:none; letter-spacing:0; font-size:.92rem; color:var(--text); margin:0; font-weight:500;}
+  .switch-row small{display:block; font-size:.74rem; color:var(--muted); font-weight:400; margin-top:2px;}
+  .switch-row input{appearance:none; -webkit-appearance:none; width:44px; height:26px; border-radius:13px; background:var(--line);
+    position:relative; flex-shrink:0; padding:0; border:none; cursor:pointer; transition:background .2s;}
+  .switch-row input::after{content:''; position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:50%; background:#fff; transition:transform .2s;}
+  .switch-row input:checked{background:var(--accent);}
+  .switch-row input:checked::after{transform:translateX(18px);}
+  .form-actions{display:flex; gap:10px;}
+  .form-actions .btn.ghost{width:auto; flex:0 0 auto; padding:14px 20px; font-size:.95rem;}
+  .link-danger{background:none; border:none; color:var(--red); font-family:inherit; font-size:.85rem; cursor:pointer;
+    display:inline-flex; align-items:center; gap:6px; padding:6px 4px;}
+  /* lista ricorrenti */
+  .rec-total{font-size:.75rem; color:var(--muted);} .rec-total b{color:var(--text); font-variant-numeric:tabular-nums;}
+  .rec{display:flex; align-items:center; gap:12px; padding:11px 2px; border-bottom:1px solid var(--line); cursor:pointer;}
+  .rec:last-child{border-bottom:none;}
+  .rec .info{flex:1; min-width:0;}
+  .rec .t{font-size:.92rem; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .rec .s{font-size:.72rem; color:var(--muted); margin-top:1px;}
+  .rec .amount{font-weight:700; font-variant-numeric:tabular-nums; white-space:nowrap;}
+  .rec .amount.in{color:var(--green);}
+  .rec .ti-chevron-right{color:var(--muted);}
+  .tx{cursor:pointer;}
+  .tx:hover .cat-name,.rec:hover .t{color:var(--accent);}
+  .rep-ico{color:var(--muted); font-size:.85rem; margin-left:5px; vertical-align:-1px;}
+  /* ricerca movimenti */
+  .tx-tools{display:flex; gap:8px; margin-bottom:8px; flex-wrap:wrap;}
+  .search{flex:1; min-width:170px; position:relative;}
+  .search .ti{position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--muted); font-size:1.05rem; pointer-events:none;}
+  .search input{padding:9px 12px 9px 37px; border-radius:10px;}
+  .tx-tools select{width:auto; max-width:170px; padding:9px 30px 9px 11px; border-radius:10px; background-position:right 10px center;}
+  .tx-summary{font-size:.76rem; color:var(--muted); margin:0 0 4px;} .tx-summary b{color:var(--text); font-variant-numeric:tabular-nums;}
+
   /* torta (ripartizione spese) */
   .pie-ctrl{display:flex; gap:8px; flex-wrap:wrap; align-items:center;}
-  .pie-ctrl select{width:auto; padding:7px 30px 7px 11px; font-size:.82rem; border-radius:10px; background-position:right 10px center;}
+  .pie-ctrl select{width:auto; padding:7px 30px 7px 11px; border-radius:10px; background-position:right 10px center;}
   .pie-wrap{display:flex; gap:22px; align-items:center; flex-wrap:wrap; margin-top:16px;}
   .pie-wrap svg{width:200px; height:200px; flex-shrink:0; margin:0 auto; font-family:inherit;}
   .pie-wrap svg path{transition:opacity .15s; cursor:pointer;}
@@ -329,7 +377,7 @@
   <div class="card">
     <div class="card-head">
       <h2><i class="ti ti-category"></i> Top categorie dell'anno</h2>
-      <div class="seg" id="catModeSeg">
+      <div class="seg cat-mode">
         <button class="on" onclick="setCatMode(false)" aria-label="Mostra in euro">€</button>
         <button onclick="setCatMode(true)" aria-label="Mostra in percentuale">%</button>
       </div>
@@ -353,12 +401,18 @@
 <!-- ============ TAB MESE ============ -->
 <div class="tab" id="tab-mese">
   <div class="kpis">
-    <div class="kpi hero"><div class="lbl">Spese mese</div><div class="val" id="kpiMonth">—</div></div>
+    <div class="kpi hero"><div class="lbl">Spese mese</div><div class="val" id="kpiMonth">—</div><div class="cmp" id="kpiCmp"></div></div>
     <div class="kpi pos"><div class="lbl">Entrate mese</div><div class="val" id="kpiIn">—</div></div>
     <div class="kpi"><div class="lbl">Saldo mese</div><div class="val" id="kpiSaldo">—</div></div>
   </div>
   <div class="card">
-    <h2><i class="ti ti-category"></i> Per categoria · <span id="catMonth"></span></h2>
+    <div class="card-head">
+      <h2><i class="ti ti-category"></i> Per categoria · <span id="catMonth"></span></h2>
+      <div class="seg cat-mode">
+        <button class="on" onclick="setCatMode(false)" aria-label="Mostra in euro">€</button>
+        <button onclick="setCatMode(true)" aria-label="Mostra in percentuale">%</button>
+      </div>
+    </div>
     <div id="catBars"></div>
   </div>
   <div class="card">
@@ -374,7 +428,19 @@
     </div>
   </div>
   <div class="card">
-    <h2><i class="ti ti-receipt"></i> Movimenti</h2>
+    <div class="card-head">
+      <h2><i class="ti ti-receipt"></i> Movimenti</h2>
+      <div class="seg" id="txScopeSeg">
+        <button class="on" onclick="setTxScope('mese')">Mese</button>
+        <button onclick="setTxScope('tutti')">Tutti</button>
+      </div>
+    </div>
+    <div class="tx-tools">
+      <div class="search"><i class="ti ti-search"></i>
+        <input type="search" id="txSearch" placeholder="Cerca: sushi, Esselunga, Mare…" oninput="renderTxList()" autocomplete="off"></div>
+      <select id="txCat" aria-label="Filtra per categoria" onchange="renderTxList()"></select>
+    </div>
+    <div class="tx-summary" id="txSummary"></div>
     <div id="tripFilterBar" style="display:none" class="trip-filter-bar">
       <i class="ti ti-tag"></i> Progetto: <b id="tripFilterName"></b> <span style="color:var(--muted)">(tutti i mesi)</span>
       <button onclick="clearTripFilter()" aria-label="Togli filtro"><i class="ti ti-x"></i></button>
@@ -386,8 +452,9 @@
 <!-- ============ TAB AGGIUNGI ============ -->
 <div class="tab" id="tab-add">
   <div class="card">
-    <h2><i class="ti ti-plus"></i> Aggiungi movimento</h2>
-    <form onsubmit="return addTx(event)">
+    <h2 id="formTitle"><i class="ti ti-plus"></i> Aggiungi movimento</h2>
+    <form id="txForm" onsubmit="return submitTx(event)">
+      <div class="full edit-info" id="editInfo" style="display:none"></div>
       <div class="full">
         <div class="type-toggle">
           <button type="button" id="btnOut" class="active-out" onclick="setType('uscita')">Uscita</button>
@@ -398,9 +465,13 @@
         <label>Importo €</label>
         <input type="number" id="fAmount" step="0.01" min="0.01" inputmode="decimal" required placeholder="0.00">
       </div>
-      <div>
+      <div id="dateBox">
         <label>Data</label>
         <input type="date" id="fDate" required>
+      </div>
+      <div id="dayBox" style="display:none">
+        <label>Giorno del mese</label>
+        <input type="number" id="fDay" min="1" max="31" step="1" inputmode="numeric" placeholder="1–31">
       </div>
       <div class="full">
         <label>Categoria</label>
@@ -414,8 +485,25 @@
         <label>Nota (opzionale)</label>
         <input type="text" id="fNote" placeholder="es. cena con amici">
       </div>
-      <div class="full"><button class="btn" type="submit"><i class="ti ti-check"></i> Salva</button></div>
+      <div class="full" id="repeatBox">
+        <label class="switch-row"><input type="checkbox" id="fRepeat">
+          <span>Ripeti ogni mese<small>La aggiungo io in automatico ogni mese, nello stesso giorno</small></span></label>
+      </div>
+      <div class="full form-actions">
+        <button class="btn ghost" type="button" id="btnCancel" onclick="cancelEdit()" style="display:none">Annulla</button>
+        <button class="btn" type="submit" id="btnSubmit"><i class="ti ti-check"></i> Salva</button>
+      </div>
+      <div class="full" id="editDanger" style="display:none; text-align:center">
+        <button type="button" class="link-danger" id="btnDanger" onclick="dangerEdit()"></button>
+      </div>
     </form>
+  </div>
+  <div class="card" id="recCard">
+    <div class="card-head">
+      <h2><i class="ti ti-repeat"></i> Ricorrenti</h2>
+      <span class="rec-total" id="recTotal"></span>
+    </div>
+    <div id="recList"></div>
   </div>
 </div>
 
@@ -445,7 +533,7 @@
 <nav class="bottomnav">
   <button id="nav-dash" onclick="showTab('dash')"><i class="ti ti-layout-dashboard ico"></i>Dashboard</button>
   <button id="nav-mese" onclick="showTab('mese')"><i class="ti ti-calendar-month ico"></i>Mese</button>
-  <button id="nav-add" onclick="showTab('add')" aria-label="Aggiungi movimento"><span class="fab"><i class="ti ti-plus"></i></span></button>
+  <button id="nav-add" onclick="openAdd()" aria-label="Aggiungi movimento"><span class="fab"><i class="ti ti-plus"></i></span></button>
   <button id="nav-projs" onclick="showTab('projs')"><i class="ti ti-luggage ico"></i>Progetti</button>
 </nav>
 
@@ -483,9 +571,15 @@ const CATS = {
   "TRASPORTI PUBBLICI":"train","PARCHEGGI & PEDAGGI":"parking","ABBONAMENTI":"repeat","SIGARETTE":"smoking","VESTITI":"shirt",
   "ENTRATE DISCO":"ticket","REGALI":"gift","MEDICINE & VISITE":"pill","VIAGGI":"plane","DEBITI":"receipt-2","ALTRO":"package"
 };
+// categorie delle entrate (lista separata: compare quando scegli "Entrata")
+const CATS_IN = {
+  "STIPENDIO":"cash","RIMBORSI":"receipt-refund","REGALI RICEVUTI":"gift","VENDITE":"shopping-bag",
+  "INTERESSI & DIVIDENDI":"chart-line","ALTRE ENTRATE":"coin"
+};
 const FISSE = new Set(["AFFITTO & BOLLETTE","ABBONAMENTI"]);
-const catNames = Object.keys(CATS);
-const ico = c => `<i class="ti ti-${CATS[c]||'package'}"></i>`;
+const catNames = Object.keys(CATS), catNamesIn = Object.keys(CATS_IN);
+const ICONS = {...CATS, ...CATS_IN};
+const ico = c => `<i class="ti ti-${ICONS[c]||'package'}"></i>`;
 // "AFFITTO & BOLLETTE" -> "Affitto & bollette" (solo visualizzazione, i dati restano uguali)
 const label = c => c.charAt(0) + c.slice(1).toLowerCase();
 const fmt = new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR'});
@@ -523,16 +617,11 @@ function demoData(){
   for(let m = 0; m <= today.getMonth(); m++){
     const summer = m >= 5 && m <= 8, winter = m <= 2 || m >= 10;
     // entrate
-    add(day(m, 3), 'ALTRO', 2150, 'Stipendio', 'entrata');
-    if(rnd() < .3) add(day(m, nr(5, 25)), 'ALTRO', between(20, 80), pick(['Rimborso Splitwise','Vendita su Vinted','Rimborso spese']), 'entrata');
+    // (stipendio, affitto e abbonamenti sono "ricorrenti": li genera la regola qui sotto)
+    if(rnd() < .3){ const [cat, note] = pick([['RIMBORSI','Rimborso Splitwise'],['VENDITE','Vendita su Vinted'],['RIMBORSI','Rimborso spese']]);
+      add(day(m, nr(5, 25)), cat, between(20, 80), note, 'entrata'); }
     // fisse
-    add(day(m, 1), 'AFFITTO & BOLLETTE', 650, 'Affitto');
-    add(day(m, 5), 'AFFITTO & BOLLETTE', 29.90, 'Internet fibra');
     if(m % 2 === 1) add(day(m, 18), 'AFFITTO & BOLLETTE', winter ? between(110, 160) : between(60, 95), 'Bolletta luce e gas');
-    add(day(m, 2), 'ABBONAMENTI', 49, 'Palestra');
-    add(day(m, 3), 'ABBONAMENTI', 11.99, 'Spotify');
-    add(day(m, 8), 'ABBONAMENTI', 13.99, 'Netflix');
-    add(day(m, 1), 'TRASPORTI PUBBLICI', 39, 'Abbonamento ATM');
     // variabili
     times(m, nr(5, 7), 'SPESA (SUPER)', 18, 75, ['Esselunga','Carrefour','Lidl','Pam','Esselunga']);
     times(m, nr(4, 7), 'PRANZI & CENE', 12, 48, ['pranzo ufficio','sushi','pizza con amici','cena fuori','poke','pranzo ufficio']);
@@ -582,19 +671,59 @@ function demoData(){
     [8, 19, 'VIAGGI', 75, 'rifugio mezza pensione'], [8, 19, 'DRINK & APERITIVI', 9, 'birra al rifugio'],
     [8, 20, 'BAR & COLAZIONE', 6, 'strudel e caffè'], [8, 20, 'VIAGGI', 46, 'funivia Seceda'],
     [8, 20, 'PRANZI & CENE', 27, 'pranzo in malga'], [8, 20, 'PARCHEGGI & PEDAGGI', 28.60, 'autostrada ritorno']]);
-  return out;
+  // ricorrenti della demo: da gennaio, generate in automatico come quelle vere
+  const st = `${Y}-01`;
+  const recurring = [
+    ['STIPENDIO', 2150, 3, 'entrata', 'Stipendio'], ['AFFITTO & BOLLETTE', 650, 1, 'uscita', 'Affitto'],
+    ['AFFITTO & BOLLETTE', 29.90, 5, 'uscita', 'Internet fibra'], ['ABBONAMENTI', 49, 2, 'uscita', 'Palestra'],
+    ['ABBONAMENTI', 11.99, 3, 'uscita', 'Spotify'], ['ABBONAMENTI', 13.99, 8, 'uscita', 'Netflix'],
+    ['TRASPORTI PUBBLICI', 39, 1, 'uscita', 'Abbonamento ATM']
+  ].map(([cat, amount, d, tipo, note], i) => ({id: 'rdemo' + i, cat, amount, day: d, tipo, note, start: st, since: st}));
+  return {tx: out, recurring};
 }
 
 // ---------- stato ----------
-let tx = [], tomb = [], projects = [];
+// recurring = regole "ripeti ogni mese": {id, cat, amount, day, tipo, note, trip?, start:'AAAA-MM', since:'AAAA-MM', skip:['AAAA-MM']}
+let tx = [], tomb = [], projects = [], recurring = [];
 let openTrips = new Set();
 if(DEMO){
-  tx = demoData();
+  ({tx, recurring} = demoData());
 } else {
   try { tx = JSON.parse(localStorage.getItem('speseTx') || '[]'); } catch(e){}
   try { tomb = JSON.parse(localStorage.getItem('speseTomb') || '[]'); } catch(e){}
+  try { projects = JSON.parse(localStorage.getItem('speseProjects') || '[]'); } catch(e){}
+  try { recurring = JSON.parse(localStorage.getItem('speseRecurring') || '[]'); } catch(e){}
   try { openTrips = new Set(JSON.parse(localStorage.getItem('speseOpenTrips') || '[]')); } catch(e){}
 }
+
+// ---------- spese ricorrenti: genera i movimenti dei mesi arrivati ----------
+// Ogni movimento generato ha id "<regola>-AAAA-MM": così non viene mai creato due volte,
+// nemmeno se telefono e PC lo generano entrambi (la sincronizzazione li unisce).
+const pad2 = n => String(n).padStart(2, '0');
+const isoDay = d => `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+const ymOf = d => `${d.getFullYear()}-${pad2(d.getMonth()+1)}`;
+function recDate(r, y, m){ return `${y}-${pad2(m+1)}-${pad2(Math.min(r.day, new Date(y, m+1, 0).getDate()))}`; }
+function applyRecurring(){
+  const today = isoDay(new Date());
+  const have = new Set(tx.map(t => String(t.id))), dead = new Set(tomb.map(String));
+  let added = 0;
+  recurring.forEach(r => {
+    let [y, m] = (r.since || r.start).split('-').map(Number); m -= 1;
+    for(let guard = 0; guard < 240; guard++){
+      const date = recDate(r, y, m);
+      if(date > today) break;
+      const ym = date.slice(0, 7), id = `${r.id}-${ym}`;
+      if(!have.has(id) && !dead.has(id) && !(r.skip || []).includes(ym)){
+        const t = {id, date, amount: r.amount, cat: r.cat, note: r.note || '', tipo: r.tipo, rid: r.id};
+        if(r.trip) t.trip = r.trip;
+        tx.push(t); have.add(id); added++;
+      }
+      if(++m > 11){ m = 0; y++; }
+    }
+  });
+  return added;
+}
+if(applyRecurring()) saveLocal();
 new Set(tx.filter(t=>t.trip).map(t=>t.trip)).forEach(p => { if(!projects.includes(p)) projects.push(p); });
 
 let cur = new Date(); cur = {y: cur.getFullYear(), m: cur.getMonth()};
@@ -608,6 +737,7 @@ function saveLocal(){
   localStorage.setItem('speseTx', JSON.stringify(tx));
   localStorage.setItem('speseTomb', JSON.stringify(tomb));
   localStorage.setItem('speseProjects', JSON.stringify(projects));
+  localStorage.setItem('speseRecurring', JSON.stringify(recurring));
   localStorage.setItem('speseOpenTrips', JSON.stringify([...openTrips]));
 }
 function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
@@ -625,21 +755,28 @@ function setSync(on, label){
   document.getElementById('syncOut').innerHTML = auth.currentUser
     ? ' · <span class="link-btn" onclick="doSignOut()">Esci</span>' : '';
 }
-function dataJson(){ return JSON.stringify({tx, tomb, projects}); }
+function dataJson(){ return JSON.stringify({tx, tomb, projects, recurring}); }
+// Firestore rifiuta i campi "undefined": li tolgo prima di inviare
+const clean = o => JSON.parse(JSON.stringify(o));
 function pushCloud(){
   if(DEMO || !auth.currentUser) return; // in demo non tocca mai Firebase
   lastPushJson = dataJson();
-  setDoc(doc(db, 'users', auth.currentUser.uid), {tx, tomb, projects, updatedAt: Date.now()})
+  setDoc(doc(db, 'users', auth.currentUser.uid), clean({tx, tomb, projects, recurring, updatedAt: Date.now()}))
     .catch(err => { console.warn('Sync error', err); setSync(false, 'errore sync'); });
 }
 function mergeCloud(c){
   const dead = new Set(c.tomb || []);
   tx = tx.filter(t => !dead.has(t.id));
-  tomb = [...new Set([...tomb, ...(c.tomb||[])])].slice(-500);
+  tomb = [...new Set([...tomb, ...(c.tomb||[])])].slice(-1000);
   projects = [...new Set([...projects, ...(c.projects||[])])];
   const cIds = new Set((c.tx||[]).map(t => t.id));
   const localOnly = tx.filter(t => !cIds.has(t.id));
   tx = [...(c.tx||[]), ...localOnly];
+  // ricorrenti: stessa logica dei movimenti (vince la versione nel cloud, si tengono quelle solo locali)
+  const deadAll = new Set(tomb);
+  const cRec = (c.recurring || []).filter(r => !deadAll.has(r.id));
+  const cRecIds = new Set(cRec.map(r => r.id));
+  recurring = [...cRec, ...recurring.filter(r => !cRecIds.has(r.id) && !deadAll.has(r.id))];
 }
 
 const authBox = document.getElementById('authBox');
@@ -686,10 +823,11 @@ if(!DEMO) onAuthStateChanged(auth, user => {
     unsub = onSnapshot(doc(db, 'users', user.uid), snap => {
       if(!snap.exists()){ pushCloud(); setSync(true, 'sincronizzato'); render(); return; }
       const d = snap.data();
-      if(JSON.stringify({tx:d.tx||[], tomb:d.tomb||[], projects:d.projects||[]}) === lastPushJson && lastPushJson !== ''){
+      if(JSON.stringify({tx:d.tx||[], tomb:d.tomb||[], projects:d.projects||[], recurring:d.recurring||[]}) === lastPushJson && lastPushJson !== ''){
         setSync(true, 'sincronizzato'); return;
       }
       mergeCloud(d);
+      applyRecurring();
       saveLocal(); setSync(true, 'sincronizzato'); render(); pushCloud();
     }, err => { console.warn(err); setSync(false, 'errore sync'); });
   } else {
@@ -700,13 +838,20 @@ if(!DEMO) onAuthStateChanged(auth, user => {
 
 // ---------- UI ----------
 const sel = document.getElementById('fCat');
-catNames.forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = label(c); sel.appendChild(o); });
+// riempie la tendina categorie in base al tipo (uscita/entrata); keep = categoria da mantenere selezionata
+function fillCats(t, keep){
+  const list = t === 'entrata' ? catNamesIn : catNames;
+  const opts = keep && !list.includes(keep) ? [...list, keep] : list; // es. vecchie entrate salvate come "ALTRO"
+  sel.innerHTML = opts.map(c => `<option value="${esc(c)}">${label(c)}</option>`).join('');
+  if(keep) sel.value = keep;
+}
+fillCats('uscita');
 // riga "categoria + importo" con barra sotto (usata in Mese e Dashboard)
 // txt (opzionale) sostituisce l'importo, es. la percentuale
 const barRow = (c, v, max, txt) => `<div class="bar-row">
   <div class="bar-head"><span class="cat" title="${label(c)}">${ico(c)}<span>${label(c)}</span></span><span class="amt">${txt ?? fmt.format(v)}</span></div>
   <div class="bar-wrap"><div class="bar" style="width:${(v/max*100).toFixed(1)}%"></div></div></div>`;
-document.getElementById('fDate').value = new Date().toISOString().slice(0,10);
+document.getElementById('fDate').value = isoDay(new Date());
 
 function toast(msg){
   const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
@@ -714,10 +859,12 @@ function toast(msg){
   requestAnimationFrame(()=>t.classList.add('show'));
   setTimeout(()=>{ t.classList.remove('show'); setTimeout(()=>t.remove(), 400); }, 1600);
 }
-window.setType = function(t){
+window.setType = function(t, keepCat){
+  const changed = t !== tipo;
   tipo = t;
   document.getElementById('btnOut').className = t==='uscita' ? 'active-out' : '';
   document.getElementById('btnIn').className  = t==='entrata' ? 'active-in' : '';
+  if(changed || keepCat) fillCats(t, keepCat);
 };
 window.showTab = function(t){
   tab = t;
@@ -752,29 +899,158 @@ window.pickMonth = function(m){
   showTab(tab === 'dash' ? 'mese' : tab);
 };
 
-window.addTx = function(e){
+// ---------- modulo: nuovo movimento, modifica movimento, modifica ricorrente ----------
+let editMode = null;      // null = nuovo | {kind:'tx', id} | {kind:'rec', id}
+let returnTab = 'mese';   // dove tornare dopo "Salva modifiche" / "Annulla"
+const keyOf = id => String(id);
+const findTx = key => tx.find(t => keyOf(t.id) === key);
+
+function setFormMode(mode, info){
+  editMode = mode;
+  const isTx = mode && mode.kind === 'tx', isRec = mode && mode.kind === 'rec';
+  document.getElementById('formTitle').innerHTML = isTx ? '<i class="ti ti-pencil"></i> Modifica movimento'
+    : isRec ? '<i class="ti ti-repeat"></i> Modifica ricorrente' : '<i class="ti ti-plus"></i> Aggiungi movimento';
+  document.getElementById('btnSubmit').innerHTML = '<i class="ti ti-check"></i> ' + (mode ? 'Salva modifiche' : 'Salva');
+  document.getElementById('btnCancel').style.display = mode ? '' : 'none';
+  document.getElementById('repeatBox').style.display = mode ? 'none' : '';
+  document.getElementById('dateBox').style.display = isRec ? 'none' : '';
+  document.getElementById('dayBox').style.display = isRec ? '' : 'none';
+  document.getElementById('fDate').required = !isRec;
+  document.getElementById('fDay').required = !!isRec;
+  document.getElementById('editDanger').style.display = mode ? '' : 'none';
+  document.getElementById('btnDanger').innerHTML = isRec ? '<i class="ti ti-player-stop"></i> Interrompi ricorrenza'
+    : '<i class="ti ti-trash"></i> Elimina movimento';
+  document.getElementById('recCard').style.display = mode ? 'none' : '';
+  const ei = document.getElementById('editInfo');
+  ei.style.display = info ? '' : 'none';
+  ei.innerHTML = info ? `<i class="ti ti-info-circle"></i><span>${info}</span>` : '';
+}
+function resetForm(){
+  document.getElementById('txForm').reset();
+  document.getElementById('fDate').value = isoDay(new Date());
+  setType('uscita', catNames[0]);
+  setFormMode(null);
+}
+function fillForm(o){
+  setType(o.tipo, o.cat);
+  document.getElementById('fAmount').value = Number(o.amount).toFixed(2);
+  document.getElementById('fNote').value = o.note || '';
+  document.getElementById('fTrip').value = o.trip || '';
+}
+// "+" in basso: modulo vuoto
+window.openAdd = function(){ resetForm(); showTab('add'); };
+// tocco su un movimento: modulo già compilato
+window.editTx = function(key){
+  const t = findTx(key); if(!t) return;
+  returnTab = tab === 'add' ? 'mese' : tab;
+  showTab('add');
+  fillForm(t);
+  document.getElementById('fDate').value = t.date;
+  setFormMode({kind:'tx', id: t.id}, t.rid && recurring.some(r => r.id === t.rid)
+    ? 'Fa parte di una spesa ricorrente: la modifica vale solo per questo mese. Per cambiare anche i prossimi mesi, modifica la ricorrenza nella pagina Aggiungi.'
+    : '');
+};
+// tocco su una ricorrente: modifichi importo, giorno, categoria… (vale dai prossimi mesi)
+window.editRec = function(id){
+  const r = recurring.find(x => x.id === id); if(!r) return;
+  returnTab = 'add';
+  fillForm(r);
+  document.getElementById('fDay').value = r.day;
+  setFormMode({kind:'rec', id}, 'Le modifiche valgono per i prossimi mesi. I movimenti già inseriti restano come sono: se serve, li modifichi uno per uno.');
+  window.scrollTo(0, 0);
+};
+window.cancelEdit = function(){ const back = returnTab; resetForm(); showTab(back); };
+
+window.submitTx = function(e){
   e.preventDefault();
-  const a = parseFloat(document.getElementById('fAmount').value);
+  const a = Math.round(parseFloat(document.getElementById('fAmount').value) * 100) / 100;
   const d = document.getElementById('fDate').value;
   const c = sel.value;
   const n = document.getElementById('fNote').value.trim();
   const tr = document.getElementById('fTrip').value;
-  if(!(a > 0) || !d) return false;
-  tx.push({id: Date.now() + Math.random(), date: d, amount: a, cat: c, note: n, tipo, trip: tr || undefined});
+  if(!(a > 0)) return false;
+  const withTrip = o => { if(tr) o.trip = tr; else delete o.trip; return o; };
+
+  if(editMode && editMode.kind === 'rec'){
+    const day = parseInt(document.getElementById('fDay').value, 10);
+    if(!(day >= 1 && day <= 31)) return false;
+    const r = recurring.find(x => x.id === editMode.id);
+    if(r){
+      Object.assign(r, {amount: a, cat: c, note: n, tipo, day});
+      withTrip(r);
+      // da questo mese in poi (i mesi già generati non cambiano)
+      const ymNow = ymOf(new Date());
+      if((r.since || r.start) < ymNow) r.since = ymNow;
+    }
+    applyRecurring();
+    saveLocal(); pushCloud();
+    toast('Ricorrente aggiornata ✓');
+    resetForm(); render();
+    return false;
+  }
+  if(!d) return false;
+
+  if(editMode && editMode.kind === 'tx'){
+    const t = tx.find(x => x.id === editMode.id);
+    if(t){ Object.assign(t, {date: d, amount: a, cat: c, note: n, tipo}); withTrip(t); }
+    saveLocal(); pushCloud();
+    toast('Movimento modificato ✓');
+    const back = returnTab; resetForm(); showTab(back);
+    return false;
+  }
+
+  // nuovo movimento (ed eventuale nuova ricorrenza)
+  const repeat = document.getElementById('fRepeat').checked;
+  if(repeat){
+    const rid = 'r' + Date.now().toString(36);
+    const r = withTrip({id: rid, cat: c, amount: a, day: +d.slice(8, 10), tipo, note: n,
+      start: d.slice(0, 7), since: [d.slice(0, 7), ymOf(new Date())].sort()[1]});
+    recurring.push(r);
+    tx.push(withTrip({id: `${rid}-${d.slice(0,7)}`, date: d, amount: a, cat: c, note: n, tipo, rid}));
+    applyRecurring();
+  } else {
+    tx.push(withTrip({id: Date.now() + Math.random(), date: d, amount: a, cat: c, note: n, tipo}));
+  }
   saveLocal(); pushCloud();
   document.getElementById('fAmount').value = '';
   document.getElementById('fNote').value = '';
-  toast(tipo === 'uscita' ? '−' + fmt.format(a) + ' salvato ✓' : '+' + fmt.format(a) + ' salvato ✓');
+  document.getElementById('fRepeat').checked = false;
+  toast((tipo === 'uscita' ? '−' : '+') + fmt.format(a) + (repeat ? ' · ripetuta ogni mese ✓' : ' salvato ✓'));
   render();
   return false;
 };
-window.delTx = function(id){
-  if(confirm('Eliminare questo movimento?')){
-    tx = tx.filter(t => t.id !== id);
-    tomb.push(id); tomb = tomb.slice(-500);
-    saveLocal(); pushCloud(); render();
+
+// elimina un movimento (se viene da una ricorrente, quel mese non verrà più rigenerato)
+function removeTx(key){
+  const t = findTx(key); if(!t) return false;
+  if(!confirm('Eliminare questo movimento?')) return false;
+  if(t.rid){
+    const r = recurring.find(x => x.id === t.rid);
+    if(r){ r.skip = [...new Set([...(r.skip || []), t.date.slice(0, 7)])]; }
   }
+  tx = tx.filter(x => x !== t);
+  tomb.push(t.id); tomb = tomb.slice(-1000);
+  saveLocal(); pushCloud();
+  return true;
+}
+window.delTx = function(key){ if(removeTx(key)) render(); };
+// bottone rosso nel modulo: elimina movimento oppure interrompe la ricorrenza
+window.dangerEdit = function(){
+  if(!editMode) return;
+  if(editMode.kind === 'tx'){
+    if(removeTx(keyOf(editMode.id))){ const back = returnTab; resetForm(); showTab(back); toast('Movimento eliminato'); }
+    return;
+  }
+  if(!confirm('Interrompere questa ricorrenza? I movimenti già inseriti restano.')) return;
+  recurring = recurring.filter(r => r.id !== editMode.id);
+  tomb.push(editMode.id); tomb = tomb.slice(-1000);
+  saveLocal(); pushCloud();
+  resetForm(); render(); toast('Ricorrenza interrotta');
 };
+// se l'app resta aperta (es. da un giorno all'altro) controlla se è arrivata una ricorrente
+document.addEventListener('visibilitychange', () => {
+  if(document.visibilityState === 'visible' && applyRecurring()){ saveLocal(); pushCloud(); render(); }
+});
 function inMonth(t, y, m){ const [yy,mm] = t.date.split('-').map(Number); return yy===y && mm-1===m; }
 
 // ---------- progetti ----------
@@ -830,12 +1106,15 @@ function render(){
     `<i class="ti ti-calendar-month"></i>${MESI[cur.m].slice(0,3)} ${cur.y}<i class="ti ti-chevron-down"></i>`;
   document.getElementById('yearSwitchLbl').textContent = cur.y;
 
-  document.getElementById('fTrip').innerHTML = '<option value="">— nessuno —</option>' +
+  const fTrip = document.getElementById('fTrip'), keepTrip = fTrip.value;
+  fTrip.innerHTML = '<option value="">— nessuno —</option>' +
     projects.map(p => `<option value="${esc(p)}">${esc(p)}</option>`).join('');
+  fTrip.value = projects.includes(keepTrip) ? keepTrip : '';
 
   renderMese();
   renderDash();
   renderProjs();
+  renderRecurring();
 }
 
 function renderMese(){
@@ -843,6 +1122,7 @@ function renderMese(){
   const outM = mt.filter(t=>t.tipo==='uscita').reduce((s,t)=>s+t.amount,0);
   const inM  = mt.filter(t=>t.tipo==='entrata').reduce((s,t)=>s+t.amount,0);
   document.getElementById('kpiMonth').textContent = fmt.format(outM);
+  renderCompare();
   document.getElementById('kpiIn').textContent = fmt.format(inM);
   const saldo = inM - outM;
   document.getElementById('kpiSaldo').textContent = (saldo>=0?'+':'') + fmt.format(saldo);
@@ -853,7 +1133,8 @@ function renderMese(){
   mt.filter(t=>t.tipo==='uscita').forEach(t => byCat[t.cat] = (byCat[t.cat]||0) + t.amount);
   const entries = Object.entries(byCat).sort((a,b)=>b[1]-a[1]).slice(0,10);
   const max = entries.length ? entries[0][1] : 1;
-  document.getElementById('catBars').innerHTML = entries.length ? entries.map(([c,v]) => barRow(c, v, max)).join('')
+  document.getElementById('catBars').innerHTML = entries.length
+    ? entries.map(([c,v]) => barRow(c, v, max, catPct ? pctFmt.format(v / outM) : undefined)).join('')
     : '<div class="empty">Nessuna spesa questo mese</div>';
 
   let trendHtml = '';
@@ -870,7 +1151,7 @@ function renderMese(){
   document.getElementById('trend').innerHTML = trendHtml;
 
   document.getElementById('splitMonth').textContent = MESI[cur.m];
-  const fixed = mt.filter(t=>t.tipo==='uscita' && FISSE.has(t.cat)).reduce((s,t)=>s+t.amount,0);
+  const fixed = mt.filter(t=>t.tipo==='uscita' && (FISSE.has(t.cat) || t.rid)).reduce((s,t)=>s+t.amount,0);
   const variable = outM - fixed;
   const pct = outM>0 ? fixed/outM*100 : 0;
   const splitBar = document.getElementById('splitBar');
@@ -881,27 +1162,106 @@ function renderMese(){
   document.getElementById('splitFixed').textContent = fmt.format(fixed);
   document.getElementById('splitVar').textContent = fmt.format(variable);
 
-  let list;
+  renderTxList();
+}
+
+// ---------- lista movimenti: ricerca, filtro categoria, mese/tutti ----------
+let txScope = 'mese';
+window.setTxScope = function(sc){ txScope = sc; renderTxList(); };
+window.renderTxList = () => renderTxList(); // usata dalla casella di ricerca e dal filtro categoria
+function renderTxList(){
   const bar = document.getElementById('tripFilterBar');
+  let list;
   if(tripFilter){
     bar.style.display = 'flex';
     document.getElementById('tripFilterName').textContent = tripFilter;
     list = tx.filter(t => t.trip === tripFilter);
   } else {
     bar.style.display = 'none';
-    list = mt;
+    list = txScope === 'tutti' ? tx : tx.filter(t => inMonth(t, cur.y, cur.m));
   }
-  list = [...list].sort((a,b)=> b.date.localeCompare(a.date) || b.id - a.id);
-  document.getElementById('txList').innerHTML = list.length ? list.map(t => {
+  document.querySelectorAll('#txScopeSeg button').forEach((b, i) => b.classList.toggle('on', (i === 1) === (txScope === 'tutti')));
+  document.getElementById('txScopeSeg').style.display = tripFilter ? 'none' : '';
+
+  // tendina categorie: solo quelle presenti
+  const catSel = document.getElementById('txCat'), keepCat = catSel.value;
+  const present = [...new Set(list.map(t => t.cat))].sort((a,b) => label(a).localeCompare(label(b)));
+  catSel.innerHTML = '<option value="">Tutte le categorie</option>' +
+    present.map(c => `<option value="${esc(c)}">${label(c)}</option>`).join('');
+  catSel.value = present.includes(keepCat) ? keepCat : '';
+
+  const q = document.getElementById('txSearch').value.trim().toLowerCase();
+  const fc = catSel.value;
+  if(fc) list = list.filter(t => t.cat === fc);
+  if(q) list = list.filter(t => [label(t.cat), t.note, t.trip, fmt.format(t.amount)].join(' ').toLowerCase().includes(q));
+  list = [...list].sort((a,b)=> b.date.localeCompare(a.date) || String(b.id).localeCompare(String(a.id)));
+
+  // riepilogo quando filtri o cerchi
+  const sum = document.getElementById('txSummary');
+  if(q || fc || txScope === 'tutti' || tripFilter){
+    const o = list.filter(t=>t.tipo==='uscita').reduce((s,t)=>s+t.amount,0);
+    const n = list.filter(t=>t.tipo==='entrata').reduce((s,t)=>s+t.amount,0);
+    sum.innerHTML = `${list.length} moviment${list.length===1?'o':'i'} · spese <b>${fmt.format(o)}</b>` + (n ? ` · entrate <b>${fmt.format(n)}</b>` : '');
+  } else sum.innerHTML = '';
+
+  const shown = list.slice(0, 300); // con "Tutti" evita liste infinite
+  document.getElementById('txList').innerHTML = shown.length ? shown.map(t => {
     const d = new Date(t.date + 'T00:00:00');
-    return `<div class="tx">
+    return `<div class="tx" data-id="${esc(keyOf(t.id))}">
       <div class="dot${t.tipo==='entrata'?' in':''}">${ico(t.cat)}</div>
-      <div class="info"><div class="cat-name">${label(t.cat)}${t.trip ? `<span class="trip-badge"><i class="ti ti-tag"></i>${esc(t.trip)}</span>` : ''}</div>
+      <div class="info"><div class="cat-name">${label(t.cat)}${t.rid ? '<i class="ti ti-repeat rep-ico" title="Ricorrente"></i>' : ''}${t.trip ? `<span class="trip-badge"><i class="ti ti-tag"></i>${esc(t.trip)}</span>` : ''}</div>
         ${t.note ? `<div class="note">${esc(t.note)}</div>` : ''}
         <div class="date">${d.getDate()} ${MESI[d.getMonth()].slice(0,3)} ${d.getFullYear()}</div></div>
       <span class="amount ${t.tipo==='uscita'?'out':'in'}">${t.tipo==='uscita'?'−':'+'}${fmt.format(t.amount)}</span>
-      <button class="del" onclick="delTx(${JSON.stringify(t.id)})" aria-label="Elimina"><i class="ti ti-trash"></i></button></div>`;
-  }).join('') : '<div class="empty">Nessun movimento' + (tripFilter ? ' per questo progetto' : ' in questo mese') + '</div>';
+      <button class="del" aria-label="Elimina"><i class="ti ti-trash"></i></button></div>`;
+  }).join('') + (list.length > shown.length ? `<div class="empty">… e altri ${list.length - shown.length}: usa la ricerca per restringere</div>` : '')
+    : '<div class="empty">' + (q || fc ? 'Nessun movimento trovato' : 'Nessun movimento' + (tripFilter ? ' per questo progetto' : txScope === 'tutti' ? '' : ' in questo mese')) + '</div>';
+}
+// tocco su un movimento = modifica; cestino = elimina
+document.getElementById('txList').addEventListener('click', e => {
+  const row = e.target.closest('.tx'); if(!row) return;
+  if(e.target.closest('.del')) delTx(row.dataset.id); else editTx(row.dataset.id);
+});
+
+// ---------- confronto col mese prima, a parità di giorni ----------
+function renderCompare(){
+  const el = document.getElementById('kpiCmp');
+  const now = new Date(), p = new Date(cur.y, cur.m - 1, 1);
+  const isNow = cur.y === now.getFullYear() && cur.m === now.getMonth();
+  if(new Date(cur.y, cur.m, 1) > now){ el.innerHTML = ''; return; } // mese futuro
+  const lastPrev = new Date(p.getFullYear(), p.getMonth() + 1, 0).getDate();
+  const lim = isNow ? Math.min(now.getDate(), lastPrev) : 31;
+  const spent = (y, m, upTo) => tx.filter(t => t.tipo==='uscita' && inMonth(t, y, m) && +t.date.slice(8,10) <= upTo).reduce((s,t)=>s+t.amount,0);
+  const a = spent(cur.y, cur.m, isNow ? now.getDate() : 31), b = spent(p.getFullYear(), p.getMonth(), lim);
+  if(!b){ el.innerHTML = ''; return; }
+  const diff = (a - b) / b, pm = MESI[p.getMonth()];
+  const when = isNow ? `1–${lim} ${pm.slice(0,3)}` : pm;
+  if(Math.abs(diff) < 0.005){ el.innerHTML = `<i class="ti ti-equal"></i> uguale a ${when}`; return; }
+  el.innerHTML = `<span class="${diff > 0 ? 'up' : 'down'}"><i class="ti ti-arrow-${diff > 0 ? 'up' : 'down'}-right"></i>
+    <b>${diff > 0 ? '+' : '−'}${Math.round(Math.abs(diff) * 100)}%</b></span> vs ${when}`;
+  el.title = `${fmt.format(a)} contro ${fmt.format(b)}`;
+}
+
+// ---------- lista ricorrenti (pagina Aggiungi) ----------
+function renderRecurring(){
+  const box = document.getElementById('recList');
+  const out = recurring.filter(r => r.tipo === 'uscita').reduce((s,r)=>s+r.amount,0);
+  document.getElementById('recTotal').innerHTML = recurring.length ? `uscite fisse al mese <b>${fmt.format(out)}</b>` : '';
+  if(!recurring.length){
+    box.innerHTML = '<div class="empty">Nessuna ricorrente. Quando aggiungi un movimento attiva «Ripeti ogni mese»: affitto, abbonamenti, stipendio…</div>';
+    return;
+  }
+  const now = new Date(), today = isoDay(now);
+  const next = r => { let d = recDate(r, now.getFullYear(), now.getMonth());
+    if(d <= today){ const n = new Date(now.getFullYear(), now.getMonth() + 1, 1); d = recDate(r, n.getFullYear(), n.getMonth()); }
+    const x = new Date(d + 'T00:00:00'); return `${x.getDate()} ${MESI[x.getMonth()].slice(0,3)}`; };
+  box.innerHTML = [...recurring].sort((a,b) => (a.tipo === b.tipo ? 0 : a.tipo === 'entrata' ? -1 : 1) || a.day - b.day).map(r => `
+    <div class="rec" onclick="editRec('${esc(r.id)}')">
+      <div class="dot${r.tipo==='entrata'?' in':''}">${ico(r.cat)}</div>
+      <div class="info"><div class="t">${esc(r.note) || label(r.cat)}</div>
+        <div class="s">ogni mese il ${r.day} · prossima ${next(r)}${r.note && r.note.toLowerCase() !== label(r.cat).toLowerCase() ? ' · ' + label(r.cat) : ''}</div></div>
+      <span class="amount${r.tipo==='entrata'?' in':''}">${r.tipo==='uscita'?'−':'+'}${fmt.format(r.amount)}</span>
+      <i class="ti ti-chevron-right"></i></div>`).join('');
 }
 
 function renderDash(){
@@ -950,7 +1310,9 @@ function renderDash(){
   document.getElementById('dCats').innerHTML = entries.length
     ? entries.map(([c,v]) => barRow(c, v, cMax, catPct ? pctFmt.format(v / yOut) : undefined)).join('')
     : '<div class="empty">Nessuna spesa quest\'anno</div>';
-  document.querySelectorAll('#catModeSeg button').forEach((b, i) => b.classList.toggle('on', (i === 1) === catPct));
+  // stato del pulsante €/% (stessa impostazione in Mese e Dashboard)
+  document.querySelectorAll('.cat-mode').forEach(seg =>
+    seg.querySelectorAll('button').forEach((b, i) => b.classList.toggle('on', (i === 1) === catPct)));
 
   renderPie();
 }
@@ -959,7 +1321,7 @@ window.gotoMonth = function(m){ cur = {y: cur.y, m}; showTab('mese'); };
 // ---------- top categorie: € oppure % ----------
 let catPct = false;
 const pctFmt = new Intl.NumberFormat('it-IT', {style:'percent', minimumFractionDigits:1, maximumFractionDigits:1});
-window.setCatMode = function(p){ catPct = p; renderDash(); };
+window.setCatMode = function(p){ catPct = p; render(); };
 
 // ---------- torta: ripartizione spese per mese o anno ----------
 // colori verificati per daltonismo e contrasto sullo sfondo scuro; "Altre" in grigio
@@ -1087,15 +1449,33 @@ window.exportCSV = function(){
   const csv = rows.map(r=>r.map(c=>`"${c}"`).join(';')).join('\n');
   download(new Blob(['\ufeff'+csv],{type:'text/csv'}), 'spese.csv');
 };
-window.exportJSON = function(){ download(new Blob([JSON.stringify(tx,null,1)],{type:'application/json'}), 'spese-backup.json'); };
+// backup: movimenti + progetti + ricorrenti (i vecchi backup con solo i movimenti si possono ancora ripristinare)
+window.exportJSON = function(){
+  download(new Blob([JSON.stringify({version: 2, tx, projects, recurring}, null, 1)], {type:'application/json'}), 'spese-backup.json');
+};
 function download(blob, name){ const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click(); }
 window.importJSON = function(inp){
   const f = inp.files[0]; if(!f) return;
   const r = new FileReader();
   r.onload = () => { try {
       const d = JSON.parse(r.result);
-      if(!Array.isArray(d)) throw 0;
-      if(confirm(`Importare ${d.length} movimenti? Sostituiranno quelli attuali.`)){ tx = d; saveLocal(); pushCloud(); render(); }
+      const newTx = Array.isArray(d) ? d : d.tx;
+      if(!Array.isArray(newTx)) throw 0;
+      if(confirm(`Importare ${newTx.length} movimenti? Sostituiranno quelli attuali.`)){
+        // segna come eliminati quelli sostituiti, così non "riappaiono" dagli altri dispositivi sincronizzati
+        const keep = new Set(newTx.map(t => keyOf(t.id)));
+        tx.forEach(t => { if(!keep.has(keyOf(t.id))) tomb.push(t.id); });
+        if(!Array.isArray(d)){
+          const keepR = new Set((d.recurring || []).map(x => x.id));
+          recurring.forEach(x => { if(!keepR.has(x.id)) tomb.push(x.id); });
+          recurring = d.recurring || [];
+          projects = [...new Set([...(d.projects || [])])];
+        }
+        tomb = [...new Set(tomb)].filter(id => !keep.has(keyOf(id))).slice(-1000);
+        tx = newTx;
+        new Set(tx.filter(t=>t.trip).map(t=>t.trip)).forEach(p => { if(!projects.includes(p)) projects.push(p); });
+        saveLocal(); pushCloud(); render(); toast('Backup ripristinato ✓');
+      }
     } catch(e){ alert('File non valido'); } };
   r.readAsText(f); inp.value = '';
 };
@@ -1109,6 +1489,9 @@ if(DEMO){
   renderAuth(null);
 }
 showTab('mese');
+
+// app installabile: il service worker serve per l'icona "Installa" e per aprirla anche offline
+if('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
 </script>
 </body>
 </html>
