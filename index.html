@@ -6,9 +6,9 @@
 <meta name="theme-color" content="#0b0e14">
 <title>Spese Tracker</title>
 <!-- installabile come app (schermata Home) -->
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="manifest" href="manifest.webmanifest?v=2">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=2">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=2">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -270,6 +270,35 @@
   /* confronto col mese prima */
   .kpi .cmp{font-size:.72rem; margin-top:5px; display:flex; align-items:center; gap:4px; color:var(--muted); font-weight:500; flex-wrap:wrap;}
   .kpi .cmp b{font-weight:700;} .kpi .cmp .up{color:var(--red);} .kpi .cmp .down{color:var(--green);}
+  .kpi .cmp{cursor:pointer; border-radius:8px; margin-left:-6px; padding:3px 6px; width:fit-content; transition:background .15s;}
+  .kpi .cmp:hover{background:color-mix(in srgb,var(--accent) 10%,transparent);}
+  .kpi .cmp .vs-lbl{text-decoration:underline dotted; text-underline-offset:3px;}
+  .kpi .cmp .ti-chevron-down{font-size:.8rem;}
+  /* finestra confronto */
+  .cmp-box{max-width:460px; max-height:86vh; overflow-y:auto; display:grid; gap:14px;}
+  .cmp-top{display:flex; align-items:center; justify-content:space-between;}
+  .cmp-top h3{font-size:1rem; font-weight:700; display:flex; align-items:center; gap:8px;}
+  .cmp-top h3 .ti{color:var(--accent);}
+  .cmp-x{background:var(--card2); border:1px solid var(--line); color:var(--muted); width:34px; height:34px; border-radius:10px; cursor:pointer; font-size:1rem;}
+  .cmp-pick{display:flex; align-items:center; gap:8px 10px; flex-wrap:wrap;}
+  .cmp-a{font-weight:600; text-transform:capitalize; white-space:nowrap;}
+  .cmp-vs{color:var(--muted); font-size:.85rem;}
+  .cmp-pick select{flex:1 1 100%; min-width:0; padding:10px 32px 10px 12px; border-radius:10px; background-position:right 11px center;}
+  .cmp-sum{display:grid; gap:2px; background:var(--card2); border:1px solid var(--line); border-radius:14px; padding:6px 12px;}
+  .cmp-line{display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:baseline; gap:2px 10px; padding:8px 0; border-bottom:1px solid var(--line);}
+  .cmp-line:last-child{border-bottom:none;}
+  .cmp-line .k{font-size:.72rem; color:var(--muted); text-transform:uppercase; letter-spacing:.6px; font-weight:600;}
+  .cmp-line .ab{grid-column:1/-1; font-variant-numeric:tabular-nums; font-size:.76rem; color:var(--muted);}
+  .cmp-line .d{font-weight:700; font-variant-numeric:tabular-nums; font-size:.86rem; text-align:right;}
+  .cmp-sub{font-size:.68rem; color:var(--muted); text-transform:uppercase; letter-spacing:.8px; font-weight:600; margin-bottom:-6px;}
+  .cmp-cat{display:grid; grid-template-columns:minmax(0,1fr) auto; gap:2px 10px; padding:9px 2px; border-bottom:1px solid var(--line);}
+  .cmp-cat:last-child{border-bottom:none;}
+  .cmp-cat .nm{display:flex; align-items:center; gap:8px; font-size:.88rem; min-width:0;}
+  .cmp-cat .nm .ti{color:var(--muted); font-size:1rem; flex-shrink:0;}
+  .cmp-cat .nm span{white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .cmp-cat .d{font-weight:700; font-variant-numeric:tabular-nums; font-size:.88rem; text-align:right;}
+  .cmp-cat .ab{grid-column:1/-1; font-size:.74rem; color:var(--muted); font-variant-numeric:tabular-nums; padding-left:24px;}
+  .up{color:var(--red);} .down{color:var(--green);} .same{color:var(--muted);}
   /* modulo: modifica, ricorrenza */
   .edit-info{font-size:.8rem; color:var(--muted); background:var(--card2); border:1px solid var(--line); border-radius:12px;
     padding:10px 12px; display:flex; gap:9px; align-items:flex-start; line-height:1.45;}
@@ -547,6 +576,26 @@
     </div>
     <div class="months-grid" id="pickerMonths"></div>
     <button class="btn ghost" onclick="closePicker()">Annulla</button>
+  </div>
+</div>
+
+<!-- confronto tra due mesi -->
+<div class="modal" id="cmpModal" onclick="if(event.target===this)closeCmp()">
+  <div class="modal-box cmp-box">
+    <div class="cmp-top">
+      <h3><i class="ti ti-arrows-diff"></i> Confronto</h3>
+      <button class="cmp-x" onclick="closeCmp()" aria-label="Chiudi"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="cmp-pick">
+      <span class="cmp-a" id="cmpA"></span>
+      <span class="cmp-vs">vs</span>
+      <select id="cmpSel" aria-label="Mese da confrontare" onchange="setCmpRef(+this.value)"></select>
+    </div>
+    <label class="switch-row" id="cmpDaysRow"><input type="checkbox" id="cmpDays" onchange="setCmpDays(this.checked)">
+      <span>A parità di giorni<small id="cmpDaysHint"></small></span></label>
+    <div class="cmp-sum" id="cmpSum"></div>
+    <div class="cmp-sub">Spese per categoria</div>
+    <div id="cmpCats"></div>
   </div>
 </div>
 
@@ -1223,23 +1272,94 @@ document.getElementById('txList').addEventListener('click', e => {
   if(e.target.closest('.del')) delTx(row.dataset.id); else editTx(row.dataset.id);
 });
 
-// ---------- confronto col mese prima, a parità di giorni ----------
+// ---------- confronto tra mesi ----------
+// cmpOff = di quanti mesi indietro è il mese di confronto (1 = mese prima, 12 = stesso mese dell'anno scorso).
+// Resta valido anche cambiando mese: se scegli "un anno prima", ottobre si confronta con ottobre dell'anno prima.
+let cmpOff = 1, cmpDays = true;
+const capF = w => w.charAt(0).toUpperCase() + w.slice(1);
+const monIdx = (y, m) => y * 12 + m;
+function cmpCtx(){
+  const now = new Date(), r = new Date(cur.y, cur.m - cmpOff, 1);
+  const ref = {y: r.getFullYear(), m: r.getMonth()};
+  const isNow = cur.y === now.getFullYear() && cur.m === now.getMonth();
+  const same = isNow && cmpDays;                     // a parità di giorni ha senso solo nel mese in corso
+  const lastRef = new Date(ref.y, ref.m + 1, 0).getDate();
+  const upA = same ? now.getDate() : 31, upB = same ? Math.min(now.getDate(), lastRef) : 31;
+  return {now, ref, isNow, same, upA, upB};
+}
+function periodData(y, m, upTo){
+  const o = {out: 0, inc: 0, byCat: {}};
+  tx.forEach(t => {
+    if(!inMonth(t, y, m) || +t.date.slice(8, 10) > upTo) return;
+    if(t.tipo === 'uscita'){ o.out += t.amount; o.byCat[t.cat] = (o.byCat[t.cat] || 0) + t.amount; }
+    else o.inc += t.amount;
+  });
+  return o;
+}
+const refName = (ref, short) => {
+  const n = short ? MESI[ref.m].slice(0, 3) : MESI[ref.m];
+  return ref.y === cur.y ? n : `${n} ${ref.y}`;
+};
+// riga sotto "Spese mese"
 function renderCompare(){
   const el = document.getElementById('kpiCmp');
-  const now = new Date(), p = new Date(cur.y, cur.m - 1, 1);
-  const isNow = cur.y === now.getFullYear() && cur.m === now.getMonth();
-  if(new Date(cur.y, cur.m, 1) > now){ el.innerHTML = ''; return; } // mese futuro
-  const lastPrev = new Date(p.getFullYear(), p.getMonth() + 1, 0).getDate();
-  const lim = isNow ? Math.min(now.getDate(), lastPrev) : 31;
-  const spent = (y, m, upTo) => tx.filter(t => t.tipo==='uscita' && inMonth(t, y, m) && +t.date.slice(8,10) <= upTo).reduce((s,t)=>s+t.amount,0);
-  const a = spent(cur.y, cur.m, isNow ? now.getDate() : 31), b = spent(p.getFullYear(), p.getMonth(), lim);
-  if(!b){ el.innerHTML = ''; return; }
-  const diff = (a - b) / b, pm = MESI[p.getMonth()];
-  const when = isNow ? `1–${lim} ${pm.slice(0,3)}` : pm;
-  if(Math.abs(diff) < 0.005){ el.innerHTML = `<i class="ti ti-equal"></i> uguale a ${when}`; return; }
-  el.innerHTML = `<span class="${diff > 0 ? 'up' : 'down'}"><i class="ti ti-arrow-${diff > 0 ? 'up' : 'down'}-right"></i>
-    <b>${diff > 0 ? '+' : '−'}${Math.round(Math.abs(diff) * 100)}%</b></span> vs ${when}`;
+  const c = cmpCtx();
+  if(new Date(cur.y, cur.m, 1) > c.now){ el.innerHTML = ''; el.onclick = null; return; } // mese futuro
+  el.onclick = openCmp;
+  const a = periodData(cur.y, cur.m, c.upA).out, b = periodData(c.ref.y, c.ref.m, c.upB).out;
+  const when = c.same ? `1–${c.upB} ${refName(c.ref, true)}` : refName(c.ref);
+  if(!b){ el.innerHTML = `<span class="vs-lbl">confronta con un altro mese</span> <i class="ti ti-chevron-down"></i>`; return; }
+  const diff = (a - b) / b;
   el.title = `${fmt.format(a)} contro ${fmt.format(b)}`;
+  if(Math.abs(diff) < 0.005){ el.innerHTML = `<i class="ti ti-equal"></i> <span class="vs-lbl">uguale a ${when}</span> <i class="ti ti-chevron-down"></i>`; return; }
+  el.innerHTML = `<span class="${diff > 0 ? 'up' : 'down'}"><i class="ti ti-arrow-${diff > 0 ? 'up' : 'down'}-right"></i>
+    <b>${diff > 0 ? '+' : '−'}${Math.round(Math.abs(diff) * 100)}%</b></span> <span class="vs-lbl">vs ${when}</span> <i class="ti ti-chevron-down"></i>`;
+}
+// finestra di confronto
+function openCmp(){ renderCmpModal(); document.getElementById('cmpModal').classList.add('show'); }
+window.closeCmp = function(){ document.getElementById('cmpModal').classList.remove('show'); };
+window.setCmpRef = function(off){ cmpOff = off; renderCmpModal(); renderCompare(); };
+window.setCmpDays = function(v){ cmpDays = v; renderCmpModal(); renderCompare(); };
+document.addEventListener('keydown', e => { if(e.key === 'Escape'){ closeCmp(); closePicker(); } });
+
+function renderCmpModal(){
+  const c = cmpCtx();
+  document.getElementById('cmpA').textContent = `${MESI[cur.m]} ${cur.y}`;
+  // mesi disponibili: quelli con almeno un movimento (+ quello scelto), escluso il mese che stai guardando
+  const curI = monIdx(cur.y, cur.m);
+  const offs = new Set(tx.map(t => curI - monIdx(+t.date.slice(0, 4), +t.date.slice(5, 7) - 1)));
+  offs.add(cmpOff); offs.add(1); offs.delete(0);
+  const sel = document.getElementById('cmpSel');
+  sel.innerHTML = [...offs].sort((a, b) => a - b).filter(o => o > -24 && o < 60).map(o => {
+    const d = new Date(cur.y, cur.m - o, 1);
+    const tag = o === 1 ? ' · mese prima' : o === 12 ? ' · un anno prima' : '';
+    return `<option value="${o}"${o === cmpOff ? ' selected' : ''}>${capF(MESI[d.getMonth()])} ${d.getFullYear()}${tag}</option>`;
+  }).join('');
+  // a parità di giorni (solo mese in corso)
+  document.getElementById('cmpDaysRow').style.display = c.isNow ? '' : 'none';
+  document.getElementById('cmpDays').checked = cmpDays;
+  document.getElementById('cmpDaysHint').textContent = `Solo dall'1 al ${c.now.getDate()} di entrambi i mesi`;
+
+  const A = periodData(cur.y, cur.m, c.upA), B = periodData(c.ref.y, c.ref.m, c.upB);
+  const nA = MESI[cur.m].slice(0, 3), nB = MESI[c.ref.m].slice(0, 3) + (c.ref.y !== cur.y ? ` ${String(c.ref.y).slice(2)}` : '');
+  // per spese "+" è male (rosso), per entrate e saldo "+" è bene (verde)
+  const delta = (a, b, goodUp) => {
+    const d = a - b; if(Math.abs(d) < 0.005) return `<span class="same">=</span>`;
+    const cls = (d > 0) === goodUp ? 'down' : 'up';
+    const pct = b ? ` <span style="font-weight:500">(${d > 0 ? '+' : '−'}${Math.round(Math.abs(d / b) * 100)}%)</span>` : '';
+    return `<span class="${cls}">${d > 0 ? '+' : '−'}${fmt.format(Math.abs(d))}${pct}</span>`;
+  };
+  const line = (k, a, b, goodUp) => `<div class="cmp-line"><span class="k">${k}</span><span class="d">${delta(a, b, goodUp)}</span>
+    <span class="ab">${capF(nA)} ${fmt.format(a)} · ${capF(nB)} ${fmt.format(b)}</span></div>`;
+  document.getElementById('cmpSum').innerHTML =
+    line('Spese', A.out, B.out, false) + line('Entrate', A.inc, B.inc, true) + line('Saldo', A.inc - A.out, B.inc - B.out, true);
+
+  const cats = [...new Set([...Object.keys(A.byCat), ...Object.keys(B.byCat)])]
+    .map(k => ({k, a: A.byCat[k] || 0, b: B.byCat[k] || 0})).sort((x, y) => Math.abs(y.a - y.b) - Math.abs(x.a - x.b));
+  document.getElementById('cmpCats').innerHTML = cats.length ? cats.map(r => `<div class="cmp-cat">
+      <span class="nm">${ico(r.k)}<span>${label(r.k)}</span></span><span class="d">${delta(r.a, r.b, false)}</span>
+      <span class="ab">${capF(nA)} ${fmt.format(r.a)} · ${capF(nB)} ${fmt.format(r.b)}</span></div>`).join('')
+    : '<div class="empty">Nessuna spesa in questi due periodi</div>';
 }
 
 // ---------- lista ricorrenti (pagina Aggiungi) ----------
