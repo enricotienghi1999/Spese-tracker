@@ -4,19 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#0b0e14">
-<title>Spese Tracker</title>
+<title>iSpend</title>
 <script>
   // applica subito il tema salvato, così non "lampeggia" quello sbagliato all'apertura
   try{ if(!/[?&]demo\b/.test(location.search)){ const s = JSON.parse(localStorage.getItem('speseSettings') || '{}'); if(s.theme) document.documentElement.dataset.theme = s.theme; } }catch(e){}
 </script>
 <!-- installabile come app (schermata Home) -->
-<link rel="manifest" href="manifest.webmanifest?v=2">
+<link rel="manifest" href="manifest.webmanifest?v=3">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=2">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=2">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Spese">
+<meta name="apple-mobile-web-app-title" content="iSpend">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
@@ -75,6 +75,19 @@
   /* header */
   header{padding:16px; padding-top:max(16px, env(safe-area-inset-top)); display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;}
   h1{font-size:1.15rem; letter-spacing:-.01em; font-weight:700; display:flex; align-items:center; gap:10px;}
+  :root{--grad-worth:linear-gradient(135deg,#f6c453,#e0952b);}
+  .logo.worth{background:var(--grad-worth);}
+  .app-h1{position:relative;}
+  .app-sw{display:flex; align-items:center; gap:10px; background:none; border:none; color:var(--text); font:inherit; font-size:1.15rem; font-weight:700;
+    letter-spacing:-.01em; cursor:pointer; padding:4px 10px 4px 4px; margin:-4px -10px -4px -4px; border-radius:14px;}
+  .app-sw:hover{background:var(--card2);} .app-sw .sw-ico{font-size:1rem; color:var(--muted);}
+  .app-menu{position:absolute; top:calc(100% + 8px); left:-4px; z-index:130; width:260px; background:var(--card); border:1px solid var(--line);
+    border-radius:16px; padding:6px; box-shadow:var(--shadow-lg); display:grid; gap:2px; font-size:1rem; letter-spacing:0;}
+  .app-item{display:flex; align-items:center; gap:12px; width:100%; padding:9px 10px; border:none; background:none; color:var(--text); font:inherit; text-align:left; border-radius:12px; cursor:pointer;}
+  .app-item:hover{background:var(--card2);} .app-item.on{background:var(--accent-dk);}
+  .app-item b{display:block; font-size:.95rem;} .app-item small{display:block; color:var(--muted); font-size:.74rem; font-weight:500;}
+  .app-item > .ti-check{margin-left:auto; color:var(--accent);} .app-item .app-dot{margin-left:auto; width:9px; height:9px; border-radius:50%; background:var(--red);}
+  .app-item .logo{width:34px; height:34px; flex-shrink:0;}
   .logo{width:34px; height:34px; border-radius:11px; background:var(--grad); color:#0a0f0c;
     display:flex; align-items:center; justify-content:center; font-size:1.15rem;}
   .hdr-right{display:flex; align-items:center; gap:10px;}
@@ -262,11 +275,14 @@
   .bottomnav button:hover{color:var(--text);}
   .bottomnav button.active{color:var(--accent);}
   .bottomnav button.active .ico{transform:translateY(-2px);}
-  #nav-add{border-radius:20px; position:relative;}
-  #nav-add .fab{width:52px; height:52px; border-radius:50%; background:var(--grad); display:flex; align-items:center;
+  .nav-fab{border-radius:20px; position:relative;}
+  .nav-fab .fab{width:52px; height:52px; border-radius:50%; background:var(--grad); display:flex; align-items:center;
     justify-content:center; font-size:1.6rem; color:#0a0f0c; margin-top:-30px; margin-bottom:-6px;
     box-shadow:0 8px 20px color-mix(in srgb,var(--accent) 45%, transparent); border:4px solid var(--bg1); transition:transform .15s;}
-  #nav-add.active .fab{transform:scale(1.06);}
+  .nav-fab.active .fab{transform:scale(1.06);}
+  #nav-wup .fab{background:var(--grad-worth); box-shadow:0 8px 20px rgba(224,149,43,.4);}
+  #nav-wup.dot::after{content:''; position:absolute; top:-26px; right:calc(50% - 30px); width:11px; height:11px; border-radius:50%; background:var(--red); border:2px solid var(--bg1);}
+  body[data-app="spend"] [data-app="worth"], body[data-app="worth"] [data-app="spend"]{display:none !important;}
 
   /* month picker */
   .modal{display:none; position:fixed; inset:0; background:rgba(4,6,10,.72); backdrop-filter:blur(4px);
@@ -422,7 +438,9 @@
   .cat-field > .ti-chevron-down{color:var(--muted); font-size:1.25rem;}
   .cat-field:focus-visible{outline:none; border-color:var(--accent); box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 15%, transparent);}
   .split-box{display:grid; gap:10px; margin-top:-2px;}
-  .trip-btn{flex:none; justify-content:flex-start; padding:9px 14px;}
+  .opt-box{display:grid; gap:10px;}
+  .opt-btns{display:flex; gap:8px;} .opt-btns .sp-btn{flex:1; padding:8px 10px; font-size:.8rem;}
+  .opt-hint{font-size:.76rem; color:var(--muted); display:flex; align-items:center; gap:6px;} .opt-hint .ti{color:var(--accent);}
   .trip-row{display:flex; gap:8px;} .trip-row select{flex:1; min-width:0;}
   .trip-x{width:48px; flex-shrink:0; border-radius:12px; border:1px solid var(--line); background:var(--card2); color:var(--muted); font-size:1rem; cursor:pointer;}
   [hidden]{display:none !important;}
@@ -503,6 +521,66 @@
   .sum-mrow b{text-align:right; font-variant-numeric:tabular-nums;} .sum-mrow small{text-align:right; font-size:.72rem; font-variant-numeric:tabular-nums;}
   .sum-mrow small.pos{color:var(--green);} .sum-mrow small.neg{color:var(--red);}
   .sum-note{font-size:.7rem; color:var(--muted);}
+  /* ----- iWorth ----- */
+  .w-empty{text-align:center; display:grid; justify-items:center; gap:10px; padding:28px 20px;} .w-empty p{color:var(--muted); font-size:.88rem; line-height:1.55; max-width:420px;}
+  .logo.big{width:56px; height:56px; border-radius:17px; font-size:1.8rem;}
+  .w-eye{background:var(--card2); border:1px solid var(--line); color:var(--muted); width:36px; height:36px; border-radius:10px; cursor:pointer; font-size:1.05rem;}
+  .w-net{font-size:2.1rem; font-weight:800; letter-spacing:-.02em; margin-top:2px;}
+  .w-sub{font-size:.8rem; color:var(--muted); margin-top:2px;} .w-sub .up, .w-ins-v.up, .w-acc small.up, .wh-row .up, .w-up-tot .up{color:var(--green);}
+  .w-sub .down, .w-ins-v.down, .w-acc small.down, .wh-row .down, .w-up-tot .down{color:var(--red);}
+  .w-note{font-size:.78rem; color:var(--muted); margin-top:14px;}
+  .w-remind{display:flex; align-items:center; gap:8px; width:100%; margin:4px 0 12px; padding:10px 12px; border-radius:12px; cursor:pointer; font:inherit; font-size:.84rem; font-weight:600;
+    border:1px solid rgba(224,149,43,.45); background:rgba(224,149,43,.1); color:var(--text); text-align:left;}
+  .w-remind span{flex:1;} .w-remind .ti:first-child{color:#e0952b;}
+  .w-chart-lbl{font-size:.78rem; color:var(--muted); margin-top:14px;} .w-chart-lbl b{color:var(--text);}
+  .w-hero{position:relative;} .w-chart{display:block; width:100%; height:96px; margin-top:6px;}
+  .w-chart-wrap{position:relative; margin-top:6px;} .w-chart-wrap .w-chart{margin:0;}
+  .w-chart-dots{position:absolute; inset:0;} .w-chart-dots button{position:absolute; width:26px; height:26px; margin:-13px 0 0 -13px; border:none; background:none; cursor:pointer; padding:0;}
+  .w-chart-dots button::after{content:''; position:absolute; inset:9px; border-radius:50%; background:var(--accent); opacity:0; transition:opacity .15s;}
+  .w-chart-dots button.on::after{opacity:1; inset:7px; box-shadow:0 0 0 3px var(--card);} .w-chart-dots button:hover::after{opacity:.6;}
+  .w-chart-x{display:flex; justify-content:space-between; font-size:.7rem; color:var(--muted); margin-top:4px;}
+  .w-stack{display:flex; gap:2px; height:12px; border-radius:6px; overflow:hidden; margin:2px 0 12px;} .w-stack i{display:block;}
+  .w-mixrow{display:grid; grid-template-columns:1fr auto 44px; gap:10px; align-items:center; font-size:.86rem; padding:5px 0;}
+  .w-mixrow span{display:flex; align-items:center; gap:8px;} .w-mixrow .sw{width:10px; height:10px; border-radius:3px; display:inline-block;}
+  .w-mixrow b{font-variant-numeric:tabular-nums;} .w-mixrow small{color:var(--muted); text-align:right; font-variant-numeric:tabular-nums;}
+  .w-mixrow.debt{border-top:1px solid var(--line); margin-top:4px; padding-top:9px;} .w-mixrow.debt .ti{color:var(--red);}
+  .w-ins{display:grid; grid-template-columns:1fr 1fr; gap:0 12px; margin:0 16px;} .w-ins .card{margin:0 0 12px;}
+  .w-ins-card.wide{grid-column:1 / -1;}
+  .w-ins-h{font-size:.72rem; color:var(--muted); font-weight:600; display:flex; align-items:center; gap:6px;} .w-ins-h .ti{color:var(--accent); font-size:.95rem;}
+  .w-ins-v{font-size:1.35rem; font-weight:800; margin:4px 0 2px; font-variant-numeric:tabular-nums;}
+  .w-ins-s{font-size:.72rem; color:var(--muted); line-height:1.4;}
+  .w-split{display:grid; grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) auto; gap:10px; align-items:center; font-size:.84rem; margin:9px 0;}
+  .w-split small{display:block; font-size:.68rem; color:var(--muted);} .w-split b{font-variant-numeric:tabular-nums; min-width:64px; text-align:right;}
+  .w-split .bar{height:8px; background:var(--card2); border-radius:4px; overflow:hidden;} .w-split .bar i{display:block; height:100%; border-radius:0 4px 4px 0;}
+  .w-split .bar i.pos{background:var(--green);} .w-split .bar i.neg{background:var(--red);}
+  .w-grp{font-size:.66rem; color:var(--muted); text-transform:uppercase; letter-spacing:.8px; font-weight:600; margin:12px 0 4px;}
+  .w-acc{display:flex; align-items:center; gap:12px; padding:9px 0; border-bottom:1px solid var(--line); cursor:pointer;}
+  .w-acc:last-of-type{border-bottom:none;} .w-acc .nm{flex:1; min-width:0; font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .w-acc .nm small{display:block; font-size:.72rem; color:var(--muted); font-weight:400;}
+  .w-acc .val{text-align:right;} .w-acc .val b{display:block; font-variant-numeric:tabular-nums;} .w-acc .val small{font-size:.72rem; font-variant-numeric:tabular-nums;}
+  .w-acc > .ti-chevron-right{color:var(--muted);}
+  .w-ico{width:36px; height:36px; border-radius:11px; background:var(--card2); display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0;}
+  .w-upd{width:100%; margin-top:12px;}
+  .w-arch{margin-top:14px;} .w-arch summary{cursor:pointer; color:var(--muted); font-size:.82rem; font-weight:600;}
+  .wh-row{display:grid; grid-template-columns:minmax(0,1fr) auto 16px; gap:10px; align-items:center; padding:11px 0; border-bottom:1px solid var(--line); cursor:pointer;}
+  .wh-row:last-child{border-bottom:none;} .wh-row small{display:block; font-size:.72rem; color:var(--muted); margin-top:2px;}
+  .wh-row .r{text-align:right;} .wh-row .r b{font-variant-numeric:tabular-nums;} .wh-row > .ti{color:var(--muted);}
+  .wh-split{grid-column:1 / -1; font-size:.72rem; color:var(--muted); margin-top:-4px;}
+  .w-up-box, .w-acc-box{max-width:460px; max-height:88vh; max-height:88dvh; overflow-y:auto; display:grid; gap:12px;}
+  .w-up-date{display:flex; align-items:center; gap:12px;} .w-up-date label{margin:0;} .w-up-date input{flex:1;}
+  .w-up-note:empty{display:none;} .w-up-note{font-size:.78rem; color:#e0952b;}
+  .w-up-row{display:grid; grid-template-columns:36px minmax(0,1fr) 130px; gap:10px; align-items:center; padding:5px 0;}
+  .w-up-row .nm{margin:0; font-size:.9rem; font-weight:500; text-transform:none; letter-spacing:0; color:var(--text);}
+  .w-up-row .nm small{display:block; font-size:.72rem; color:var(--muted); font-weight:400;}
+  .w-up-row input{text-align:right; font-variant-numeric:tabular-nums;}
+  .w-up-foot{position:sticky; bottom:-18px; background:var(--card); padding:12px 0 4px; display:grid; gap:10px; border-top:1px solid var(--line);}
+  .w-up-tot{font-size:.86rem; color:var(--muted);} .w-up-tot b{color:var(--text); font-size:1.05rem;}
+  .w-type{display:flex; width:100%;} .w-type button{flex:1; padding:8px 4px;} .w-hint{display:block; font-size:.72rem; color:var(--muted); margin-top:5px;}
+  .w-icons{display:grid; grid-template-columns:repeat(6,1fr); gap:6px;}
+  .w-icons button{height:42px; border-radius:11px; border:1px solid var(--line); background:var(--card2); color:var(--muted); font-size:1.15rem; cursor:pointer;}
+  .w-icons button.on{border-color:var(--accent); color:var(--accent); background:var(--accent-dk);}
+  .hide-money .mv{filter:blur(7px); user-select:none;}
+  @media (min-width:1024px){ .w-ins{margin:0;} .w-ins .card{margin:0 0 20px;} }
   .sum-empty{text-align:center; color:var(--muted); padding:30px 0; font-size:.9rem;} .sum-empty .ti{display:block; font-size:1.8rem; margin-bottom:6px;}
   .sum-link.in-col{margin:0 16px 12px;}
   @media (min-width:1024px){ .sum-link{width:auto; margin:-8px 16px 20px;} .cols .sum-link.in-col{width:100%; margin:-8px 0 20px;} }
@@ -658,11 +736,14 @@
     .bottomnav button:hover{background:var(--card2); color:var(--text);}
     .bottomnav button.active{background:var(--accent-dk); color:var(--accent);}
     .bottomnav button.active .ico{transform:none;}
-    #nav-add{order:-1; border-radius:12px; background:var(--grad); color:#0a0f0c; font-weight:700; justify-content:center; margin-bottom:18px;
+    header .app-h1{position:fixed; top:24px; left:24px; z-index:60;}
+    .bottomnav .nav-fab{order:-1; border-radius:12px; background:var(--grad); color:#0a0f0c; font-weight:700; justify-content:center; margin-bottom:18px;
       box-shadow:0 4px 14px color-mix(in srgb,var(--accent) 28%,transparent);}
-    #nav-add:hover,#nav-add.active{background:var(--grad); color:#0a0f0c; filter:brightness(1.05);}
-    #nav-add .fab{width:auto; height:auto; margin:0; border:none; background:none; box-shadow:none; color:inherit; font-size:1.2rem;}
-    #nav-add.active .fab{transform:none;}
+    .bottomnav .nav-fab:hover,.bottomnav .nav-fab.active{background:var(--grad); color:#0a0f0c; filter:brightness(1.05);}
+    .nav-fab .fab{width:auto; height:auto; margin:0; border:none; background:none; box-shadow:none; color:inherit; font-size:1.2rem;}
+    .nav-fab.active .fab{transform:none;}
+    .bottomnav #nav-wup, .bottomnav #nav-wup:hover{background:var(--grad-worth); color:#1a1205; box-shadow:0 4px 14px rgba(224,149,43,.3);} #nav-wup .fab{background:none; box-shadow:none;}
+    #nav-wup.dot::after{top:8px; right:12px;}
     .nav-lbl{display:inline;}
     #nav-sett{margin-top:auto; margin-bottom:20px;}
     .lbl-short{display:none;} .lbl-long{display:inline;}
@@ -696,7 +777,9 @@
 
 <header>
   <div class="page-title" id="pageTitle"></div>
-  <h1><span class="logo"><i class="ti ti-wallet"></i></span> Spese Tracker</h1>
+  <h1 class="app-h1"><button type="button" class="app-sw" id="appSw" onclick="toggleAppMenu(event)" aria-haspopup="true" aria-label="Cambia sezione">
+    <span class="logo spend" id="appLogo"><i class="ti ti-wallet"></i></span><span id="appName">iSpend</span><i class="ti ti-selector sw-ico"></i></button>
+    <div class="app-menu" id="appMenu" hidden></div></h1>
   <div class="hdr-right">
     <div class="sync-status"><span class="sync-dot off" id="syncDot"></span><span id="syncLabel">solo locale</span><span id="syncOut"></span></div>
     <button class="month-btn" id="monthBtn" onclick="openPicker()">—</button>
@@ -863,22 +946,23 @@
         <button type="button" class="cat-field empty" id="fCatBtn" onclick="openCatPick()"></button>
         <div class="quick-cats" id="quickCats" aria-label="Categorie usate più spesso"></div>
       </div>
-      <div class="full trip-box" id="tripBox">
-        <button type="button" class="sp-btn trip-btn" id="tripBtn" onclick="openTrip()"><i class="ti ti-luggage"></i> Aggiungi a un viaggio</button>
-        <div id="tripField" hidden>
-          <label for="fTrip">Viaggio</label>
-          <div class="trip-row"><select id="fTrip"><option value="">— nessuno —</option></select>
-            <button type="button" class="trip-x" onclick="closeTrip()" aria-label="Togli il viaggio"><i class="ti ti-x"></i></button></div>
-        </div>
-      </div>
       <div class="full">
         <label>Nota (opzionale)</label>
         <input type="text" id="fNote" placeholder="es. cena con amici" autocomplete="off">
         <div class="note-sug" id="noteSug"></div>
       </div>
-      <div class="full" id="repeatBox">
-        <label class="switch-row"><input type="checkbox" id="fRepeat">
-          <span>Ripeti ogni mese<small>La aggiungo io in automatico ogni mese, nello stesso giorno</small></span></label>
+      <div class="full opt-box" id="optBox">
+        <div class="opt-btns">
+          <button type="button" class="sp-btn" id="tripBtn" onclick="openTrip()"><i class="ti ti-luggage"></i> Viaggio</button>
+          <button type="button" class="sp-btn" id="repeatBtn" onclick="toggleRepeat()" aria-pressed="false"><i class="ti ti-repeat"></i> Ripeti ogni mese</button>
+          <input type="checkbox" id="fRepeat" hidden>
+        </div>
+        <div class="opt-hint" id="repeatHint" hidden><i class="ti ti-repeat"></i> La aggiungo io ogni mese, nello stesso giorno</div>
+        <div id="tripField" hidden>
+          <label for="fTrip">Viaggio</label>
+          <div class="trip-row"><select id="fTrip"><option value="">— nessuno —</option></select>
+            <button type="button" class="trip-x" onclick="closeTrip()" aria-label="Togli il viaggio"><i class="ti ti-x"></i></button></div>
+        </div>
       </div>
       <div class="full form-actions">
         <button class="btn ghost" type="button" id="btnCancel" onclick="cancelEdit()" style="display:none">Annulla</button>
@@ -918,6 +1002,20 @@
 </div>
 
 <!-- ============ TAB IMPOSTAZIONI ============ -->
+<!-- ===== iWorth ===== -->
+<div class="tab" id="tab-wpan" data-app="worth">
+  <div id="wEmpty"></div>
+  <div class="cols" id="wMain"><div class="col">
+    <div class="card w-hero" id="wHero"></div>
+    <div class="card" id="wMix"></div>
+    <div class="w-ins" id="wIns"></div>
+  </div><div class="col">
+    <div class="card" id="wAccList"></div>
+  </div></div>
+</div>
+<div class="tab" id="tab-whist" data-app="worth"><div class="card" id="wHist"></div></div>
+<div class="tab" id="tab-wacc" data-app="worth"><div class="card" id="wAccMgr"></div></div>
+
 <div class="tab" id="tab-sett">
   <div class="cols"><div class="col">
   <div class="card">
@@ -1013,10 +1111,14 @@
 
 <!-- bottom nav -->
 <nav class="bottomnav">
-  <button id="nav-dash" onclick="showTab('dash')"><i class="ti ti-layout-dashboard ico"></i>Dashboard</button>
-  <button id="nav-mese" onclick="showTab('mese')"><i class="ti ti-calendar-month ico"></i>Mese</button>
-  <button id="nav-add" onclick="openAdd()" aria-label="Aggiungi movimento"><span class="fab"><i class="ti ti-plus"></i></span><span class="nav-lbl">Nuovo movimento</span></button>
-  <button id="nav-projs" onclick="showTab('projs')"><i class="ti ti-luggage ico"></i>Viaggi</button>
+  <button id="nav-dash" data-app="spend" onclick="showTab('dash')"><i class="ti ti-layout-dashboard ico"></i>Dashboard</button>
+  <button id="nav-mese" data-app="spend" onclick="showTab('mese')"><i class="ti ti-calendar-month ico"></i>Mese</button>
+  <button id="nav-add" class="nav-fab" data-app="spend" onclick="openAdd()" aria-label="Aggiungi movimento"><span class="fab"><i class="ti ti-plus"></i></span><span class="nav-lbl">Nuovo movimento</span></button>
+  <button id="nav-projs" data-app="spend" onclick="showTab('projs')"><i class="ti ti-luggage ico"></i>Viaggi</button>
+  <button id="nav-wpan" data-app="worth" onclick="showTab('wpan')"><i class="ti ti-chart-donut ico"></i>Panoramica</button>
+  <button id="nav-whist" data-app="worth" onclick="showTab('whist')"><i class="ti ti-history ico"></i>Storico</button>
+  <button id="nav-wup" class="nav-fab" data-app="worth" onclick="openUpdate()" aria-label="Aggiorna i saldi"><span class="fab"><i class="ti ti-refresh"></i></span><span class="nav-lbl">Aggiorna i saldi</span></button>
+  <button id="nav-wacc" data-app="worth" onclick="showTab('wacc')"><i class="ti ti-building-bank ico"></i>Conti</button>
   <button id="nav-sett" onclick="showTab('sett')"><i class="ti ti-settings ico"></i><span class="lbl-short">Opzioni</span><span class="lbl-long">Impostazioni</span></button>
 </nav>
 
@@ -1065,6 +1167,36 @@
       <button class="btn ghost" type="button" onclick="closeImport()">Annulla</button>
       <button class="btn" type="button" id="impGo" onclick="confirmImport()" style="display:none"><i class="ti ti-check"></i> Importa</button>
     </div>
+  </div>
+</div>
+
+<!-- iWorth: aggiorna i saldi -->
+<div class="modal" id="wUpModal" onclick="if(event.target===this)closeUpdate()">
+  <div class="modal-box w-up-box">
+    <div class="cmp-top"><h3 id="wUpTitle">Aggiorna i saldi</h3>
+      <button class="cmp-x" type="button" onclick="closeUpdate()" aria-label="Chiudi"><i class="ti ti-x"></i></button></div>
+    <div class="w-up-date"><label for="wUpDate">Data</label><input type="date" id="wUpDate"></div>
+    <div class="w-up-note" id="wUpNote"></div>
+    <div id="wUpList"></div>
+    <div class="w-up-foot">
+      <div class="w-up-tot" id="wUpTot"></div>
+      <button class="btn" type="button" onclick="saveUpdate()"><i class="ti ti-check"></i> Salva</button>
+      <button class="link-danger" type="button" id="wUpDel" onclick="deleteSnap()" hidden>Elimina questo aggiornamento</button>
+    </div>
+  </div>
+</div>
+<!-- iWorth: conto -->
+<div class="modal" id="wAccModal" onclick="if(event.target===this)closeAcc()">
+  <div class="modal-box w-acc-box">
+    <div class="cmp-top"><h3 id="wAccTitle">Nuovo conto</h3>
+      <button class="cmp-x" type="button" onclick="closeAcc()" aria-label="Chiudi"><i class="ti ti-x"></i></button></div>
+    <div><label for="wAccName">Nome</label><input type="text" id="wAccName" maxlength="40" placeholder="es. Conto corrente, Broker ETF" autocomplete="off"></div>
+    <div><label>Tipo</label><div class="seg w-type" id="wAccType"></div><small class="w-hint" id="wAccTypeHint"></small></div>
+    <div><label>Icona</label><div class="w-icons" id="wAccIcons"></div></div>
+    <div id="wAccBalBox"><label for="wAccBal" id="wAccBalLbl">Saldo di oggi (facoltativo)</label><input type="text" id="wAccBal" inputmode="decimal" placeholder="0,00" autocomplete="off"></div>
+    <label class="switch-row" id="wAccArchRow"><input type="checkbox" id="wAccArch"><span>Conto chiuso<small>Resta nello storico ma non lo aggiorni più</small></span></label>
+    <button class="btn" type="button" onclick="saveAcc()"><i class="ti ti-check"></i> Salva</button>
+    <button class="link-danger" type="button" id="wAccDel" onclick="deleteAcc()">Elimina conto e saldi passati</button>
   </div>
 </div>
 
@@ -1333,15 +1465,33 @@ function demoData(){
   const pr = spentNow('PRANZI & CENE'), dr = spentNow('DRINK & APERITIVI');
   budgets['PRANZI & CENE'] = pr > 20 ? Math.floor(pr * 0.9 / 5) * 5 : 60;
   budgets['DRINK & APERITIVI'] = dr > 10 ? Math.ceil(dr / 0.86 / 5) * 5 : 100;
-  return {tx: out, recurring, budgets};
+  // iWorth: 5 conti e un aggiornamento al mese (il conto corrente segue entrate − spese registrate)
+  const wealth = {accounts: [
+    {id: 'wcc', name: 'Conto corrente', type: 'liq', icon: 'ti-building-bank'},
+    {id: 'wdep', name: 'Conto deposito', type: 'liq', icon: 'ti-pig-money'},
+    {id: 'wrev', name: 'Revolut', type: 'liq', icon: 'ti-credit-card'},
+    {id: 'wetf', name: 'Broker ETF', type: 'inv', icon: 'ti-chart-line'},
+    {id: 'wbtc', name: 'Crypto', type: 'other', icon: 'ti-currency-bitcoin'}], snaps: {}};
+  let cc = 3900, dep = 7600, etf = 23800, btc = 1650, prevD = '0000';
+  for(let m = 0; m <= today.getMonth(); m++){
+    const date = iso(new Date(today.getFullYear(), m, Math.min(2, today.getDate())));
+    const saved = out.filter(t => t.date > prevD && t.date <= date).reduce((x, t) => x + (t.tipo === 'entrata' ? t.amount : -t.amount), 0);
+    if(m){ cc = Math.max(1500, cc + saved - 160); dep += 60; etf = etf * (1 + between(-0.03, 0.045)) + 300; btc = btc * (1 + between(-0.14, 0.17)); }
+    const r = v => Math.round(v * 100) / 100;
+    wealth.snaps[date.slice(0, 7)] = {date, ts: 1, v: {wcc: r(cc), wdep: r(dep), wrev: between(120, 460), wetf: r(etf), wbtc: r(btc)}};
+    prevD = date;
+  }
+  return {tx: out, recurring, budgets, wealth};
 }
 
 // ---------- stato ----------
 // recurring = regole "ripeti ogni mese": {id, cat, amount, day, tipo, note, trip?, start:'AAAA-MM', since:'AAAA-MM', skip:['AAAA-MM']}
 let tx = [], tomb = [], projects = [], recurring = [];
+let wealth = {accounts: [], snaps: {}}; // iWorth: conti e saldi mese per mese
+const normWealth = w => ({accounts: Array.isArray(w && w.accounts) ? w.accounts : [], snaps: w && w.snaps && typeof w.snaps === 'object' ? w.snaps : {}});
 let openTrips = new Set();
 if(DEMO){
-  const d = demoData(); tx = d.tx; recurring = d.recurring;
+  const d = demoData(); tx = d.tx; recurring = d.recurring; wealth = d.wealth;
   settings.budgets = d.budgets; settings.budgetTotal = 1600;
   settings.budgetOverrides = {[`${new Date().getFullYear()}-12`]: {total: 2200, cats: {'REGALI': 250}}};
 } else {
@@ -1351,6 +1501,7 @@ if(DEMO){
   try { recurring = JSON.parse(localStorage.getItem('speseRecurring') || '[]'); } catch(e){}
   try { settings = normSettings(JSON.parse(localStorage.getItem('speseSettings') || '{}')); } catch(e){}
   try { openTrips = new Set(JSON.parse(localStorage.getItem('speseOpenTrips') || '[]')); } catch(e){}
+  try { wealth = normWealth(JSON.parse(localStorage.getItem('speseWealth') || '{}')); } catch(e){}
 }
 
 // ---------- spese ricorrenti: genera i movimenti dei mesi arrivati ----------
@@ -1398,6 +1549,7 @@ function saveLocal(){
   localStorage.setItem('speseRecurring', JSON.stringify(recurring));
   localStorage.setItem('speseSettings', JSON.stringify(settings));
   localStorage.setItem('speseOpenTrips', JSON.stringify([...openTrips]));
+  localStorage.setItem('speseWealth', JSON.stringify(wealth));
 }
 function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
 
@@ -1415,13 +1567,13 @@ function setSync(on, label){
   document.getElementById('syncOut').innerHTML = auth.currentUser
     ? ' · <span class="link-btn" onclick="doSignOut()">Esci</span>' : '';
 }
-function dataJson(){ return JSON.stringify({tx, tomb, projects, recurring, settings}); }
+function dataJson(){ return JSON.stringify({tx, tomb, projects, recurring, settings, wealth}); }
 // Firestore rifiuta i campi "undefined": li tolgo prima di inviare
 const clean = o => JSON.parse(JSON.stringify(o));
 function pushCloud(){
   if(DEMO || !auth.currentUser) return; // in demo non tocca mai Firebase
   lastPushJson = dataJson();
-  setDoc(doc(db, 'users', auth.currentUser.uid), clean({tx, tomb, projects, recurring, settings, updatedAt: Date.now()}))
+  setDoc(doc(db, 'users', auth.currentUser.uid), clean({tx, tomb, projects, recurring, settings, wealth, updatedAt: Date.now()}))
     .catch(err => { console.warn('Sync error', err); setSync(false, 'errore sync'); });
 }
 function mergeCloud(c){
@@ -1439,6 +1591,19 @@ function mergeCloud(c){
   recurring = [...cRec, ...recurring.filter(r => !cRecIds.has(r.id) && !deadAll.has(r.id))];
   // impostazioni: vale quella nel cloud (così tema e categorie sono uguali su telefono e PC)
   if(c.settings){ settings = normSettings(c.settings); applySettings(); }
+  // iWorth: conti come i movimenti (vince il cloud, restano quelli solo locali); per ogni mese vince l'aggiornamento più recente
+  if(c.wealth){
+    const cw = normWealth(c.wealth), dw = new Set(tomb.map(String));
+    const cA = new Set(cw.accounts.map(a => a.id));
+    wealth.accounts = [...cw.accounts, ...wealth.accounts.filter(a => !cA.has(a.id))].filter(a => !dw.has(String(a.id)));
+    const snaps = {};
+    new Set([...Object.keys(wealth.snaps), ...Object.keys(cw.snaps)]).forEach(k => {
+      if(dw.has('ws:' + k)) return;
+      const l = wealth.snaps[k], r = cw.snaps[k];
+      snaps[k] = !l ? r : !r ? l : ((r.ts || 0) >= (l.ts || 0) ? r : l);
+    });
+    wealth.snaps = snaps;
+  }
 }
 
 const authBox = document.getElementById('authBox');
@@ -1508,7 +1673,7 @@ if(!DEMO) onAuthStateChanged(auth, user => {
     unsub = onSnapshot(doc(db, 'users', user.uid), snap => {
       if(!snap.exists()){ pushCloud(); setSync(true, 'sincronizzato'); render(); return; }
       const d = snap.data();
-      if(JSON.stringify({tx:d.tx||[], tomb:d.tomb||[], projects:d.projects||[], recurring:d.recurring||[], settings:d.settings||{}}) === lastPushJson && lastPushJson !== ''){
+      if(JSON.stringify({tx:d.tx||[], tomb:d.tomb||[], projects:d.projects||[], recurring:d.recurring||[], settings:d.settings||{}, wealth:d.wealth||{accounts:[], snaps:{}}}) === lastPushJson && lastPushJson !== ''){
         setSync(true, 'sincronizzato'); return;
       }
       mergeCloud(d);
@@ -1783,8 +1948,9 @@ window.setType = function(t, keepCat){
   renderSplit();
 };
 window.showTab = function(t){
-  closeCatPick();
-  if(['dash', 'projs', 'sett'].includes(t)) resetTxFilters();
+  closeCatPick(); closeAppMenu();
+  if(TAB_APP[t] && TAB_APP[t] !== app) setApp(TAB_APP[t], true); // es. dal riepilogo annuale a un mese: torni in iSpend
+  if(['dash', 'projs', 'sett', 'wpan', 'whist', 'wacc'].includes(t)) resetTxFilters();
   tab = t;
   document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
   document.getElementById('tab-' + t).classList.add('active');
@@ -1793,7 +1959,8 @@ window.showTab = function(t){
   // calendario solo nella pagina Mese, selettore anno solo nella Dashboard
   document.getElementById('monthBtn').style.display = t === 'mese' ? '' : 'none';
   document.getElementById('yearSwitch').style.display = t === 'dash' ? '' : 'none';
-  document.getElementById('pageTitle').textContent = {dash:'Dashboard', mese:'Mese', add:'Aggiungi', projs:'Viaggi', sett:'Impostazioni'}[t];
+  document.getElementById('pageTitle').textContent = {dash:'Dashboard', mese:'Mese', add:'Aggiungi', projs:'Viaggi', sett:'Impostazioni',
+    wpan:'Patrimonio', whist:'Storico', wacc:'Conti'}[t];
   window.scrollTo(0,0);
   render();
 };
@@ -1845,7 +2012,7 @@ function setFormMode(mode, info){
     : isRec ? '<i class="ti ti-repeat"></i> Modifica ricorrente' : '<i class="ti ti-plus"></i> Aggiungi movimento';
   document.getElementById('btnSubmit').innerHTML = '<i class="ti ti-check"></i> ' + (mode ? 'Salva modifiche' : 'Salva');
   document.getElementById('btnCancel').style.display = mode ? '' : 'none';
-  document.getElementById('repeatBox').style.display = mode ? 'none' : '';
+  document.getElementById('repeatBtn').hidden = !!mode; syncRepeat();
   document.getElementById('dateBox').style.display = isRec ? 'none' : '';
   document.getElementById('dayBox').style.display = isRec ? '' : 'none';
   document.getElementById('fDate').required = !isRec;
@@ -1865,16 +2032,22 @@ function resetForm(){
   setType('uscita'); fillCats('uscita');
   setFormMode(null);
   setSplitState(null);
-  tripOpen = false; syncTrip();
+  tripOpen = false; syncTrip(); syncRepeat();
 }
 // il campo Viaggio compare solo se lo chiedi (o se il movimento ha già un viaggio)
 let tripOpen = false;
 function syncTrip(){
   const f = document.getElementById('fTrip'), open = tripOpen || !!f.value;
-  document.getElementById('tripBox').style.display = projects.length || f.value ? '' : 'none'; // nessun viaggio creato: niente pulsante
   document.getElementById('tripField').hidden = !open;
-  document.getElementById('tripBtn').hidden = open;
+  document.getElementById('tripBtn').hidden = open || !projects.length; // nessun viaggio creato: niente pulsante
 }
+// "Ripeti ogni mese": un pulsante piccolo (le ricorrenti sono poche), la spiegazione compare solo se è attivo
+function syncRepeat(){
+  const on = document.getElementById('fRepeat').checked, b = document.getElementById('repeatBtn');
+  b.classList.toggle('on', on); b.setAttribute('aria-pressed', on);
+  document.getElementById('repeatHint').hidden = !on || b.hidden;
+}
+window.toggleRepeat = function(){ const f = document.getElementById('fRepeat'); f.checked = !f.checked; syncRepeat(); };
 window.openTrip = function(){ tripOpen = true; syncTrip(); document.getElementById('fTrip').focus(); };
 window.closeTrip = function(){ document.getElementById('fTrip').value = ''; tripOpen = false; syncTrip(); };
 document.getElementById('fTrip').addEventListener('change', syncTrip);
@@ -2044,7 +2217,7 @@ window.submitTx = function(e){
   document.getElementById('fAmount').value = '';
   setSplitState(null); // la prossima spesa parte intera (meglio non dividere per sbaglio)
   document.getElementById('fNote').value = '';
-  document.getElementById('fRepeat').checked = false;
+  document.getElementById('fRepeat').checked = false; syncRepeat();
   autoCat = null; noteSugView();
   const act = {label: 'Annulla', fn: () => undoAdd(added)};
   const al = tipo === 'uscita' ? budgetAlert(snap) : null;
@@ -2070,7 +2243,7 @@ function undoAdd(added){
     document.getElementById('fNote').value = f.note || '';
     document.getElementById('fDate').value = f.date;
     document.getElementById('fTrip').value = f.trip || ''; syncTrip();
-    document.getElementById('fRepeat').checked = !!f.repeat;
+    document.getElementById('fRepeat').checked = !!f.repeat; syncRepeat();
     toast('Annullato: correggilo e salva');
   } else toast('Annullato');
 }
@@ -2205,6 +2378,7 @@ function render(){
   renderProjs();
   renderRecurring();
   renderSettings();
+  renderWorth();
 }
 
 function renderMese(){
@@ -2378,7 +2552,7 @@ function openCmp(){ renderCmpModal(); document.getElementById('cmpModal').classL
 window.closeCmp = function(){ document.getElementById('cmpModal').classList.remove('show'); };
 window.setCmpRef = function(off){ cmpOff = off; renderCmpModal(); renderCompare(); };
 window.setCmpDays = function(v){ cmpDays = v; renderCmpModal(); renderCompare(); };
-document.addEventListener('keydown', e => { if(e.key === 'Escape'){ closeCmp(); closePicker(); closeCatPick(); closeSummary(); } });
+document.addEventListener('keydown', e => { if(e.key === 'Escape'){ closeCmp(); closePicker(); closeCatPick(); closeSummary(); closeUpdate(); closeAcc(); closeAppMenu(); } });
 
 function renderCmpModal(){
   const c = cmpCtx();
@@ -3213,7 +3387,7 @@ window.undoImport = function(){
 };
 // backup: movimenti + progetti + ricorrenti (i vecchi backup con solo i movimenti si possono ancora ripristinare)
 window.exportJSON = function(){
-  download(new Blob([JSON.stringify({version: 3, tx, projects, recurring, settings}, null, 1)], {type:'application/json'}), 'spese-backup.json');
+  download(new Blob([JSON.stringify({version: 4, tx, projects, recurring, settings, wealth}, null, 1)], {type:'application/json'}), 'ispend-backup.json');
 };
 function download(blob, name){ const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click(); }
 window.importJSON = function(inp){
@@ -3233,6 +3407,7 @@ window.importJSON = function(inp){
           recurring = d.recurring || [];
           projects = [...new Set([...(d.projects || [])])];
           if(d.settings){ settings = normSettings(d.settings); applySettings(); }
+          if(d.wealth) wealth = normWealth(d.wealth);
         }
         tomb = [...new Set(tomb)].filter(id => !keep.has(keyOf(id))).slice(-1000);
         tx = newTx;
@@ -3251,9 +3426,6 @@ if(DEMO){
 } else {
   renderAuth(null);
 }
-applySettings();
-showTab('mese');
-handleQuickAdd();
 
 // ================= Riepilogo del mese: scheda "in breve", finestra e PDF =================
 // tutti i numeri di un mese (se è il mese in corso, i confronti sono a parità di giorni)
@@ -3430,7 +3602,7 @@ function makePdf(){
       });
       objs[2] = `<< /Type /Pages /Kids [${kids.join(' ')}] /Count ${pages.length} >>`;
       const d = new Date(), stamp = `${d.getFullYear()}${pad2(d.getMonth() + 1)}${pad2(d.getDate())}${pad2(d.getHours())}${pad2(d.getMinutes())}${pad2(d.getSeconds())}`;
-      objs.push(`<< /Title (${pdfEnc(title).replace(/[\\()]/g, '\\$&')}) /Producer (Spese Tracker) /CreationDate (D:${stamp}) >>`);
+      objs.push(`<< /Title (${pdfEnc(title).replace(/[\\()]/g, '\\$&')}) /Producer (iSpend) /CreationDate (D:${stamp}) >>`);
       let out = '%PDF-1.4\n%\xE2\xE3\xCF\xD3\n'; const offs = [];
       for(let i = 1; i < objs.length; i++){ offs[i] = out.length; out += `${i} 0 obj\n${objs[i]}\nendobj\n`; }
       const xref = out.length;
@@ -3458,7 +3630,7 @@ function buildSummaryPdf(s){
   const money = v => fmt.format(v), money0 = v => fmt0.format(v);
   const name = sumName(s), saldo = s.inc - s.out;
   let y = 0;
-  const footer = () => P.text(P.W / 2, 822, `Spese Tracker · ${capF(name)} · pagina ${P.pageCount()}`, {size: 7.5, color: MUT, align: 'center'});
+  const footer = () => P.text(P.W / 2, 822, `iSpend · ${capF(name)} · pagina ${P.pageCount()}`, {size: 7.5, color: MUT, align: 'center'});
   const newPage = () => { P.page(); y = 52; };
   const need = h => { if(y + h > BOT){ footer(); newPage(); return true; } return false; };
   const h2 = (x, yy, t) => P.text(x, yy, t.toUpperCase(), {size: 8, bold: true, color: MUT});
@@ -3468,7 +3640,7 @@ function buildSummaryPdf(s){
 
   // ---------- pagina 1: il mese in una pagina ----------
   newPage();
-  P.text(M, y, 'SPESE TRACKER', {size: 8, bold: true, color: ACC});
+  P.text(M, y, 'iSpend', {size: 9, bold: true, color: ACC});
   P.text(M, y + 26, `Riepilogo di ${name}`, {size: 22, bold: true});
   P.text(M, y + 44, `${shortDate(s.a)} – ${shortDate(s.b)} ${s.y}${s.partial ? ' · mese in corso, dati fino a oggi' : ''} · ${s.list.length} movimenti · creato il ${new Date().toLocaleDateString('it-IT')}`, {size: 8.5, color: MUT});
   y += 62;
@@ -3736,7 +3908,7 @@ function buildYearPdf(s){
   const money = v => fmt.format(v), money0 = v => fmt0.format(v);
   const saldo = s.inc - s.out;
   let y = 0;
-  const footer = () => P.text(P.W / 2, 822, `Spese Tracker · Anno ${s.y} · pagina ${P.pageCount()}`, {size: 7.5, color: MUT, align: 'center'});
+  const footer = () => P.text(P.W / 2, 822, `iSpend · Anno ${s.y} · pagina ${P.pageCount()}`, {size: 7.5, color: MUT, align: 'center'});
   const newPage = () => { P.page(); y = 52; };
   const need = h => { if(y + h > BOT){ footer(); newPage(); return true; } return false; };
   const h2 = (x, yy, t) => P.text(x, yy, t.toUpperCase(), {size: 8, bold: true, color: MUT});
@@ -3744,7 +3916,7 @@ function buildYearPdf(s){
   const vbar = (x, base, w, h, c) => { if(h <= 0) return; const r = Math.min(2, w / 2); P.rect(x, base - h, w, h, c, r); P.rect(x, base - Math.min(h, r), w, Math.min(h, r), c); };
 
   newPage();
-  P.text(M, y, 'SPESE TRACKER', {size: 8, bold: true, color: ACC});
+  P.text(M, y, 'iSpend', {size: 9, bold: true, color: ACC});
   P.text(M, y + 26, `Riepilogo del ${s.y}`, {size: 22, bold: true});
   P.text(M, y + 44, `${s.partial ? 'gennaio – oggi (anno in corso)' : 'gennaio – dicembre'} · ${s.list.length} movimenti · creato il ${new Date().toLocaleDateString('it-IT')}`, {size: 8.5, color: MUT});
   y += 62;
@@ -3888,6 +4060,342 @@ function buildYearPdf(s){
   return P.bytes(`Riepilogo ${s.y}`);
 }
 
+// ================= sezioni dell'app (selettore in alto): iSpend, iWorth… =================
+// per aggiungere una sezione: una voce qui, le sue pagine (data-app) e i pulsanti nella barra in basso
+const APPS = {
+  spend: {name: 'iSpend', icon: 'ti-wallet', home: 'mese', desc: 'Spese ed entrate'},
+  worth: {name: 'iWorth', icon: 'ti-diamond', home: 'wpan', desc: 'Il tuo patrimonio'}
+};
+const TAB_APP = {dash: 'spend', mese: 'spend', add: 'spend', projs: 'spend', wpan: 'worth', whist: 'worth', wacc: 'worth'};
+let app = 'spend';
+try { const a = localStorage.getItem('speseApp'); if(APPS[a]) app = a; } catch(e){}
+function applyApp(){
+  const A = APPS[app];
+  document.body.dataset.app = app;
+  const lg = document.getElementById('appLogo'); lg.className = 'logo ' + app; lg.innerHTML = `<i class="ti ${A.icon}"></i>`;
+  document.getElementById('appName').textContent = A.name;
+  document.title = A.name;
+  document.getElementById('appMenu').innerHTML = Object.entries(APPS).map(([k, x]) => `<button type="button" class="app-item${k === app ? ' on' : ''}" data-app-item="${k}" onclick="setApp('${k}')">
+    <span class="logo ${k}"><i class="ti ${x.icon}"></i></span><span><b>${x.name}</b><small>${x.desc}</small></span>
+    ${k === app ? '<i class="ti ti-check"></i>' : '<span class="app-dot" hidden></span>'}</button>`).join('');
+}
+window.setApp = function(a, keepTab){
+  closeAppMenu(); if(!APPS[a]) return;
+  app = a; try { localStorage.setItem('speseApp', a); } catch(e){}
+  applyApp(); syncWorthDot();
+  if(!keepTab) showTab(APPS[a].home);
+};
+window.toggleAppMenu = function(e){ e.stopPropagation(); const m = document.getElementById('appMenu'); m.hidden = !m.hidden; if(!m.hidden) syncWorthDot(); };
+window.closeAppMenu = function(){ const m = document.getElementById('appMenu'); if(m) m.hidden = true; };
+document.addEventListener('click', e => { if(!e.target.closest('#appMenu') && !e.target.closest('#appSw')) closeAppMenu(); });
+
+// ================= iWorth: il patrimonio =================
+// Conti (liquidità, investimenti, altro, debiti) e, per ogni mese, una "fotografia" dei saldi inserita a mano.
+// wealth = {accounts: [{id, name, type, icon, archived?}], snaps: {'AAAA-MM': {date, ts, v: {idConto: saldo}}}}
+const W_TYPES = {
+  liq: {label: 'Liquidità', icon: 'ti-building-bank', hint: 'conti correnti, depositi, contanti'},
+  inv: {label: 'Investimenti', icon: 'ti-chart-line', hint: 'ETF, azioni, fondi, fondo pensione'},
+  other: {label: 'Altro', icon: 'ti-box', hint: 'crypto, buoni, oggetti di valore'},
+  debt: {label: 'Debiti', icon: 'ti-credit-card', hint: 'mutuo, prestiti, carta: contano in negativo'}
+};
+const W_ORDER = ['liq', 'inv', 'other', 'debt'];
+const W_ICONS = ['ti-building-bank', 'ti-pig-money', 'ti-wallet', 'ti-cash', 'ti-credit-card', 'ti-chart-line', 'ti-chart-candle',
+  'ti-currency-bitcoin', 'ti-briefcase', 'ti-home', 'ti-car', 'ti-coins'];
+const wColor = t => t === 'debt' ? 'var(--red)' : pieColors()[W_ORDER.indexOf(t)];
+const wAcc = id => wealth.accounts.find(a => a.id === id);
+const snapKeys = () => Object.keys(wealth.snaps).sort();
+const curSnapKey = () => { const p = periodOf(isoDay(new Date())); return ymKey(p.y, p.m); };
+const keyLabel = k => { const [y, m] = k.split('-').map(Number); return `${MESI[m - 1]} ${y}`; };
+function snapTotals(k){
+  const s = wealth.snaps[k]; if(!s) return null;
+  const t = {liq: 0, inv: 0, other: 0, debt: 0};
+  for(const [id, v] of Object.entries(s.v || {})){ const a = wAcc(id); if(a) t[a.type] += +v || 0; }
+  return {...t, assets: t.liq + t.inv + t.other, net: t.liq + t.inv + t.other - t.debt, date: s.date, key: k};
+}
+// entrate − spese registrate in iSpend tra due date (la prima esclusa): quanto hai "risparmiato" in quel periodo
+function savedBetween(d0, d1){ let s = 0; tx.forEach(t => { if(t.date > d0 && t.date <= d1) s += t.tipo === 'entrata' ? t.amount : -t.amount; }); return s; }
+// ultimo saldo noto di un conto, fino al mese "upTo" compreso
+function lastValue(id, upTo){
+  for(const k of snapKeys().reverse()){ if(upTo && k > upTo) continue; const v = wealth.snaps[k].v; if(v && v[id] != null) return +v[id]; }
+  return null;
+}
+// spesa media al mese (ultimi 6 mesi completi) da iSpend
+function avgMonthlySpend(){
+  const np = periodOf(isoDay(new Date())), vals = [];
+  for(let i = 1; i <= 6; i++){ const d = new Date(np.y, np.m - i, 1); const o = periodData(d.getFullYear(), d.getMonth(), 99).out; if(o > 0) vals.push(o); }
+  return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : 0;
+}
+let wSel = null; // punto selezionato nel grafico
+const mv = html => `<span class="mv">${html}</span>`; // importi che si possono nascondere
+function renderWorth(){ renderWPan(); renderWHist(); renderWAcc(); syncWorthDot(); }
+function needsUpdate(){ return wealth.accounts.some(a => !a.archived) && !wealth.snaps[curSnapKey()]; }
+function syncWorthDot(){
+  const n = needsUpdate();
+  document.getElementById('nav-wup').classList.toggle('dot', n);
+  const it = document.querySelector('#appMenu [data-app-item="worth"] .app-dot'); if(it) it.hidden = !n;
+}
+function renderWPan(){
+  const keys = snapKeys(), last = keys.length ? snapTotals(keys[keys.length - 1]) : null, prev = keys.length > 1 ? snapTotals(keys[keys.length - 2]) : null;
+  const active = wealth.accounts.filter(a => !a.archived);
+  const empty = document.getElementById('wEmpty'), main = document.getElementById('wMain');
+  if(!active.length && !keys.length){
+    main.hidden = true;
+    empty.innerHTML = `<div class="card w-empty"><span class="logo worth big"><i class="ti ti-diamond"></i></span>
+      <h3>Benvenuto in iWorth</h3><p>Aggiungi i tuoi conti (conto corrente, deposito, broker…) e una volta al mese aggiorna i saldi:
+      qui vedi il tuo patrimonio, come cresce e quanto della crescita viene dal risparmio.</p>
+      <button class="btn" type="button" onclick="openAcc()"><i class="ti ti-plus"></i> Aggiungi il primo conto</button></div>`;
+    return;
+  }
+  empty.innerHTML = ''; main.hidden = false;
+  const hide = document.body.classList.contains('hide-money');
+  // --- patrimonio netto + grafico ---
+  let hero = `<div class="card-head"><h2><i class="ti ti-diamond"></i> Patrimonio netto</h2>
+    <button class="w-eye" type="button" onclick="toggleHideMoney()" aria-label="${hide ? 'Mostra' : 'Nascondi'} gli importi"><i class="ti ti-${hide ? 'eye-off' : 'eye'}"></i></button></div>`;
+  if(needsUpdate()) hero += `<button class="w-remind" type="button" onclick="openUpdate()"><i class="ti ti-refresh"></i>
+    <span>Aggiorna i saldi di ${MESI[+curSnapKey().slice(5) - 1]}</span><i class="ti ti-chevron-right"></i></button>`;
+  if(!last){
+    hero += `<div class="w-sub">Hai ${active.length} ${active.length === 1 ? 'conto' : 'conti'}: inserisci i saldi per vedere il patrimonio.</div>
+      <button class="btn" type="button" onclick="openUpdate()"><i class="ti ti-refresh"></i> Inserisci i saldi</button>`;
+  } else {
+    const d = prev ? last.net - prev.net : null;
+    hero += `<div class="w-net">${mv(fmt0.format(last.net))}</div>
+      <div class="w-sub">al ${shortDate(last.date)} ${last.date.slice(0, 4)}${d != null ? ` · <span class="${d >= 0 ? 'up' : 'down'}">${d >= 0 ? '▲' : '▼'} ${mv(`${sgn(d)}${fmt0.format(Math.abs(d))}`)}${prev.net ? ` (${sgn(d)}${(Math.abs(d) / Math.abs(prev.net) * 100).toFixed(1).replace('.', ',')}%)` : ''}</span> da ${MESI[+prev.key.slice(5) - 1]}` : ''}</div>`;
+    hero += keys.length > 1 ? wChart(keys.slice(-24)) : `<div class="w-note">Il grafico compare dal secondo aggiornamento.</div>`;
+  }
+  document.getElementById('wHero').innerHTML = hero;
+  // --- come è diviso ---
+  const mix = document.getElementById('wMix');
+  if(last && last.assets > 0){
+    const parts = ['liq', 'inv', 'other'].filter(t => last[t] > 0);
+    mix.hidden = false;
+    mix.innerHTML = `<h2><i class="ti ti-chart-pie"></i> Come è diviso</h2>
+      <div class="w-stack">${parts.map(t => `<i style="flex:${last[t]};background:${wColor(t)}"></i>`).join('')}</div>
+      ${parts.map(t => `<div class="w-mixrow"><span><i class="sw" style="background:${wColor(t)}"></i>${W_TYPES[t].label}</span>
+        <b>${mv(fmt0.format(last[t]))}</b><small>${Math.round(last[t] / last.assets * 100)}%</small></div>`).join('')}
+      ${last.debt > 0 ? `<div class="w-mixrow debt"><span><i class="ti ti-credit-card"></i>Debiti</span><b>${mv('−' + fmt0.format(last.debt))}</b><small></small></div>` : ''}`;
+  } else { mix.hidden = true; mix.innerHTML = ''; }
+  // --- le idee: autonomia, crescita del mese, da inizio anno ---
+  const ins = [];
+  const avg = avgMonthlySpend();
+  if(last && avg > 0 && last.liq > 0){
+    const mo = last.liq / avg;
+    ins.push(`<div class="card w-ins-card"><div class="w-ins-h"><i class="ti ti-shield-check"></i> Autonomia</div>
+      <div class="w-ins-v">${mo >= 100 ? '99+' : mo.toFixed(1).replace('.', ',')} mesi</div>
+      <div class="w-ins-s">la tua liquidità ÷ la spesa media (${fmt0.format(avg)} al mese, da iSpend)</div></div>`);
+  }
+  if(last){
+    const y = last.date.slice(0, 4), base = keys.filter(k => k < y + '-01').pop() || keys.find(k => k.startsWith(y));
+    if(base && base !== last.key){
+      const b = snapTotals(base), d = last.net - b.net;
+      ins.push(`<div class="card w-ins-card"><div class="w-ins-h"><i class="ti ti-calendar-up"></i> Da ${base < y + '-01' ? 'inizio anno' : MESI[+base.slice(5) - 1]}</div>
+        <div class="w-ins-v ${d >= 0 ? 'up' : 'down'}">${mv(sgn(d) + fmt0.format(Math.abs(d)))}</div>
+        <div class="w-ins-s">${b.net ? `${sgn(d)}${(Math.abs(d) / Math.abs(b.net) * 100).toFixed(1).replace('.', ',')}% rispetto a ${keyLabel(base)}` : ''}</div></div>`);
+    }
+  }
+  if(last && prev){
+    const d = last.net - prev.net, saved = savedBetween(prev.date, last.date), mkt = d - saved, mx = Math.max(Math.abs(saved), Math.abs(mkt), 1);
+    ins.push(`<div class="card w-ins-card wide"><div class="w-ins-h"><i class="ti ti-trending-up"></i> Da dove viene la crescita (${shortDate(prev.date)} → ${shortDate(last.date)})</div>
+      <div class="w-split"><span>Risparmio <small>entrate − spese in iSpend</small></span><span class="bar"><i class="${saved >= 0 ? 'pos' : 'neg'}" style="width:${(Math.abs(saved) / mx * 100).toFixed(1)}%"></i></span><b>${mv(sgn(saved) + fmt0.format(Math.abs(saved)))}</b></div>
+      <div class="w-split"><span>Mercati e altro <small>il resto della variazione</small></span><span class="bar"><i class="${mkt >= 0 ? 'pos' : 'neg'}" style="width:${(Math.abs(mkt) / mx * 100).toFixed(1)}%"></i></span><b>${mv(sgn(mkt) + fmt0.format(Math.abs(mkt)))}</b></div>
+      <div class="w-ins-s">È una stima: funziona bene se in iSpend segni tutte le spese e qui tutti i conti.</div></div>`);
+  }
+  document.getElementById('wIns').innerHTML = ins.join('');
+  // --- i conti ---
+  const rows = W_ORDER.map(t => {
+    const list = wealth.accounts.filter(a => a.type === t && !a.archived); if(!list.length) return '';
+    return `<div class="w-grp">${W_TYPES[t].label}</div>` + list.map(a => {
+      const v = last ? wealth.snaps[last.key].v[a.id] : null, pv = prev ? wealth.snaps[prev.key].v[a.id] : null;
+      const dd = v != null && pv != null ? v - pv : null;
+      return `<div class="w-acc" onclick="openAcc('${a.id}')"><span class="w-ico" style="color:${wColor(t)}"><i class="ti ${a.icon || W_TYPES[t].icon}"></i></span>
+        <span class="nm">${esc(a.name)}</span><span class="val"><b>${v != null ? mv((t === 'debt' ? '−' : '') + fmt0.format(v)) : '—'}</b>
+        ${dd != null && Math.abs(dd) >= 1 ? `<small class="${(t === 'debt' ? -dd : dd) >= 0 ? 'up' : 'down'}">${mv(sgn(dd) + fmt0.format(Math.abs(dd)))}</small>` : ''}</span></div>`;
+    }).join('');
+  }).join('');
+  document.getElementById('wAccList').innerHTML = `<div class="card-head"><h2><i class="ti ti-list"></i> I tuoi conti</h2>
+      <button class="link-btn" type="button" onclick="showTab('wacc')">Gestisci</button></div>${rows}
+    <button class="btn ghost w-upd" type="button" onclick="openUpdate()"><i class="ti ti-refresh"></i> Aggiorna i saldi</button>`;
+}
+// grafico del patrimonio nel tempo (tocca un punto per vedere il valore)
+function wChart(keys){
+  const pts = keys.map(k => snapTotals(k)), vals = pts.map(p => p.net);
+  let lo = Math.min(...vals), hi = Math.max(...vals); if(hi - lo < 1){ hi += 1; lo -= 1; }
+  const pad = (hi - lo) * .15; lo -= pad; hi += pad;
+  const W = 320, H = 96, X = i => 8 + i * (W - 16) / Math.max(1, pts.length - 1), Y = v => 6 + (1 - (v - lo) / (hi - lo)) * (H - 12);
+  const sel = wSel && keys.includes(wSel) ? keys.indexOf(wSel) : pts.length - 1;
+  const line = pts.map((p, i) => `${X(i).toFixed(1)},${Y(p.net).toFixed(1)}`).join(' ');
+  const area = `${X(0).toFixed(1)},${H} ${line} ${X(pts.length - 1).toFixed(1)},${H}`;
+  const sp = pts[sel];
+  return `<div class="w-chart-lbl">${keyLabel(sp.key)} · <b>${mv(fmt0.format(sp.net))}</b></div>
+    <div class="w-chart-wrap"><svg class="w-chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Patrimonio netto nel tempo">
+      <polygon points="${area}" fill="var(--accent)" opacity=".12"/>
+      <polyline points="${line}" fill="none" stroke="var(--accent)" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round" stroke-linecap="round"/>
+      <line x1="${X(sel).toFixed(1)}" x2="${X(sel).toFixed(1)}" y1="0" y2="${H}" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+    </svg>
+    <div class="w-chart-dots">${pts.map((p, i) => `<button type="button" style="left:${(X(i) / W * 100).toFixed(2)}%;top:${(Y(p.net) / H * 100).toFixed(2)}%"
+      class="${i === sel ? 'on' : ''}" onclick="wPick('${p.key}')" aria-label="${keyLabel(p.key)}"></button>`).join('')}</div></div>
+    <div class="w-chart-x"><span>${keyLabel(keys[0]).replace(/(\w{3})\w* (\d{2})(\d{2})/, '$1 $3')}</span><span>${keyLabel(keys[keys.length - 1]).replace(/(\w{3})\w* (\d{2})(\d{2})/, '$1 $3')}</span></div>`;
+}
+window.wPick = function(k){ wSel = k; renderWPan(); };
+window.toggleHideMoney = function(){
+  const on = !document.body.classList.contains('hide-money');
+  document.body.classList.toggle('hide-money', on);
+  try { localStorage.setItem('speseHideMoney', on ? '1' : ''); } catch(e){}
+  renderWPan(); renderWHist();
+};
+try { if(localStorage.getItem('speseHideMoney')) document.body.classList.add('hide-money'); } catch(e){}
+
+// --- storico: una riga per fotografia ---
+function renderWHist(){
+  const keys = snapKeys().reverse(), el = document.getElementById('wHist');
+  if(!keys.length){ el.innerHTML = `<h2><i class="ti ti-history"></i> Storico</h2><div class="empty">Ancora nessun aggiornamento dei saldi.</div>
+    <button class="btn" type="button" onclick="openUpdate()"><i class="ti ti-refresh"></i> Inserisci i saldi</button>`; return; }
+  el.innerHTML = `<h2><i class="ti ti-history"></i> Storico · ${keys.length} ${keys.length === 1 ? 'aggiornamento' : 'aggiornamenti'}</h2>` + keys.map((k, i) => {
+    const t = snapTotals(k), pk = keys[i + 1], p = pk ? snapTotals(pk) : null, d = p ? t.net - p.net : null, sv = p ? savedBetween(p.date, t.date) : null;
+    return `<div class="wh-row" onclick="openUpdate('${k}')"><div><b>${capF(keyLabel(k))}</b><small>aggiornato il ${shortDate(t.date)}</small></div>
+      <div class="r"><b>${mv(fmt0.format(t.net))}</b>${d != null ? `<small class="${d >= 0 ? 'up' : 'down'}">${mv(sgn(d) + fmt0.format(Math.abs(d)))}</small>` : '<small>primo aggiornamento</small>'}</div>
+      <i class="ti ti-chevron-right"></i>
+      ${d != null ? `<div class="wh-split">risparmio ${mv(sgn(sv) + fmt0.format(Math.abs(sv)))} · mercati e altro ${mv(sgn(d - sv) + fmt0.format(Math.abs(d - sv)))}</div>` : ''}</div>`;
+  }).join('');
+}
+// --- gestione conti ---
+function renderWAcc(){
+  const el = document.getElementById('wAccMgr'), last = snapKeys().pop();
+  const row = a => `<div class="w-acc" onclick="openAcc('${a.id}')"><span class="w-ico" style="color:${wColor(a.type)}"><i class="ti ${a.icon || W_TYPES[a.type].icon}"></i></span>
+      <span class="nm">${esc(a.name)}<small>${W_TYPES[a.type].label}</small></span><span class="val"><b>${lastValue(a.id) != null ? mv((a.type === 'debt' ? '−' : '') + fmt0.format(lastValue(a.id))) : '—'}</b></span><i class="ti ti-chevron-right"></i></div>`;
+  const act = wealth.accounts.filter(a => !a.archived), arch = wealth.accounts.filter(a => a.archived);
+  el.innerHTML = `<div class="card-head"><h2><i class="ti ti-building-bank"></i> Conti</h2></div>
+    ${act.length ? W_ORDER.map(t => { const l = act.filter(a => a.type === t); return l.length ? `<div class="w-grp">${W_TYPES[t].label}</div>` + l.map(row).join('') : ''; }).join('')
+      : '<div class="empty">Nessun conto: aggiungine uno per iniziare.</div>'}
+    <button class="btn" type="button" onclick="openAcc()"><i class="ti ti-plus"></i> Nuovo conto</button>
+    ${arch.length ? `<details class="w-arch"><summary>Conti chiusi (${arch.length})</summary>${arch.map(row).join('')}</details>` : ''}`;
+}
+
+// --- finestra "Aggiorna i saldi" ---
+let wEditKey = null, wEditFromHist = false; // dallo Storico: cambiando la data sposti quell'aggiornamento
+window.openUpdate = function(key){
+  if(!wealth.accounts.some(a => !a.archived) && !key){ toast('Prima aggiungi un conto'); openAcc(); return; }
+  const ck = curSnapKey();
+  wEditKey = key || (wealth.snaps[ck] ? ck : null); wEditFromHist = !!key;
+  const snap = wEditKey ? wealth.snaps[wEditKey] : null;
+  document.getElementById('wUpTitle').textContent = wEditKey && key ? `Saldi di ${keyLabel(wEditKey)}` : 'Aggiorna i saldi';
+  document.getElementById('wUpDate').value = snap ? snap.date : isoDay(new Date());
+  const ids = wealth.accounts.filter(a => !a.archived || (snap && snap.v[a.id] != null));
+  const before = k => snapKeys().filter(x => x < k).pop();
+  const pk = before(wEditKey || ck);
+  document.getElementById('wUpList').innerHTML = W_ORDER.map(t => {
+    const l = ids.filter(a => a.type === t); if(!l.length) return '';
+    return `<div class="w-grp">${W_TYPES[t].label}</div>` + l.map(a => {
+      const v = snap && snap.v[a.id] != null ? snap.v[a.id] : lastValue(a.id, pk), pv = pk ? wealth.snaps[pk].v[a.id] : null;
+      return `<div class="w-up-row"><span class="w-ico" style="color:${wColor(t)}"><i class="ti ${a.icon || W_TYPES[t].icon}"></i></span>
+        <label class="nm" for="wu-${a.id}">${esc(a.name)}${pv != null ? `<small>prima: ${fmt.format(pv)}</small>` : ''}</label>
+        <input type="text" inputmode="decimal" autocomplete="off" id="wu-${a.id}" data-id="${a.id}" placeholder="0,00" value="${v != null ? Number(v).toFixed(2).replace('.', ',') : ''}"></div>`;
+    }).join('');
+  }).join('');
+  document.getElementById('wUpDel').hidden = !(wEditKey && key);
+  document.getElementById('wUpModal').classList.add('show');
+  wUpTotals();
+};
+window.closeUpdate = function(){ document.getElementById('wUpModal').classList.remove('show'); };
+function wUpRead(){
+  const v = {}; let bad = null;
+  document.querySelectorAll('#wUpList input').forEach(i => {
+    const s = i.value.trim(); if(!s) return;
+    const n = parseAmount(s.replace(/^-/, ''));
+    if(!(n >= 0)) bad = i; else v[i.dataset.id] = Math.round(n * 100) / 100;
+  });
+  return {v, bad};
+}
+function wUpTotals(){
+  const {v} = wUpRead(); let net = 0;
+  for(const [id, x] of Object.entries(v)){ const a = wAcc(id); if(a) net += a.type === 'debt' ? -x : x; }
+  const k = ymKey(periodOf(document.getElementById('wUpDate').value || isoDay(new Date())).y, periodOf(document.getElementById('wUpDate').value || isoDay(new Date())).m);
+  const pk = snapKeys().filter(x => x < k).pop(), p = pk ? snapTotals(pk) : null, d = p ? net - p.net : null;
+  document.getElementById('wUpTot').innerHTML = `Patrimonio netto <b>${fmt0.format(net)}</b>${d != null ? ` <span class="${d >= 0 ? 'up' : 'down'}">${sgn(d)}${fmt0.format(Math.abs(d))} da ${MESI[+pk.slice(5) - 1]}</span>` : ''}`;
+  const note = document.getElementById('wUpNote');
+  note.textContent = wealth.snaps[k] && k !== wEditKey ? `C'è già un aggiornamento di ${keyLabel(k)}: salvando lo sostituisci.` : '';
+}
+document.getElementById('wUpList').addEventListener('input', wUpTotals);
+document.getElementById('wUpDate').addEventListener('change', wUpTotals);
+window.saveUpdate = function(){
+  const date = document.getElementById('wUpDate').value; if(!date){ toast('Scegli la data'); return; }
+  const {v, bad} = wUpRead(); if(bad){ toast('Controlla questo importo'); bad.focus(); return; }
+  if(!Object.keys(v).length){ toast('Scrivi almeno un saldo'); return; }
+  const p = periodOf(date), k = ymKey(p.y, p.m);
+  if(wEditKey && wEditFromHist && wEditKey !== k){ delete wealth.snaps[wEditKey]; tomb.push('ws:' + wEditKey); }
+  tomb = tomb.filter(x => x !== 'ws:' + k);
+  wealth.snaps[k] = {date, ts: Date.now(), v};
+  saveLocal(); pushCloud(); closeUpdate(); render();
+  const t = snapTotals(k);
+  toast(`Saldi di ${MESI[p.m]} salvati ✓ · patrimonio ${fmt0.format(t.net)}`);
+};
+window.deleteSnap = function(){
+  if(!wEditKey || !confirm(`Eliminare l'aggiornamento di ${keyLabel(wEditKey)}?`)) return;
+  delete wealth.snaps[wEditKey]; tomb.push('ws:' + wEditKey);
+  saveLocal(); pushCloud(); closeUpdate(); render(); toast('Aggiornamento eliminato');
+};
+
+// --- finestra conto (nuovo / modifica) ---
+let wAccEdit = null, wAccType = 'liq', wAccIcon = null;
+window.openAcc = function(id){
+  const a = id ? wAcc(id) : null; wAccEdit = a ? a.id : null;
+  wAccType = a ? a.type : 'liq'; wAccIcon = a ? a.icon : null;
+  document.getElementById('wAccTitle').textContent = a ? 'Modifica conto' : 'Nuovo conto';
+  document.getElementById('wAccName').value = a ? a.name : '';
+  document.getElementById('wAccBalBox').hidden = !!a;
+  document.getElementById('wAccBal').value = '';
+  document.getElementById('wAccArchRow').hidden = !a;
+  document.getElementById('wAccArch').checked = !!(a && a.archived);
+  document.getElementById('wAccDel').hidden = !a;
+  renderAccForm();
+  document.getElementById('wAccModal').classList.add('show');
+  if(!a) setTimeout(() => document.getElementById('wAccName').focus(), 50);
+};
+window.closeAcc = function(){ document.getElementById('wAccModal').classList.remove('show'); };
+function renderAccForm(){
+  document.getElementById('wAccType').innerHTML = W_ORDER.map(t => `<button type="button" class="${t === wAccType ? 'on' : ''}" onclick="setAccType('${t}')">${W_TYPES[t].label}</button>`).join('');
+  document.getElementById('wAccTypeHint').textContent = W_TYPES[wAccType].hint;
+  const ic = wAccIcon || W_TYPES[wAccType].icon;
+  document.getElementById('wAccIcons').innerHTML = W_ICONS.map(i => `<button type="button" class="${i === ic ? 'on' : ''}" onclick="setAccIcon('${i}')" aria-label="${i.slice(3)}"><i class="ti ${i}"></i></button>`).join('');
+  document.getElementById('wAccBalLbl').textContent = wAccType === 'debt' ? 'Quanto devi ancora (facoltativo)' : 'Saldo di oggi (facoltativo)';
+}
+window.setAccType = function(t){ wAccType = t; renderAccForm(); };
+window.setAccIcon = function(i){ wAccIcon = i; renderAccForm(); };
+window.saveAcc = function(){
+  const name = document.getElementById('wAccName').value.trim();
+  if(!name){ toast('Dai un nome al conto'); document.getElementById('wAccName').focus(); return; }
+  if(wAccEdit){
+    const a = wAcc(wAccEdit);
+    Object.assign(a, {name, type: wAccType, icon: wAccIcon || W_TYPES[wAccType].icon});
+    if(document.getElementById('wAccArch').checked) a.archived = true; else delete a.archived;
+  } else {
+    const id = 'w' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+    wealth.accounts.push({id, name, type: wAccType, icon: wAccIcon || W_TYPES[wAccType].icon});
+    const bs = document.getElementById('wAccBal').value.trim();
+    if(bs){
+      const n = parseAmount(bs.replace(/^-/, ''));
+      if(!(n >= 0)){ wealth.accounts.pop(); toast('Controlla il saldo'); return; }
+      // il saldo va nell'aggiornamento di questo mese (se non c'è, lo creo ripartendo dagli ultimi saldi noti degli altri conti)
+      const k = curSnapKey();
+      if(!wealth.snaps[k]){
+        const v = {}; wealth.accounts.forEach(x => { if(!x.archived && x.id !== id){ const lv = lastValue(x.id); if(lv != null) v[x.id] = lv; } });
+        wealth.snaps[k] = {date: isoDay(new Date()), ts: Date.now(), v};
+      }
+      wealth.snaps[k].v[id] = Math.round(n * 100) / 100; wealth.snaps[k].ts = Date.now();
+    }
+  }
+  saveLocal(); pushCloud(); closeAcc(); render();
+  toast(wAccEdit ? 'Conto aggiornato ✓' : `Conto "${name}" aggiunto ✓`);
+};
+window.deleteAcc = function(){
+  const a = wAcc(wAccEdit); if(!a) return;
+  if(!confirm(`Eliminare "${a.name}" e tutti i suoi saldi passati? Se il conto è solo chiuso, meglio segnarlo come "Conto chiuso".`)) return;
+  wealth.accounts = wealth.accounts.filter(x => x.id !== a.id);
+  Object.values(wealth.snaps).forEach(s => { if(s.v && a.id in s.v){ delete s.v[a.id]; s.ts = Date.now(); } });
+  tomb.push(a.id);
+  saveLocal(); pushCloud(); closeAcc(); render(); toast('Conto eliminato');
+};
+document.getElementById('wAccName').addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); saveAcc(); } });
+
 // link rapido, per Siri / app Comandi:
 //   ?nuova&importo=4,50&categoria=caffe&nota=bar sotto casa&tipo=entrata&salva=1
 // apre il modulo già compilato; con "salva" registra subito (e mostra Annulla)
@@ -3924,6 +4432,12 @@ window.copySiriLink = function(){
 
 // app installabile: il service worker serve per l'icona "Installa" e per aprirla anche offline
 if('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
+
+// ---------- avvio (in fondo: a questo punto tutto il codice sopra è pronto) ----------
+applySettings();
+applyApp();
+showTab(APPS[app].home);
+handleQuickAdd();
 </script>
 </body>
 </html>
