@@ -391,7 +391,7 @@
   .sett-row b{display:block; font-weight:600; font-size:.92rem;}
   .sett-row small{display:block; color:var(--muted); font-size:.74rem; margin-top:2px; line-height:1.4;}
   .sett-row select{width:auto; min-width:96px; max-width:180px; padding:9px 30px 9px 12px; border-radius:10px; background-position:right 10px center; flex-shrink:0;}
-  .data-btns{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px;}
+  .data-btns{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px;}
   .data-btns .btn{padding:12px 6px; font-size:.82rem; flex-direction:column; gap:5px;}
   .data-btns .btn .ti{font-size:1.35rem; color:var(--accent);}
   .sett-note{font-size:.76rem; color:var(--muted); margin-top:10px; line-height:1.5;}
@@ -454,6 +454,34 @@
   .bud-add select{flex:1; min-width:0; padding:9px 30px 9px 12px; border-radius:10px; background-position:right 10px center;}
   .bud-add .bud-in{width:96px;}
   .bud-add .btn{width:auto; padding:10px 13px; flex-shrink:0;}
+
+  /* import da Excel */
+  .imp-steps{display:grid; gap:10px;}
+  .imp-step{display:flex; gap:12px; align-items:flex-start; background:var(--card2); border:1px solid var(--line); border-radius:14px; padding:12px;}
+  .imp-step .n{width:26px; height:26px; border-radius:50%; background:var(--accent-dk); color:var(--accent); font-weight:700; font-size:.85rem;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+  .imp-step b{display:block; font-weight:600;} .imp-step small{display:block; color:var(--muted); font-size:.78rem; margin-top:2px; line-height:1.4;}
+  .imp-step .btn{width:auto; margin-top:9px; padding:9px 13px; font-size:.85rem;}
+  .imp-err{display:flex; gap:10px; align-items:flex-start; background:color-mix(in srgb,var(--red) 12%,transparent); color:var(--text);
+    border:1px solid color-mix(in srgb,var(--red) 40%,transparent); border-radius:12px; padding:11px 12px; font-size:.84rem; margin-bottom:10px; line-height:1.45;}
+  .imp-err .ti{color:var(--red); font-size:1.1rem;}
+  .imp-file{display:flex; align-items:center; gap:8px; font-weight:600; font-size:.9rem; word-break:break-all;}
+  .imp-file .ti{color:var(--accent); font-size:1.15rem;} .imp-file .link-btn{margin-left:auto; flex-shrink:0;}
+  .imp-chips{display:flex; gap:6px; flex-wrap:wrap; margin-top:10px;}
+  .imp-chips .chip{font-size:.74rem; font-weight:600; padding:4px 9px; border-radius:7px; background:var(--card2); color:var(--muted); border:1px solid var(--line);}
+  .imp-chips .chip.ok{background:var(--accent-dk); color:var(--accent); border-color:transparent;}
+  .imp-chips .chip.bad{background:color-mix(in srgb,var(--red) 14%,transparent); color:var(--red); border-color:transparent;}
+  .imp-sample{margin-top:10px; border:1px solid var(--line); border-radius:12px; padding:4px 10px;}
+  .imp-row{display:grid; grid-template-columns:52px minmax(0,1fr) auto; gap:8px; align-items:center; padding:7px 0; border-bottom:1px solid var(--line); font-size:.82rem;}
+  .imp-row:last-child{border-bottom:none;} .imp-row > span:first-child{color:var(--muted);}
+  .imp-row .c{display:flex; align-items:center; gap:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;} .imp-row .c .ti{color:var(--muted);}
+  .imp-row b{font-variant-numeric:tabular-nums; font-weight:600;} .imp-row b.in{color:var(--green);}
+  .imp-more{font-size:.76rem; color:var(--muted); padding:6px 0;}
+  .imp-h{font-size:.68rem; color:var(--muted); text-transform:uppercase; letter-spacing:.8px; font-weight:600; margin-top:12px;}
+  .imp-list{margin:6px 0 0 18px; font-size:.78rem; line-height:1.5;} .imp-list.warn{color:var(--gold);} .imp-list.bad{color:var(--red);}
+  .imp-undo{display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:.8rem; color:var(--muted); margin-top:10px;}
+  .imp-undo:empty{display:none;}
+  .sett-note b{color:var(--text); font-weight:600;}
 
   /* torta (ripartizione spese) */
   .pie-ctrl{display:flex; gap:8px; flex-wrap:wrap; align-items:center;}
@@ -799,10 +827,14 @@
     <div class="data-btns">
       <button class="btn ghost" onclick="exportJSON()"><i class="ti ti-device-floppy"></i> Backup</button>
       <button class="btn ghost" onclick="document.getElementById('importFile').click()"><i class="ti ti-folder-open"></i> Ripristina</button>
-      <button class="btn ghost" onclick="exportCSV()"><i class="ti ti-file-spreadsheet"></i> Esporta CSV</button>
+      <button class="btn ghost" onclick="exportExcel()"><i class="ti ti-file-export"></i> Esporta Excel</button>
+      <button class="btn ghost" onclick="openImport()"><i class="ti ti-file-import"></i> Importa da Excel</button>
     </div>
-    <p class="sett-note">Il backup salva in un file movimenti, ricorrenti, viaggi e impostazioni; con Ripristina lo ricarichi. Il CSV si apre con Excel.</p>
+    <div class="imp-undo" id="impUndo"></div>
+    <p class="sett-note"><b>Backup / Ripristina</b>: copia completa (movimenti, ricorrenti, viaggi, impostazioni); il ripristino sostituisce i dati.
+      <b>Excel</b>: esporti i movimenti con il riepilogo dei mesi, oppure importi nuovi movimenti da un file, che si aggiungono a quelli che hai.</p>
     <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(this)">
+    <input type="file" id="xlsFile" accept=".xlsx,.csv,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" style="display:none" onchange="importExcel(this)">
   </div>
   <div class="card">
     <h2><i class="ti ti-user"></i> Account</h2>
@@ -852,6 +884,21 @@
     <div class="cmp-sum" id="cmpSum"></div>
     <div class="cmp-sub">Spese per categoria</div>
     <div id="cmpCats"></div>
+  </div>
+</div>
+
+<!-- importa da Excel -->
+<div class="modal" id="impModal" onclick="if(event.target===this)closeImport()">
+  <div class="modal-box cmp-box">
+    <div class="cmp-top">
+      <h3><i class="ti ti-file-import"></i> Importa movimenti</h3>
+      <button class="cmp-x" onclick="closeImport()" aria-label="Chiudi"><i class="ti ti-x"></i></button>
+    </div>
+    <div id="impBody"></div>
+    <div class="form-actions">
+      <button class="btn ghost" type="button" onclick="closeImport()">Annulla</button>
+      <button class="btn" type="button" id="impGo" onclick="confirmImport()" style="display:none"><i class="ti ti-check"></i> Importa</button>
+    </div>
   </div>
 </div>
 
@@ -2160,6 +2207,9 @@ function renderSettings(){
   document.getElementById('budCat').innerHTML = '<option value="">Scegli categoria</option>' +
     free.map(c => `<option value="${esc(c)}">${label(c)}</option>`).join('');
 
+  document.getElementById('impUndo').innerHTML = lastImport.length
+    ? `<span>Ultima importazione: ${lastImport.length} movimenti</span><button class="link-danger" onclick="undoImport()"><i class="ti ti-arrow-back-up"></i> Annulla</button>` : '';
+
   const acct = document.getElementById('accountBox');
   const demoLink = location.origin + location.pathname + '?demo';
   const demoRow = `<div class="row-btns"><button class="btn ghost" onclick="copyDemo()"><i class="ti ti-copy"></i> Copia link demo</button></div>`;
@@ -2293,11 +2343,314 @@ window.deleteCatEdit = function(){
   saveLocal(); pushCloud(); closeCatEdit(); fillCats(tipo, sel.value); render(); toast('Categoria eliminata');
 };
 
-window.exportCSV = function(){
-  const rows = [['Data','Tipo','Categoria','Importo','Viaggio','Nota'],
-    ...tx.map(t=>[t.date, t.tipo, label(t.cat), t.amount.toFixed(2).replace('.',','), t.trip||'', t.note||''])];
-  const csv = rows.map(r=>r.map(c=>`"${c}"`).join(';')).join('\n');
-  download(new Blob(['\ufeff'+csv],{type:'text/csv'}), 'spese.csv');
+// ================= Excel: esporta (.xlsx) e importa (.xlsx / .csv), senza librerie esterne =================
+// --- ZIP minimo: i file .xlsx sono archivi zip di file XML (qui non compressi, Excel li apre lo stesso) ---
+const CRC_T = (() => { const t = new Uint32Array(256); for(let n = 0; n < 256; n++){ let c = n; for(let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+const crc32 = b => { let c = 0xFFFFFFFF; for(let i = 0; i < b.length; i++) c = CRC_T[(c ^ b[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; };
+function zipStore(files){
+  const enc = new TextEncoder(), parts = [], central = []; let off = 0;
+  const u16 = v => [v & 255, (v >>> 8) & 255], u32 = v => [v & 255, (v >>> 8) & 255, (v >>> 16) & 255, (v >>> 24) & 255];
+  for(const [name, text] of files){
+    const nb = enc.encode(name), data = enc.encode(text), crc = crc32(data);
+    const head = new Uint8Array([...u32(0x04034b50), ...u16(20), ...u16(0x0800), ...u16(0), ...u16(0), ...u16(0x21),
+      ...u32(crc), ...u32(data.length), ...u32(data.length), ...u16(nb.length), ...u16(0)]);
+    parts.push(head, nb, data);
+    central.push(new Uint8Array([...u32(0x02014b50), ...u16(20), ...u16(20), ...u16(0x0800), ...u16(0), ...u16(0), ...u16(0x21),
+      ...u32(crc), ...u32(data.length), ...u32(data.length), ...u16(nb.length), ...u16(0), ...u16(0), ...u16(0), ...u16(0), ...u32(0), ...u32(off)]), nb);
+    off += head.length + nb.length + data.length;
+  }
+  const cdSize = central.reduce((s, p) => s + p.length, 0);
+  const end = new Uint8Array([...u32(0x06054b50), ...u16(0), ...u16(0), ...u16(files.length), ...u16(files.length), ...u32(cdSize), ...u32(off), ...u16(0)]);
+  return new Blob([...parts, ...central, end], {type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+}
+
+// --- scrittura .xlsx ---
+const xesc = s => String(s).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const colL = i => String.fromCharCode(65 + i);
+const xlDate = iso => (Date.UTC(+iso.slice(0, 4), +iso.slice(5, 7) - 1, +iso.slice(8, 10)) - Date.UTC(1899, 11, 30)) / 864e5;
+// stili: 1 intestazione, 2 data, 3 importo, 4 importo in grassetto, 5 testo in grassetto
+function sheetXml(sh){
+  const rows = sh.rows.map((r, ri) => `<row r="${ri + 1}">` + r.map((c, ci) => {
+    if(c === null || c === undefined || c === '') return '';
+    const o = typeof c === 'object' ? c : {v: c}, ref = colL(ci) + (ri + 1), st = o.s ? ` s="${o.s}"` : '';
+    return typeof o.v === 'number' ? `<c r="${ref}"${st}><v>${o.v}</v></c>`
+      : `<c r="${ref}"${st} t="inlineStr"><is><t xml:space="preserve">${xesc(o.v)}</t></is></c>`;
+  }).join('') + '</row>').join('');
+  return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    + '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
+    + (sh.freeze ? '<sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>' : '')
+    + `<cols>${sh.cols.map((w, i) => `<col min="${i + 1}" max="${i + 1}" width="${w}" customWidth="1"/>`).join('')}</cols>`
+    + `<sheetData>${rows}</sheetData>`
+    + (sh.filter ? `<autoFilter ref="${sh.filter}"/>` : '') + '</worksheet>';
+}
+function buildXlsx(sheets){
+  const R = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships';
+  const money = xesc(`#,##0.00 "${curSym}"`);
+  const files = [
+    ['[Content_Types].xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
+      + '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/>'
+      + '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'
+      + '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>'
+      + sheets.map((s, i) => `<Override PartName="/xl/worksheets/sheet${i + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('') + '</Types>'],
+    ['_rels/.rels', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="${R}/officeDocument" Target="xl/workbook.xml"/></Relationships>`],
+    ['xl/workbook.xml', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="${R}"><sheets>`
+      + sheets.map((s, i) => `<sheet name="${xesc(s.name)}" sheetId="${i + 1}" r:id="rId${i + 1}"/>`).join('') + '</sheets>'
+      + (sheets.some(s => s.filter) ? '<definedNames>' + sheets.map((s, i) => s.filter
+          ? `<definedName name="_xlnm._FilterDatabase" localSheetId="${i}" hidden="1">'${xesc(s.name)}'!$${s.filter.replace(':', ':$').replace(/([A-Z]+)(\d+)/g, '$1$$$2')}</definedName>` : '').join('') + '</definedNames>' : '')
+      + '</workbook>'],
+    ['xl/_rels/workbook.xml.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+      + sheets.map((s, i) => `<Relationship Id="rId${i + 1}" Type="${R}/worksheet" Target="worksheets/sheet${i + 1}.xml"/>`).join('')
+      + `<Relationship Id="rId${sheets.length + 1}" Type="${R}/styles" Target="styles.xml"/></Relationships>`],
+    ['xl/styles.xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
+      + `<numFmts count="2"><numFmt numFmtId="164" formatCode="dd/mm/yyyy"/><numFmt numFmtId="165" formatCode="${money}"/></numFmts>`
+      + '<fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font></fonts>'
+      + '<fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FFDCF4EC"/><bgColor indexed="64"/></patternFill></fill></fills>'
+      + '<borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>'
+      + '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="6">'
+      + '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>'
+      + '<xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1"/>'
+      + '<xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>'
+      + '<xf numFmtId="165" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>'
+      + '<xf numFmtId="165" fontId="1" fillId="0" borderId="0" xfId="0" applyNumberFormat="1" applyFont="1"/>'
+      + '<xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/>'
+      + '</cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>'],
+    ...sheets.map((s, i) => [`xl/worksheets/sheet${i + 1}.xml`, sheetXml(s)])
+  ];
+  return zipStore(files);
+}
+const H = t => ({v: t, s: 1});
+const XL_HEAD = ['Data', 'Tipo', 'Categoria', 'Importo', 'Viaggio', 'Nota'].map(H);
+const XL_COLS = [12, 10, 24, 13, 22, 34];
+const xlRow = t => [{v: xlDate(t.date), s: 2}, t.tipo === 'entrata' ? 'Entrata' : 'Uscita', label(t.cat), {v: Math.round(t.amount * 100) / 100, s: 3}, t.trip || '', t.note || ''];
+
+// esporta tutti i movimenti + riepilogo mese per mese
+window.exportExcel = function(){
+  const list = [...tx].sort((a, b) => a.date.localeCompare(b.date));
+  const mov = {name: 'Movimenti', cols: XL_COLS, freeze: true, rows: [XL_HEAD, ...list.map(xlRow)], filter: list.length ? `A1:F${list.length + 1}` : ''};
+  const sum = {name: 'Riepilogo mesi', cols: [20, 14, 14, 14], freeze: true, rows: [['Mese', 'Spese', 'Entrate', 'Saldo'].map(H)]};
+  if(list.length){
+    const a = periodOf(list[0].date), z = periodOf(list[list.length - 1].date);
+    let tO = 0, tI = 0;
+    for(let i = monIdx(a.y, a.m); i <= monIdx(z.y, z.m); i++){
+      const y = Math.floor(i / 12), m = i % 12, mt = tx.filter(t => inMonth(t, y, m));
+      const o = mt.filter(t => t.tipo === 'uscita').reduce((s, t) => s + t.amount, 0), n = mt.filter(t => t.tipo === 'entrata').reduce((s, t) => s + t.amount, 0);
+      tO += o; tI += n;
+      sum.rows.push([`${capF(MESI[m])} ${y}`, {v: +o.toFixed(2), s: 3}, {v: +n.toFixed(2), s: 3}, {v: +(n - o).toFixed(2), s: 3}]);
+    }
+    sum.rows.push([], [{v: 'Totale', s: 5}, {v: +tO.toFixed(2), s: 4}, {v: +tI.toFixed(2), s: 4}, {v: +(tI - tO).toFixed(2), s: 4}]);
+  }
+  download(buildXlsx([mov, sum]), `spese-${isoDay(new Date())}.xlsx`);
+  toast(`Excel esportato · ${list.length} movimenti ✓`);
+};
+// modello da compilare per l'import
+window.downloadTemplate = function(){
+  const today = isoDay(new Date());
+  const mov = {name: 'Movimenti', cols: XL_COLS, freeze: true, rows: [XL_HEAD,
+    xlRow({date: today, tipo: 'uscita', cat: 'SPESA (SUPER)', amount: 42.5, note: 'Esempio: cancella questa riga'}),
+    xlRow({date: today, tipo: 'entrata', cat: 'STIPENDIO', amount: 2150, note: 'Esempio: cancella questa riga'})]};
+  const info = [[{v: 'Come compilare il foglio "Movimenti"', s: 5}], [],
+    ['Data', 'giorno/mese/anno, es. 11/11/2026'],
+    ['Tipo', 'Uscita oppure Entrata. Se lasci vuota la colonna: importi negativi = uscite, positivi = entrate'],
+    ['Categoria', 'una di quelle qui sotto (se non la riconosco uso Altro / Altre entrate)'],
+    ['Importo', 'un numero, es. 12,50'],
+    ['Viaggio', 'facoltativo: se non esiste lo creo io'],
+    ['Nota', 'facoltativa'], [],
+    ['Righe già presenti nell\'app (stessa data, tipo, categoria, importo e nota) vengono saltate.'], [],
+    [{v: 'Categorie spese', s: 5}], ...catList('uscita').map(c => [label(c)]), [],
+    [{v: 'Categorie entrate', s: 5}], ...catList('entrata').map(c => [label(c)])];
+  download(buildXlsx([mov, {name: 'Istruzioni', cols: [34, 90], rows: info}]), 'modello-import-spese.xlsx');
+};
+
+// --- lettura .xlsx: unzip (con la decompressione del browser) + XML ---
+function readZip(buf){
+  const dv = new DataView(buf), u8 = new Uint8Array(buf), out = new Map(), dec = new TextDecoder();
+  let e = u8.length - 22; while(e >= 0 && dv.getUint32(e, true) !== 0x06054b50) e--;
+  if(e < 0) throw new Error('nozip');
+  const n = dv.getUint16(e + 10, true); let p = dv.getUint32(e + 16, true);
+  for(let i = 0; i < n; i++){
+    const method = dv.getUint16(p + 10, true), csize = dv.getUint32(p + 20, true), nlen = dv.getUint16(p + 28, true),
+      xlen = dv.getUint16(p + 30, true), clen = dv.getUint16(p + 32, true), loff = dv.getUint32(p + 42, true);
+    const name = dec.decode(u8.subarray(p + 46, p + 46 + nlen));
+    const start = loff + 30 + dv.getUint16(loff + 26, true) + dv.getUint16(loff + 28, true);
+    out.set(name, {method, data: u8.subarray(start, start + csize)});
+    p += 46 + nlen + xlen + clen;
+  }
+  return out;
+}
+async function zipText(entry){
+  if(!entry) return null;
+  if(entry.method === 0) return new TextDecoder().decode(entry.data);
+  if(entry.method !== 8) throw new Error('compressione');
+  if(typeof DecompressionStream === 'undefined') throw new Error('browser');
+  return await new Response(new Blob([entry.data]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).text();
+}
+const tags = (node, t) => node ? [...node.getElementsByTagNameNS('*', t)] : [];
+const colIdx = ref => { let n = 0; for(const ch of ref.replace(/\d+/g, '')) n = n * 26 + ch.charCodeAt(0) - 64; return n - 1; };
+async function readXlsx(buf){
+  const z = readZip(buf), P = new DOMParser();
+  const xml = async n => { const t = await zipText(z.get(n)); return t ? P.parseFromString(t, 'application/xml') : null; };
+  const wb = await xml('xl/workbook.xml'), rels = await xml('xl/_rels/workbook.xml.rels');
+  if(!wb) throw new Error('nozip');
+  const sheets = tags(wb, 'sheet'), pick = sheets.find(s => /moviment/i.test(s.getAttribute('name'))) || sheets[0];
+  const rid = pick.getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships', 'id') || pick.getAttribute('r:id');
+  let target = tags(rels, 'Relationship').find(r => r.getAttribute('Id') === rid).getAttribute('Target');
+  target = target.startsWith('/') ? target.slice(1) : 'xl/' + target.replace(/^\.\//, '');
+  const ssDoc = await xml('xl/sharedStrings.xml');
+  const ss = tags(ssDoc, 'si').map(si => tags(si, 't').filter(t => t.parentNode.localName !== 'rPh').map(t => t.textContent).join(''));
+  const rows = [];
+  for(const r of tags(await xml(target), 'row')){
+    const row = []; let auto = 0;
+    for(const c of tags(r, 'c')){
+      const ref = c.getAttribute('r'), ci = ref ? colIdx(ref) : auto; auto = ci + 1;
+      const t = c.getAttribute('t'), v = tags(c, 'v')[0];
+      row[ci] = t === 's' ? (ss[+(v && v.textContent)] ?? '')
+        : t === 'inlineStr' ? tags(c, 't').map(x => x.textContent).join('')
+        : (t === 'str' || t === 'e' || t === 'd') ? (v ? v.textContent : '')
+        : t === 'b' ? (v ? v.textContent === '1' : '')
+        : v ? Number(v.textContent) : '';
+    }
+    rows[(+r.getAttribute('r') || rows.length + 1) - 1] = row;
+  }
+  return Array.from(rows, r => r || []);
+}
+// --- lettura .csv (separatore ; , o tab; UTF-8 oppure il formato di Excel per Windows) ---
+function readCsv(buf){
+  let text; try { text = new TextDecoder('utf-8', {fatal: true}).decode(buf); } catch(e){ text = new TextDecoder('windows-1252').decode(buf); }
+  text = text.replace(/^﻿/, '');
+  const first = text.split(/\r?\n/)[0] || '';
+  const delim = [';', '\t', ','].map(d => [d, first.split(d).length]).sort((a, b) => b[1] - a[1])[0][0];
+  const rows = []; let row = [], f = '', q = false;
+  for(let i = 0; i < text.length; i++){
+    const ch = text[i];
+    if(q){ if(ch === '"'){ if(text[i + 1] === '"'){ f += '"'; i++; } else q = false; } else f += ch; }
+    else if(ch === '"') q = true;
+    else if(ch === delim){ row.push(f); f = ''; }
+    else if(ch === '\n' || ch === '\r'){ if(ch === '\r' && text[i + 1] === '\n') i++; row.push(f); rows.push(row); row = []; f = ''; }
+    else f += ch;
+  }
+  if(f !== '' || row.length){ row.push(f); rows.push(row); }
+  return rows;
+}
+
+// --- dalle righe del file ai movimenti ---
+const normTxt = s => String(s ?? '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
+const XL_NAMES = {date: ['data', 'date', 'giorno', 'data operazione', 'data contabile'], tipo: ['tipo', 'type', 'entrata uscita', 'segno'],
+  cat: ['categoria', 'category', 'cat'], amount: ['importo', 'amount', 'euro', 'valore', 'totale', 'prezzo', 'importo eur'],
+  trip: ['viaggio', 'progetto', 'trip', 'evento'], note: ['nota', 'note', 'descrizione', 'description', 'dettaglio', 'causale']};
+function toIsoDate(v){
+  const ok = (y, mo, d) => { const dt = new Date(Date.UTC(y, mo - 1, d)); return y > 1990 && y < 2100 && dt.getUTCMonth() === mo - 1 && dt.getUTCDate() === d ? `${y}-${pad2(mo)}-${pad2(d)}` : null; };
+  if(typeof v === 'number' && v > 25000 && v < 80000){ const d = new Date(Date.UTC(1899, 11, 30) + Math.floor(v + 1e-9) * 864e5); return d.toISOString().slice(0, 10); }
+  const s = String(v ?? '').trim(); let m;
+  if((m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/))) return ok(+m[1], +m[2], +m[3]);
+  if((m = s.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2}|\d{4})\b/))) return ok(m[3].length === 2 ? 2000 + +m[3] : +m[3], +m[2], +m[1]);
+  return null;
+}
+function toAmount(v){
+  if(typeof v === 'number') return v;
+  const s = String(v ?? '').trim(); if(!s) return NaN;
+  const neg = /^\(.*\)$/.test(s) || /^[-−]/.test(s) || /[-−]$/.test(s.replace(/[\s€$£]/g, ''));
+  const a = parseAmount(s.replace(/[()−-]/g, ''));
+  return a ? (neg ? -a : a) : NaN;
+}
+function findCat(v, tp){
+  const n = normTxt(v), fallback = tp === 'entrata' ? 'ALTRE ENTRATE' : 'ALTRO';
+  if(!n) return {cat: fallback};
+  const hit = [...catList('uscita', true), ...catList('entrata', true)].find(c => normTxt(label(c)) === n || normTxt(c) === n || normTxt(defLabel(c)) === n);
+  return hit ? {cat: hit} : {cat: fallback, warn: `categoria "${String(v).trim()}" non trovata → ${label(fallback)}`};
+}
+function rowsToMovements(rows){
+  let hi = -1, map = {};
+  for(let i = 0; i < Math.min(rows.length, 15) && hi < 0; i++){
+    const m = {};
+    (rows[i] || []).forEach((c, ci) => { const n = normTxt(c); for(const [k, names] of Object.entries(XL_NAMES)) if(m[k] === undefined && names.includes(n)) m[k] = ci; });
+    if(m.date !== undefined && m.amount !== undefined){ hi = i; map = m; }
+  }
+  if(hi < 0) throw new Error('intestazione');
+  const body = rows.slice(hi + 1), ready = [], problems = [], warnings = [];
+  const anyNeg = map.tipo === undefined && body.some(r => toAmount(r[map.amount]) < 0);
+  body.forEach((r, i) => {
+    const line = hi + i + 2;
+    if(!r || r.every(c => String(c ?? '').trim() === '')) return;
+    const date = toIsoDate(r[map.date]), a = toAmount(r[map.amount]);
+    if(!date){ problems.push(`Riga ${line}: data non valida (${String(r[map.date] ?? '').trim() || 'vuota'})`); return; }
+    if(!(Math.abs(a) > 0)){ problems.push(`Riga ${line}: importo non valido (${String(r[map.amount] ?? '').trim() || 'vuoto'})`); return; }
+    let tp;
+    if(map.tipo !== undefined){ const tv = normTxt(r[map.tipo]); tp = /^(entr|accredit|income|in$|e$|\+)/.test(tv) ? 'entrata' : 'uscita'; }
+    else tp = anyNeg && a > 0 ? 'entrata' : 'uscita';
+    const fc = findCat(map.cat !== undefined ? r[map.cat] : '', tp);
+    if(fc.warn) warnings.push(`Riga ${line}: ${fc.warn}`);
+    ready.push({date, tipo: tp, cat: fc.cat, amount: Math.round(Math.abs(a) * 100) / 100,
+      note: map.note !== undefined ? String(r[map.note] ?? '').trim() : '', trip: map.trip !== undefined ? String(r[map.trip] ?? '').trim() : ''});
+  });
+  return {ready, problems, warnings};
+}
+
+// --- finestra di import: guida (modello) -> anteprima -> importa ---
+let impPending = null, lastImport = [];
+const dupKey = t => `${t.date}|${t.tipo}|${t.cat}|${Number(t.amount).toFixed(2)}|${normTxt(t.note)}`;
+window.openImport = function(){ impPending = null; renderImport(); document.getElementById('impModal').classList.add('show'); };
+window.closeImport = function(){ document.getElementById('impModal').classList.remove('show'); impPending = null; };
+window.importExcel = async function(inp){
+  const f = inp.files[0]; inp.value = ''; if(!f) return;
+  try {
+    const buf = await f.arrayBuffer();
+    const isZip = new Uint8Array(buf.slice(0, 2))[0] === 0x50 && new Uint8Array(buf.slice(0, 2))[1] === 0x4b;
+    const res = rowsToMovements(isZip ? await readXlsx(buf) : readCsv(buf));
+    // già presenti: stessa data, tipo, categoria, importo e nota (contando i doppioni veri)
+    const have = new Map(); tx.forEach(t => { const k = dupKey(t); have.set(k, (have.get(k) || 0) + 1); });
+    res.dups = 0;
+    res.ready = res.ready.filter(t => { const k = dupKey(t), n = have.get(k) || 0; if(n){ have.set(k, n - 1); res.dups++; return false; } return true; });
+    impPending = {...res, file: f.name};
+  } catch(e){
+    impPending = {error: e.message === 'intestazione'
+      ? 'Non trovo le colonne "Data" e "Importo" nelle prime righe. Usa il modello qui sopra.'
+      : e.message === 'browser' ? 'Il browser è troppo vecchio per leggere questo file: aggiornalo, oppure salva il file come CSV.'
+      : 'Non riesco a leggere il file. Usa un file Excel (.xlsx) o CSV, meglio partendo dal modello.', file: f.name};
+  }
+  renderImport();
+};
+function renderImport(){
+  const b = document.getElementById('impBody'), go = document.getElementById('impGo');
+  const steps = `<div class="imp-steps">
+    <div class="imp-step"><span class="n">1</span><div><b>Scarica il modello</b><small>Excel con le colonne giuste, due righe d'esempio e l'elenco delle categorie</small>
+      <button class="btn ghost" onclick="downloadTemplate()"><i class="ti ti-file-download"></i> Scarica il modello</button></div></div>
+    <div class="imp-step"><span class="n">2</span><div><b>Compilalo</b><small>Con Excel, Numbers o Google Fogli. Una riga per ogni movimento</small></div></div>
+    <div class="imp-step"><span class="n">3</span><div><b>Scegli il file compilato</b><small>Va bene anche un CSV. Prima di importare ti mostro un'anteprima</small>
+      <button class="btn ghost" onclick="document.getElementById('xlsFile').click()"><i class="ti ti-file-import"></i> Scegli file</button></div></div></div>`;
+  if(!impPending){ b.innerHTML = steps; go.style.display = 'none'; return; }
+  if(impPending.error){ b.innerHTML = `<div class="imp-err"><i class="ti ti-alert-triangle"></i><span><b>${esc(impPending.file)}</b><br>${impPending.error}</span></div>` + steps; go.style.display = 'none'; return; }
+  const p = impPending, n = p.ready.length;
+  const sample = p.ready.slice(0, 6).map(t => `<div class="imp-row"><span>${shortDate(t.date)}</span><span class="c">${ico(t.cat)}${esc(label(t.cat))}${t.trip ? ` · ${esc(t.trip)}` : ''}</span>
+    <b class="${t.tipo === 'entrata' ? 'in' : ''}">${t.tipo === 'entrata' ? '+' : '−'}${fmt.format(t.amount)}</b></div>`).join('');
+  const list = (arr, cls) => arr.length ? `<ul class="imp-list ${cls}">${arr.slice(0, 8).map(x => `<li>${esc(x)}</li>`).join('')}${arr.length > 8 ? `<li>${arr.length - 9 ? `… e altri ${arr.length - 8}` : '… e un altro'}</li>` : ''}</ul>` : '';
+  b.innerHTML = `<div class="imp-file"><i class="ti ti-file-spreadsheet"></i>${esc(p.file)}
+      <button class="link-btn" onclick="document.getElementById('xlsFile').click()">cambia file</button></div>
+    <div class="imp-chips"><span class="chip ok">${n} da importare</span>${p.dups ? `<span class="chip">${p.dups} già presenti</span>` : ''}${p.problems.length ? `<span class="chip bad">${p.problems.length} con problemi</span>` : ''}</div>
+    ${n ? `<div class="imp-sample">${sample}${n > 6 ? `<div class="imp-more">${n - 6 === 1 ? '… e un altro' : `… e altri ${n - 6}`}</div>` : ''}</div>` : '<div class="empty">Niente di nuovo da importare</div>'}
+    ${p.warnings.length ? `<div class="imp-h">Da controllare (le importo lo stesso)</div>${list(p.warnings, 'warn')}` : ''}
+    ${p.problems.length ? `<div class="imp-h">Saltate</div>${list(p.problems, 'bad')}` : ''}
+    ${p.dups ? `<p class="sett-note">Le righe già presenti nell'app (stessa data, tipo, categoria, importo e nota) le salto, così non hai doppioni.</p>` : ''}`;
+  go.style.display = n ? '' : 'none';
+  go.innerHTML = `<i class="ti ti-check"></i> Importa ${n}`;
+}
+window.confirmImport = function(){
+  if(!impPending || !impPending.ready || !impPending.ready.length) return;
+  const base = Date.now(), ids = [];
+  impPending.ready.forEach((r, i) => {
+    const t = {id: base + i + Math.random() / 2, date: r.date, amount: r.amount, cat: r.cat, note: r.note, tipo: r.tipo};
+    if(r.trip){ t.trip = r.trip; if(!projects.includes(r.trip)) projects.push(r.trip); }
+    tx.push(t); ids.push(t.id);
+  });
+  lastImport = ids;
+  saveLocal(); pushCloud(); closeImport(); render();
+  toast(`Importati ${ids.length} movimenti ✓`);
+};
+window.undoImport = function(){
+  if(!lastImport.length || !confirm(`Togliere i ${lastImport.length} movimenti dell'ultima importazione?`)) return;
+  const ids = new Set(lastImport.map(keyOf));
+  tx = tx.filter(t => !ids.has(keyOf(t.id)));
+  tomb = [...tomb, ...lastImport].slice(-1000); lastImport = [];
+  saveLocal(); pushCloud(); render(); toast('Importazione annullata');
 };
 // backup: movimenti + progetti + ricorrenti (i vecchi backup con solo i movimenti si possono ancora ripristinare)
 window.exportJSON = function(){
