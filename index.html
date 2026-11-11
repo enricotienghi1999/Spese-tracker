@@ -1020,6 +1020,7 @@
   <div id="wEmpty"></div>
   <div class="cols" id="wMain"><div class="col">
     <div class="card w-hero" id="wHero"></div>
+    <button type="button" class="sum-link in-col" id="wSumLink" onclick="openWorthSummary()"><i class="ti ti-report-analytics"></i><span id="wSumLbl">Riepilogo del patrimonio</span><span class="sum-pdf">PDF</span><i class="ti ti-chevron-right"></i></button>
     <div class="card" id="wMix"></div>
     <div class="w-ins" id="wIns"></div>
   </div><div class="col">
@@ -3515,12 +3516,13 @@ window.openSummary = function(y, m){
 };
 window.closeSummary = function(){ document.getElementById('sumModal').classList.remove('show'); };
 window.shiftSummary = function(d){
-  if(sumYM.kind === 'y') sumYM.y += d;
+  if(sumYM.kind !== 'm') sumYM.y += d; // anno (iSpend o iWorth)
   else { const x = new Date(sumYM.y, sumYM.m + d, 1); sumYM = {kind: 'm', y: x.getFullYear(), m: x.getMonth()}; }
   renderSummary();
 };
 function renderSummary(){
   if(sumYM.kind === 'y') return renderYearSummary();
+  if(sumYM.kind === 'w') return renderWorthSummary();
   const s = monthSummary(sumYM.y, sumYM.m), saldo = s.inc - s.out, np = periodOf(isoDay(new Date()));
   document.getElementById('sumTitle').textContent = capF(sumName(s));
   document.getElementById('sumNext').disabled = monIdx(s.y, s.m) >= monIdx(np.y, np.m);
@@ -3801,8 +3803,12 @@ function buildSummaryPdf(s){
   return P.bytes(`Riepilogo ${name}`);
 }
 window.downloadSummaryPdf = async function(){
-  const yearly = sumYM.kind === 'y', s = yearly ? yearSummary(sumYM.y) : monthSummary(sumYM.y, sumYM.m); if(!s.list.length) return;
-  const bytes = yearly ? buildYearPdf(s) : buildSummaryPdf(s), fname = yearly ? `Spese anno ${s.y}.pdf` : `Spese ${capF(MESI[s.m])} ${s.y}.pdf`;
+  let bytes, fname;
+  if(sumYM.kind === 'w'){ const s = worthSummary(sumYM.y); if(s.empty) return; bytes = buildWorthPdf(s); fname = `Patrimonio ${s.y}.pdf`; }
+  else {
+    const yearly = sumYM.kind === 'y', s = yearly ? yearSummary(sumYM.y) : monthSummary(sumYM.y, sumYM.m); if(!s.list.length) return;
+    bytes = yearly ? buildYearPdf(s) : buildSummaryPdf(s); fname = yearly ? `Spese anno ${s.y}.pdf` : `Spese ${capF(MESI[s.m])} ${s.y}.pdf`;
+  }
   const blob = new Blob([bytes], {type: 'application/pdf'});
   // sul telefono: menu Condividi (salva in File, WhatsApp, Mail…); sul PC: download
   try {
@@ -4078,7 +4084,8 @@ function buildYearPdf(s){
 // ================= sezioni dell'app (selettore in alto): iSpend, iWorth… =================
 // per aggiungere una sezione: una voce qui, le sue pagine (data-app) e i pulsanti nella barra in basso
 const APPS = {
-  spend: {name: 'iSpend', icon: 'ti-wallet', home: 'mese', desc: 'Spese ed entrate'},
+  // home = dove vai cliccando la sezione; start = dove si apre l'app (iSpend: sul Mese, quello che usi ogni giorno)
+  spend: {name: 'iSpend', icon: 'ti-wallet', home: 'dash', start: 'mese', desc: 'Spese ed entrate'},
   worth: {name: 'iWorth', icon: 'ti-diamond', home: 'wpan', desc: 'Il tuo patrimonio'}
 };
 const TAB_APP = {dash: 'spend', mese: 'spend', add: 'spend', projs: 'spend', wpan: 'worth', whist: 'worth', wacc: 'worth'};
@@ -4178,6 +4185,8 @@ function renderWPan(){
     hero += keys.length > 1 ? wChart(keys.slice(-24)) : `<div class="w-note">Il grafico compare dal secondo aggiornamento.</div>`;
   }
   document.getElementById('wHero').innerHTML = hero;
+  document.getElementById('wSumLink').hidden = !last;
+  if(last) document.getElementById('wSumLbl').textContent = `Riepilogo del patrimonio ${last.date.slice(0, 4)}`;
   // --- come è diviso ---
   const mix = document.getElementById('wMix');
   if(last && last.assets > 0){
@@ -4411,6 +4420,155 @@ window.deleteAcc = function(){
 };
 document.getElementById('wAccName').addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); saveAcc(); } });
 
+// ================= iWorth: riepilogo dell'anno (finestra + PDF) =================
+// base = l'ultimo aggiornamento dell'anno prima (se c'è), altrimenti il primo dell'anno
+function worthSummary(y){
+  const keys = snapKeys(), inY = keys.filter(k => k.startsWith(y + '-'));
+  if(!inY.length) return {y, empty: true};
+  const baseKey = keys.filter(k => k < y + '-01').pop() || null;
+  const startKey = baseKey || inY[0], endKey = inY[inY.length - 1];
+  const S = snapTotals(startKey), E = snapTotals(endKey);
+  const months = inY.map((k, i) => {
+    const t = snapTotals(k), pk = i ? inY[i - 1] : baseKey, p = pk ? snapTotals(pk) : null;
+    const d = p ? t.net - p.net : null, sv = p ? savedBetween(p.date, t.date) : null;
+    return {k, t, d, sv, mk: d != null ? d - sv : null};
+  });
+  const d = E.net - S.net, saved = startKey !== endKey ? savedBetween(S.date, E.date) : 0;
+  const sv = wealth.snaps[startKey].v || {}, ev = wealth.snaps[endKey].v || {};
+  const accs = wealth.accounts.filter(a => sv[a.id] != null || ev[a.id] != null)
+    .map(a => ({a, s: sv[a.id] ?? null, e: ev[a.id] ?? null}))
+    .sort((p, q) => W_ORDER.indexOf(p.a.type) - W_ORDER.indexOf(q.a.type) || (q.e || 0) - (p.e || 0));
+  const avg = avgMonthlySpend();
+  return {y, startKey, endKey, fromPrev: !!baseKey, S, E, d, saved, mk: d - saved, months, accs, n: inY.length,
+    partial: y === periodOf(isoDay(new Date())).y, autonomy: avg > 0 && E.liq > 0 ? E.liq / avg : null, single: startKey === endKey};
+}
+const pctW = (d, base) => base ? `${sgn(d)}${(Math.abs(d) / Math.abs(base) * 100).toFixed(1).replace('.', ',')}%` : '';
+window.openWorthSummary = function(y){
+  sumYM = {kind: 'w', y: y ?? (snapKeys().length ? +snapKeys().pop().slice(0, 4) : new Date().getFullYear()), m: 0}; renderSummary();
+  document.getElementById('sumModal').classList.add('show');
+  document.querySelector('#sumModal .sum-box').scrollTop = 0;
+};
+function renderWorthSummary(){
+  const s = worthSummary(sumYM.y), ny = periodOf(isoDay(new Date())).y;
+  document.getElementById('sumTitle').textContent = `Patrimonio ${s.y}`;
+  document.getElementById('sumNext').disabled = s.y >= ny;
+  document.getElementById('sumPdf').disabled = !!s.empty;
+  const body = document.getElementById('sumBody');
+  if(s.empty){ body.innerHTML = `<div class="sum-empty"><i class="ti ti-calendar-off"></i>Nessun aggiornamento dei saldi nel ${s.y}.</div>`; return; }
+  const v = x => mv(fmt0.format(x)), sv = x => mv(sgn(x) + fmt0.format(Math.abs(x)));
+  body.innerHTML = `
+    <div class="sum-range">dal ${shortDate(s.S.date)} ${s.S.date.slice(0, 4)} al ${shortDate(s.E.date)} ${s.E.date.slice(0, 4)} · ${s.n} ${s.n === 1 ? 'aggiornamento' : 'aggiornamenti'}${s.partial ? ' · anno in corso' : ''}</div>
+    <div class="sum-kpis">
+      <div class="kpi hero"><div class="lbl">Patrimonio netto</div><div class="val">${v(s.E.net)}</div></div>
+      <div class="kpi"><div class="lbl">Variazione</div><div class="val" style="color:var(--${s.d >= 0 ? 'green' : 'red'})">${sv(s.d)}</div></div>
+      <div class="kpi"><div class="lbl">Risparmiato</div><div class="val">${sv(s.saved)}</div></div>
+      <div class="kpi"><div class="lbl">Mercati e altro</div><div class="val">${sv(s.mk)}</div></div>
+    </div>
+    ${s.single ? '<div class="sum-line"><span>Con un solo aggiornamento non c\'è ancora una variazione: torna dopo il prossimo.</span></div>' : `
+    <div class="sum-sec"><h4>In sintesi</h4>
+      <div class="sum-line"><span>Da ${keyLabel(s.startKey)} <small>(${v(s.S.net)})</small></span><b class="${s.d >= 0 ? 'down' : 'up'}">${pctW(s.d, s.S.net) || '—'}</b></div>
+      ${s.autonomy ? `<div class="sum-line"><span>Autonomia a fine periodo</span><b>${s.autonomy.toFixed(1).replace('.', ',')} mesi</b></div>` : ''}
+    </div>`}
+    <div class="sum-sec"><h4>Mese per mese</h4>${s.months.slice().reverse().map(o => `<div class="wh-row"><div><b>${capF(keyLabel(o.k))}</b><small>al ${shortDate(o.t.date)}</small></div>
+      <div class="r"><b>${v(o.t.net)}</b>${o.d != null ? `<small class="${o.d >= 0 ? 'up' : 'down'}">${sv(o.d)}</small>` : '<small>partenza</small>'}</div><span></span>
+      ${o.d != null ? `<div class="wh-split">risparmio ${sv(o.sv)} · mercati e altro ${sv(o.mk)}</div>` : ''}</div>`).join('')}</div>
+    <div class="sum-sec"><h4>Come è diviso (${keyLabel(s.startKey)} → ${keyLabel(s.endKey)})</h4>${W_ORDER.filter(t => s.S[t] || s.E[t]).map(t => `<div class="sum-ch">
+      <span class="cat"><i class="sw" style="background:${wColor(t)};width:10px;height:10px;border-radius:3px;display:inline-block"></i><span>${W_TYPES[t].label}</span></span>
+      <span class="was">${v(s.S[t])} → ${v(s.E[t])}</span><b class="${(t === 'debt' ? -1 : 1) * (s.E[t] - s.S[t]) >= 0 ? 'down' : 'up'}">${sv(s.E[t] - s.S[t])}</b></div>`).join('')}</div>
+    <div class="sum-sec"><h4>Conti</h4>${s.accs.map(o => `<div class="sum-ch"><span class="cat"><i class="ti ${o.a.icon || W_TYPES[o.a.type].icon}" style="color:${wColor(o.a.type)}"></i><span>${esc(o.a.name)}</span></span>
+      <span class="was">${o.s != null ? v(o.s) : '—'} → ${o.e != null ? v(o.e) : '—'}</span>${o.s != null && o.e != null ? `<b class="${(o.a.type === 'debt' ? -1 : 1) * (o.e - o.s) >= 0 ? 'down' : 'up'}">${sv(o.e - o.s)}</b>` : '<b></b>'}</div>`).join('')}</div>
+    <div class="sum-note">Variazione = risparmio (entrate − spese in iSpend) + mercati e altro. È una stima: è precisa se segni tutte le spese e tutti i conti.</div>`;
+}
+function buildWorthPdf(s){
+  const P = makePdf(), M = 40, CW = P.W - 2 * M, BOT = 800;
+  const INK = [.11, .13, .16], MUT = [.42, .46, .52], TRK = [.92, .935, .95], BOX = [.955, .962, .97], RED = [.82, .25, .25], GRN = [.1, .56, .38], GOLD = [.74, .5, .1];
+  const hx = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16) / 255), TC = t => t === 'debt' ? RED : hx(PIE_LIGHT[W_ORDER.indexOf(t)]); // sulla carta bianca: i colori del tema chiaro
+  const money0 = x => fmt0.format(x), smoney = x => sgn(x) + fmt0.format(Math.abs(x));
+  let y = 0;
+  const footer = () => P.text(P.W / 2, 822, `iWorth · Patrimonio ${s.y} · pagina ${P.pageCount()}`, {size: 7.5, color: MUT, align: 'center'});
+  const newPage = () => { P.page(); y = 52; };
+  const need = h => { if(y + h > BOT){ footer(); newPage(); return true; } return false; };
+  const h2 = (x, yy, t) => P.text(x, yy, t.toUpperCase(), {size: 8, bold: true, color: MUT});
+  newPage();
+  P.text(M, y, 'iWorth', {size: 9, bold: true, color: GOLD});
+  P.text(M, y + 26, `Il patrimonio nel ${s.y}`, {size: 22, bold: true});
+  P.text(M, y + 44, `dal ${shortDate(s.S.date)} ${s.S.date.slice(0, 4)} al ${shortDate(s.E.date)} ${s.E.date.slice(0, 4)} · ${s.n} aggiornamenti${s.partial ? ' · anno in corso' : ''} · creato il ${new Date().toLocaleDateString('it-IT')}`, {size: 8.5, color: MUT});
+  y += 62;
+  const kp = [['Patrimonio netto', money0(s.E.net), INK], ['Variazione', smoney(s.d), s.d >= 0 ? GRN : RED], ['Risparmiato', smoney(s.saved), INK], ['Mercati e altro', smoney(s.mk), INK]];
+  const kw = (CW - 30) / 4;
+  kp.forEach(([l, val, c], i) => { const x = M + i * (kw + 10); P.rect(x, y, kw, 54, BOX, 8); h2(x + 12, y + 18, l); P.text(x + 12, y + 40, val, {size: 15, bold: true, color: c, max: kw - 20}); });
+  y += 72;
+  if(!s.single){
+    P.text(M, y, `Da ${keyLabel(s.startKey)} (${money0(s.S.net)}): `, {size: 9.5, color: MUT});
+    const x0 = M + P.width(`Da ${keyLabel(s.startKey)} (${money0(s.S.net)}): `, 9.5) + 4;
+    P.tri(x0, y - 1, 6.5, s.d >= 0, s.d >= 0 ? GRN : RED);
+    P.text(x0 + 10, y, `${pctW(s.d, s.S.net)}  (${smoney(s.d)}: ${smoney(s.saved)} risparmiati, ${smoney(s.mk)} da mercati e altro)`, {size: 9.5, bold: true, max: CW - (x0 - M) - 10});
+    y += 15;
+    if(s.autonomy) { P.text(M, y, `Autonomia a fine periodo: ${s.autonomy.toFixed(1).replace('.', ',')} mesi di spese coperte dalla liquidità`, {size: 9.5, color: MUT}); y += 15; }
+  }
+  y += 14;
+  // grafico del patrimonio netto (una linea, un punto per aggiornamento)
+  const pts = [...(s.fromPrev ? [{k: s.startKey, t: s.S}] : []), ...s.months.map(o => ({k: o.k, t: o.t}))];
+  if(pts.length > 1){
+    h2(M, y, 'Patrimonio netto nel tempo'); y += 12;
+    const CH = 90, top = y, vals = pts.map(p => p.t.net);
+    let lo = Math.min(...vals), hi = Math.max(...vals); if(hi - lo < 1){ hi += 1; lo -= 1; } const pad = (hi - lo) * .12; lo -= pad; hi += pad;
+    const X = i => M + 10 + i * (CW - 20) / (pts.length - 1), Y = val => top + (1 - (val - lo) / (hi - lo)) * CH;
+    P.line(M, top + CH + .5, M + CW, top + CH + .5, [.8, .82, .85], .6);
+    for(let i = 1; i < pts.length; i++) P.line(X(i - 1), Y(vals[i - 1]), X(i), Y(vals[i]), GOLD, 1.8);
+    pts.forEach((p, i) => {
+      P.rect(X(i) - 2.5, Y(p.t.net) - 2.5, 5, 5, GOLD, 2.5);
+      if(i === 0 || i === pts.length - 1 || pts.length <= 7) P.text(X(i), Y(p.t.net) - 6, money0(p.t.net), {size: 7, color: i === pts.length - 1 ? INK : MUT, bold: i === pts.length - 1, align: 'center'});
+      P.text(X(i), top + CH + 12, MESI[+p.k.slice(5) - 1].slice(0, 3), {size: 7, color: MUT, align: 'center'});
+    });
+    y = top + CH + 34;
+  }
+  // due colonne: composizione e conti
+  const LW = 240, RX = M + LW + 25, RW = CW - LW - 25;
+  h2(M, y, `Come è diviso`); let ly = y + 16;
+  W_ORDER.filter(t => s.S[t] || s.E[t]).forEach(t => {
+    P.rect(M, ly - 7, 7, 7, TC(t), 1.5);
+    P.text(M + 12, ly, W_TYPES[t].label, {size: 9});
+    P.text(M + LW, ly, (t === 'debt' ? '−' : '') + money0(s.E[t]), {size: 9, bold: true, align: 'right'});
+    P.text(M + 12, ly + 10, `da ${(t === 'debt' ? '−' : '') + money0(s.S[t])} · ${smoney(s.E[t] - s.S[t])}`, {size: 7.5, color: MUT});
+    ly += 24;
+  });
+  if(s.E.assets > 0){
+    let x = M; ['liq', 'inv', 'other'].filter(t => s.E[t] > 0).forEach(t => { const w = LW * s.E[t] / s.E.assets; P.rect(x, ly, Math.max(w - 2, 1), 8, TC(t), 2); x += w; });
+    ly += 20;
+  }
+  h2(RX, y, 'Conti'); let ry = y + 16;
+  s.accs.forEach(o => {
+    if(ry > BOT - 20) return;
+    P.text(RX, ry, o.a.name, {size: 9, max: RW - 130});
+    P.text(RX + RW, ry, o.e != null ? (o.a.type === 'debt' ? '−' : '') + money0(o.e) : '—', {size: 9, bold: true, align: 'right'});
+    if(o.s != null && o.e != null) P.text(RX + RW - 78, ry, smoney(o.e - o.s), {size: 8, color: (o.a.type === 'debt' ? -1 : 1) * (o.e - o.s) >= 0 ? GRN : RED, align: 'right'});
+    P.text(RX, ry + 10, W_TYPES[o.a.type].label + (o.s != null ? ` · da ${money0(o.s)}` : ''), {size: 7.5, color: MUT});
+    ry += 24;
+  });
+  y = Math.max(ly, ry) + 12;
+  // mese per mese
+  need(60);
+  h2(M, y, 'Mese per mese'); y += 16;
+  const C = [[M, 'Mese', 'left'], [M + 220, 'Patrimonio', 'right'], [M + 310, 'Variazione', 'right'], [M + 410, 'Risparmio', 'right'], [M + CW, 'Mercati e altro', 'right']];
+  const head = () => { C.forEach(([x, t, a]) => P.text(x, y, t.toUpperCase(), {size: 7.5, bold: true, color: MUT, align: a})); y += 6; P.line(M, y, M + CW, y, [.82, .84, .87], .6); y += 13; };
+  head();
+  s.months.forEach((o, i) => {
+    if(need(15)) head();
+    if(i % 2) P.rect(M - 4, y - 10.5, CW + 8, 15, [.972, .976, .98]);
+    P.text(M, y, `${capF(keyLabel(o.k))} (${shortDate(o.t.date)})`, {size: 9});
+    P.text(M + 220, y, money0(o.t.net), {size: 9, bold: true, align: 'right'});
+    P.text(M + 310, y, o.d != null ? smoney(o.d) : '—', {size: 9, align: 'right', color: o.d == null ? MUT : o.d >= 0 ? GRN : RED});
+    P.text(M + 410, y, o.sv != null ? smoney(o.sv) : '—', {size: 9, align: 'right', color: MUT});
+    P.text(M + CW, y, o.mk != null ? smoney(o.mk) : '—', {size: 9, align: 'right', color: MUT});
+    y += 15;
+  });
+  y += 8; need(20);
+  P.text(M, y, 'Variazione = risparmio (entrate − spese registrate in iSpend) + mercati e altro. È una stima: è precisa se segni tutte le spese e tutti i conti.', {size: 7.5, color: MUT, max: CW});
+  footer();
+  return P.bytes(`Patrimonio ${s.y}`);
+}
+
 // link rapido, per Siri / app Comandi:
 //   ?nuova&importo=4,50&categoria=caffe&nota=bar sotto casa&tipo=entrata&salva=1
 // apre il modulo già compilato; con "salva" registra subito (e mostra Annulla)
@@ -4451,7 +4609,7 @@ if('serviceWorker' in navigator && location.protocol === 'https:') navigator.ser
 // ---------- avvio (in fondo: a questo punto tutto il codice sopra è pronto) ----------
 applySettings();
 applyApp();
-showTab(APPS[app].home);
+showTab(APPS[app].start || APPS[app].home);
 handleQuickAdd();
 </script>
 </body>
