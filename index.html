@@ -218,6 +218,8 @@
   .type-toggle button.active-in{background:color-mix(in srgb,var(--green) 16%,var(--card)); color:var(--green); box-shadow:0 2px 8px rgba(0,0,0,.3);}
 
   /* progetti */
+  .trip-sum{font-size:.8rem; color:var(--muted); margin:-4px 0 12px;} .trip-sum b{color:var(--text); font-weight:600; font-variant-numeric:tabular-nums;}
+  #tripYearSeg{flex-wrap:wrap;}
   .proj-card{background:var(--card2); border:1px solid var(--line); border-radius:14px; padding:13px 15px; margin-bottom:10px; cursor:pointer;}
   .proj-card .p-head{display:flex; align-items:center; justify-content:space-between; gap:10px;}
   .proj-card .p-name{font-weight:600; font-size:.95rem; display:flex; align-items:center; gap:8px;}
@@ -236,7 +238,8 @@
   .trip-filter-bar button{margin-left:auto; background:none; border:none; color:var(--muted); font-size:1rem; cursor:pointer;}
   .toast{position:fixed; bottom:118px; left:50%; transform:translateX(-50%) translateY(80px); background:var(--grad);
     color:#0a0f0c; padding:11px 24px; border-radius:24px; font-weight:700; transition:transform .3s; z-index:99;
-    box-shadow:0 6px 20px rgba(0,0,0,.4); white-space:nowrap;}
+    box-shadow:0 6px 20px rgba(0,0,0,.4); width:max-content; max-width:calc(100vw - 32px); text-align:center; line-height:1.35;}
+  .toast.warn{background:var(--gold); color:#1d1606;} .toast.over{background:var(--red); color:#fff;}
   .toast.show{transform:translateX(-50%) translateY(0);}
   .auth-form{display:grid; gap:10px;}
   .auth-actions{display:flex; gap:8px; margin-top:2px;}
@@ -415,6 +418,35 @@
   .acct .btn{width:auto; padding:10px 14px; font-size:.85rem;}
   a.btn{text-decoration:none;}
 
+  /* budget */
+  .card-head{flex-wrap:wrap; row-gap:8px;}
+  .head-right{display:flex; align-items:center; gap:6px;}
+  .bud-chip{font-size:.68rem; font-weight:600; padding:3px 8px; border-radius:7px; display:inline-flex; align-items:center; gap:3px; white-space:nowrap;}
+  .bud-chip:empty{display:none;}
+  .bud-chip.over{background:color-mix(in srgb,var(--red) 16%,transparent); color:var(--red);}
+  .bud-chip.warn{background:color-mix(in srgb,var(--gold) 18%,transparent); color:var(--gold);}
+  @media (max-width:520px){ .bud-chip .t{display:none;} .has-chip .hm{display:none;} }
+  .bud-warn .bar{background:var(--gold);} .bud-over .bar{background:var(--red);}
+  .bud-sub{font-size:.72rem; color:var(--muted); margin-top:4px;}
+  .bud-warn .bud-sub{color:var(--gold);} .bud-over .bud-sub,.bud-over .amt{color:var(--red);}
+  .kpi-bud{margin-top:6px;} .kpi-bud:empty{display:none;}
+  .kb-line{display:flex; justify-content:space-between; font-size:.72rem; color:var(--muted); font-variant-numeric:tabular-nums;}
+  .kb-line b{color:var(--text); font-weight:600;} .kb-line b.warn{color:var(--gold);} .kb-line b.over{color:var(--red);}
+  .kb-trk{position:relative; height:5px; border-radius:3px; background:var(--card2); margin-top:4px;}
+  .kb-trk i{display:block; height:100%; border-radius:3px; background:var(--grad);}
+  .kb-trk.warn i{background:var(--gold);} .kb-trk.over i{background:var(--red);}
+  .kb-now{position:absolute; top:-2px; width:2px; height:9px; margin-left:-1px; border-radius:1px; background:var(--text); opacity:.85;}
+  .bud-in{width:116px; text-align:right; padding:9px 12px; border-radius:10px; font-variant-numeric:tabular-nums; flex-shrink:0;}
+  .bud-row{display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--line);}
+  .bud-row .dot{width:34px; height:34px; font-size:1.05rem;}
+  .bud-row .nm{flex:1; min-width:0; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .bud-x{background:none; border:none; color:var(--muted); width:30px; height:30px; border-radius:8px; cursor:pointer; font-size:1rem; flex-shrink:0;}
+  .bud-x:hover{color:var(--red); background:var(--card2);}
+  .bud-add{display:flex; gap:8px; margin-top:12px; align-items:center;}
+  .bud-add select{flex:1; min-width:0; padding:9px 30px 9px 12px; border-radius:10px; background-position:right 10px center;}
+  .bud-add .bud-in{width:96px;}
+  .bud-add .btn{width:auto; padding:10px 13px; flex-shrink:0;}
+
   /* torta (ripartizione spese) */
   .pie-ctrl{display:flex; gap:8px; flex-wrap:wrap; align-items:center;}
   .pie-ctrl select{width:auto; padding:7px 30px 7px 11px; border-radius:10px; background-position:right 10px center;}
@@ -563,17 +595,20 @@
 <!-- ============ TAB MESE ============ -->
 <div class="tab" id="tab-mese">
   <div class="kpis">
-    <div class="kpi hero"><div class="lbl">Spese mese<span class="rng" id="kpiRange"></span></div><div class="val" id="kpiMonth">—</div><div class="cmp" id="kpiCmp"></div></div>
+    <div class="kpi hero"><div class="lbl">Spese mese<span class="rng" id="kpiRange"></span></div><div class="val" id="kpiMonth">—</div><div class="kpi-bud" id="kpiBud"></div><div class="cmp" id="kpiCmp"></div></div>
     <div class="kpi pos"><div class="lbl">Entrate mese</div><div class="val" id="kpiIn">—</div></div>
     <div class="kpi"><div class="lbl">Saldo mese</div><div class="val" id="kpiSaldo">—</div></div>
   </div>
   <div class="cols wide-right"><div class="col">
   <div class="card">
-    <div class="card-head">
-      <h2><i class="ti ti-category"></i> Per categoria · <span id="catMonth"></span></h2>
-      <div class="seg cat-mode">
-        <button class="on" onclick="setCatMode(false)" aria-label="Mostra in euro">€</button>
-        <button onclick="setCatMode(true)" aria-label="Mostra in percentuale">%</button>
+    <div class="card-head" id="catHead">
+      <h2><i class="ti ti-category"></i> Per categoria<span class="hm">· <span id="catMonth"></span></span></h2>
+      <div class="head-right">
+        <span class="bud-chip" id="budChip"></span>
+        <div class="seg cat-mode">
+          <button class="on" onclick="setCatMode(false)" aria-label="Mostra in euro">€</button>
+          <button onclick="setCatMode(true)" aria-label="Mostra in percentuale">%</button>
+        </div>
       </div>
     </div>
     <div id="catBars"></div>
@@ -612,7 +647,7 @@
     </div>
     <div class="tx-summary" id="txSummary"></div>
     <div id="tripFilterBar" style="display:none" class="trip-filter-bar">
-      <i class="ti ti-tag"></i> Progetto: <b id="tripFilterName"></b> <span style="color:var(--muted)">(tutti i mesi)</span>
+      <i class="ti ti-tag"></i> Viaggio: <b id="tripFilterName"></b> <span style="color:var(--muted)">(tutti i mesi)</span>
       <button onclick="clearTripFilter()" aria-label="Togli filtro"><i class="ti ti-x"></i></button>
     </div>
     <div id="txList"></div>
@@ -650,7 +685,7 @@
         <select id="fCat"></select>
       </div>
       <div class="full">
-        <label>Progetto / viaggio (opzionale)</label>
+        <label>Viaggio (opzionale)</label>
         <select id="fTrip"><option value="">— nessuno —</option></select>
       </div>
       <div class="full">
@@ -681,12 +716,16 @@
   </div></div><!-- /cols -->
 </div>
 
-<!-- ============ TAB PROGETTI ============ -->
+<!-- ============ TAB VIAGGI (nel codice: "projs" / "projects" / "trip") ============ -->
 <div class="tab" id="tab-projs">
   <div class="card">
-    <h2><i class="ti ti-luggage"></i> I tuoi progetti</h2>
+    <div class="card-head">
+      <h2><i class="ti ti-luggage"></i> I tuoi viaggi</h2>
+      <div class="seg" id="tripYearSeg"></div>
+    </div>
+    <div class="trip-sum" id="tripSum"></div>
     <div class="newproj">
-      <input type="text" id="pNew" placeholder="Nome nuovo progetto...">
+      <input type="text" id="pNew" placeholder="Nuovo viaggio, es. Weekend Dolomiti">
       <button class="btn" onclick="addProject()">Crea</button>
     </div>
     <div id="projList"></div>
@@ -699,6 +738,20 @@
   <div class="card">
     <h2><i class="ti ti-palette"></i> Aspetto</h2>
     <div class="theme-grid" id="themeGrid"></div>
+  </div>
+  <div class="card">
+    <h2><i class="ti ti-target-arrow"></i> Budget al mese</h2>
+    <div class="sett-row">
+      <div><b>Totale del mese</b><small>Facoltativo: lo vedi sotto "Spese mese"</small></div>
+      <input type="text" inputmode="decimal" id="budTotal" class="bud-in" placeholder="nessuno" autocomplete="off" aria-label="Budget totale del mese" onchange="setBudgetTotal(this.value)">
+    </div>
+    <div id="budList"></div>
+    <div class="bud-add">
+      <select id="budCat" aria-label="Categoria a cui dare un budget"></select>
+      <input type="text" inputmode="decimal" id="budAmt" class="bud-in" placeholder="importo" autocomplete="off" aria-label="Importo del budget">
+      <button class="btn" onclick="addBudget()" aria-label="Aggiungi budget"><i class="ti ti-plus"></i></button>
+    </div>
+    <p class="sett-note">In "Per categoria" la barra diventa arancione all'80% e rossa quando sfori. Quando aggiungi una spesa che ti porta vicino o oltre il limite, ti avviso.</p>
   </div>
   <div class="card">
     <div class="card-head">
@@ -730,7 +783,7 @@
       <button class="btn ghost" onclick="document.getElementById('importFile').click()"><i class="ti ti-folder-open"></i> Ripristina</button>
       <button class="btn ghost" onclick="exportCSV()"><i class="ti ti-file-spreadsheet"></i> Esporta CSV</button>
     </div>
-    <p class="sett-note">Il backup salva in un file movimenti, ricorrenti, progetti e impostazioni; con Ripristina lo ricarichi. Il CSV si apre con Excel.</p>
+    <p class="sett-note">Il backup salva in un file movimenti, ricorrenti, viaggi e impostazioni; con Ripristina lo ricarichi. Il CSV si apre con Excel.</p>
     <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(this)">
   </div>
   <div class="card">
@@ -747,7 +800,7 @@
   <button id="nav-dash" onclick="showTab('dash')"><i class="ti ti-layout-dashboard ico"></i>Dashboard</button>
   <button id="nav-mese" onclick="showTab('mese')"><i class="ti ti-calendar-month ico"></i>Mese</button>
   <button id="nav-add" onclick="openAdd()" aria-label="Aggiungi movimento"><span class="fab"><i class="ti ti-plus"></i></span><span class="nav-lbl">Nuovo movimento</span></button>
-  <button id="nav-projs" onclick="showTab('projs')"><i class="ti ti-luggage ico"></i>Progetti</button>
+  <button id="nav-projs" onclick="showTab('projs')"><i class="ti ti-luggage ico"></i>Viaggi</button>
   <button id="nav-sett" onclick="showTab('sett')"><i class="ti ti-settings ico"></i><span class="lbl-short">Opzioni</span><span class="lbl-long">Impostazioni</span></button>
 </nav>
 
@@ -840,8 +893,10 @@ const ICONS = {...CATS, ...CATS_IN};
 // catMeta[CATEGORIA] = {label, icon, fixed, hidden} per modificare quelle di serie,
 // oppure {custom:true, tipo, label, icon, fixed, hidden} per quelle create da te.
 // I movimenti salvano sempre il nome "interno" della categoria: rinominare non tocca i dati.
-const DEFAULT_SETTINGS = {theme: 'smeraldo', currency: 'EUR', startDay: 1, catMeta: {}};
-let settings = {...DEFAULT_SETTINGS, catMeta: {}};
+// budgets[CATEGORIA] = importo al mese; budgetTotal = budget totale del mese (0 = nessuno)
+const DEFAULT_SETTINGS = {theme: 'smeraldo', currency: 'EUR', startDay: 1, catMeta: {}, budgets: {}, budgetTotal: 0};
+const normSettings = o => ({...DEFAULT_SETTINGS, ...o, catMeta: {...((o && o.catMeta) || {})}, budgets: {...((o && o.budgets) || {})}});
+let settings = normSettings({});
 const meta = c => settings.catMeta[c] || {};
 // nomi di serie diversi dal nome interno (il nome interno resta per non toccare i movimenti già salvati)
 const BUILTIN_LABELS = {"AFFITTO & BOLLETTE": "Affitto / mutuo"};
@@ -1004,7 +1059,13 @@ function demoData(){
     ['ABBONAMENTI', 11.99, 3, 'uscita', 'Spotify'], ['ABBONAMENTI', 13.99, 8, 'uscita', 'Netflix'],
     ['TRASPORTI PUBBLICI', 39, 1, 'uscita', 'Abbonamento ATM']
   ].map(([cat, amount, d, tipo, note], i) => ({id: 'rdemo' + i, cat, amount, day: d, tipo, note, start: st, since: st}));
-  return {tx: out, recurring};
+  // budget di esempio: uno sforato, uno quasi al limite, gli altri tranquilli (calcolati sul mese in corso)
+  const ym = todayIso.slice(0, 7), spentNow = c => out.filter(t => t.tipo === 'uscita' && t.cat === c && t.date.startsWith(ym)).reduce((x, t) => x + t.amount, 0);
+  const budgets = {'SPESA (SUPER)': 300, 'BENZINA': 120, 'BAR & COLAZIONE': 60};
+  const pr = spentNow('PRANZI & CENE'), dr = spentNow('DRINK & APERITIVI');
+  budgets['PRANZI & CENE'] = pr > 20 ? Math.floor(pr * 0.9 / 5) * 5 : 60;
+  budgets['DRINK & APERITIVI'] = dr > 10 ? Math.ceil(dr / 0.86 / 5) * 5 : 100;
+  return {tx: out, recurring, budgets};
 }
 
 // ---------- stato ----------
@@ -1012,13 +1073,14 @@ function demoData(){
 let tx = [], tomb = [], projects = [], recurring = [];
 let openTrips = new Set();
 if(DEMO){
-  ({tx, recurring} = demoData());
+  const d = demoData(); tx = d.tx; recurring = d.recurring;
+  settings.budgets = d.budgets; settings.budgetTotal = 1600;
 } else {
   try { tx = JSON.parse(localStorage.getItem('speseTx') || '[]'); } catch(e){}
   try { tomb = JSON.parse(localStorage.getItem('speseTomb') || '[]'); } catch(e){}
   try { projects = JSON.parse(localStorage.getItem('speseProjects') || '[]'); } catch(e){}
   try { recurring = JSON.parse(localStorage.getItem('speseRecurring') || '[]'); } catch(e){}
-  try { settings = {...DEFAULT_SETTINGS, ...JSON.parse(localStorage.getItem('speseSettings') || '{}')}; } catch(e){}
+  try { settings = normSettings(JSON.parse(localStorage.getItem('speseSettings') || '{}')); } catch(e){}
   try { openTrips = new Set(JSON.parse(localStorage.getItem('speseOpenTrips') || '[]')); } catch(e){}
 }
 
@@ -1106,7 +1168,7 @@ function mergeCloud(c){
   const cRecIds = new Set(cRec.map(r => r.id));
   recurring = [...cRec, ...recurring.filter(r => !cRecIds.has(r.id) && !deadAll.has(r.id))];
   // impostazioni: vale quella nel cloud (così tema e categorie sono uguali su telefono e PC)
-  if(c.settings){ settings = {...DEFAULT_SETTINGS, ...c.settings, catMeta: c.settings.catMeta || {}}; applySettings(); }
+  if(c.settings){ settings = normSettings(c.settings); applySettings(); }
 }
 
 const authBox = document.getElementById('authBox');
@@ -1181,13 +1243,49 @@ fillCats('uscita');
 const barRow = (c, v, max, txt) => `<div class="bar-row">
   <div class="bar-head"><span class="cat" title="${label(c)}">${ico(c)}<span>${label(c)}</span></span><span class="amt">${txt ?? fmt.format(v)}</span></div>
   <div class="bar-wrap"><div class="bar" style="width:${(v/max*100).toFixed(1)}%"></div></div></div>`;
+
+// ---------- budget ----------
+// stato: 'ok' (sotto l'80%), 'warn' (dall'80% al 100%), 'over' (oltre)
+const budgetState = (v, b) => v > b ? 'over' : v >= b * .8 ? 'warn' : 'ok';
+// riga di una categoria con budget: "210 € / 300 €", barra = quanto del budget hai usato
+function budgetRow(c, v, b, txt){
+  const st = budgetState(v, b);
+  const sub = st === 'over' ? `${fmt.format(v - b)} oltre il budget` : `restano ${fmt.format(b - v)}${st === 'warn' ? ' · quasi al limite' : ''}`;
+  return `<div class="bar-row bud-${st}">
+  <div class="bar-head"><span class="cat" title="${label(c)}">${ico(c)}<span>${label(c)}</span></span><span class="amt">${txt ?? `${fmt0.format(v)} / ${fmt0.format(b)}`}</span></div>
+  <div class="bar-wrap"><div class="bar" style="width:${(Math.min(v / b, 1) * 100).toFixed(1)}%"></div></div>
+  <div class="bud-sub">${sub}</div></div>`;
+}
+// budget totale dentro il riquadro "Spese mese" (la tacchetta = a che punto del mese siamo oggi)
+function renderBudgetTotal(out){
+  const el = document.getElementById('kpiBud'), T = settings.budgetTotal || 0;
+  if(!T){ el.innerHTML = ''; return; }
+  const st = budgetState(out, T), today = isoDay(new Date()), [a, b] = periodRange(cur.y, cur.m);
+  const mark = today >= a && today <= b ? (dayIndex(today, cur.y, cur.m) / dayIndex(b, cur.y, cur.m) * 100) : null;
+  el.innerHTML = `<div class="kb-line"><span>di ${fmt0.format(T)}</span><b class="${st}">${Math.round(out / T * 100)}%</b></div>
+    <div class="kb-trk ${st}"><i style="width:${(Math.min(out / T, 1) * 100).toFixed(1)}%"></i>${mark !== null ? `<span class="kb-now" style="left:${mark.toFixed(1)}%" title="oggi"></span>` : ''}</div>`;
+}
+// avviso quando una spesa fa superare (o avvicinare) un budget
+const spentIn = (p, cat) => tx.filter(t => t.tipo === 'uscita' && inMonth(t, p.y, p.m) && (!cat || t.cat === cat)).reduce((x, t) => x + t.amount, 0);
+function budgetSnap(date, cat){ const p = periodOf(date); return {p, cat, c: spentIn(p, cat), t: spentIn(p)}; }
+function budgetAlert(sn){
+  const b = (settings.budgets || {})[sn.cat], T = settings.budgetTotal || 0;
+  const c2 = spentIn(sn.p, sn.cat), t2 = spentIn(sn.p);
+  if(b && c2 > b && c2 > sn.c) return {kind: 'over', msg: `${label(sn.cat)}: ${fmt.format(c2 - b)} oltre il budget`};
+  if(T && t2 > T && sn.t <= T) return {kind: 'over', msg: `Hai superato il budget del mese (${fmt0.format(T)})`};
+  if(b && c2 >= b * .8 && sn.c < b * .8) return {kind: 'warn', msg: `${label(sn.cat)}: sei al ${Math.round(c2 / b * 100)}% del budget`};
+  if(T && t2 >= T * .8 && sn.t < T * .8) return {kind: 'warn', msg: `Budget del mese al ${Math.round(t2 / T * 100)}%`};
+  return null;
+}
 document.getElementById('fDate').value = isoDay(new Date());
 
-function toast(msg){
-  const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+// kind: '' (normale), 'warn' (arancione), 'over' (rosso)
+function toast(msg, kind){
+  document.querySelectorAll('.toast').forEach(x => x.remove());
+  const t = document.createElement('div'); t.className = 'toast' + (kind ? ' ' + kind : ''); t.textContent = msg;
   document.body.appendChild(t);
   requestAnimationFrame(()=>t.classList.add('show'));
-  setTimeout(()=>{ t.classList.remove('show'); setTimeout(()=>t.remove(), 400); }, 1600);
+  setTimeout(()=>{ t.classList.remove('show'); setTimeout(()=>t.remove(), 400); }, kind ? 3200 : 1600);
 }
 window.setType = function(t, keepCat){
   const changed = t !== tipo;
@@ -1206,7 +1304,7 @@ window.showTab = function(t){
   // calendario solo nella pagina Mese, selettore anno solo nella Dashboard
   document.getElementById('monthBtn').style.display = t === 'mese' ? '' : 'none';
   document.getElementById('yearSwitch').style.display = t === 'dash' ? '' : 'none';
-  document.getElementById('pageTitle').textContent = {dash:'Dashboard', mese:'Mese', add:'Aggiungi', projs:'Progetti', sett:'Impostazioni'}[t];
+  document.getElementById('pageTitle').textContent = {dash:'Dashboard', mese:'Mese', add:'Aggiungi', projs:'Viaggi', sett:'Impostazioni'}[t];
   window.scrollTo(0,0);
   render();
 };
@@ -1343,15 +1441,18 @@ window.submitTx = function(e){
 
   if(editMode && editMode.kind === 'tx'){
     const t = tx.find(x => x.id === editMode.id);
+    const snap = budgetSnap(d, c);
     if(t){ Object.assign(t, {date: d, amount: a, cat: c, note: n, tipo}); withTrip(t); }
     saveLocal(); pushCloud();
-    toast('Movimento modificato ✓');
+    const al = tipo === 'uscita' ? budgetAlert(snap) : null;
+    if(al) toast('✓ Modificato · ' + al.msg, al.kind); else toast('Movimento modificato ✓');
     const back = returnTab; resetForm(); showTab(back);
     return false;
   }
 
   // nuovo movimento (ed eventuale nuova ricorrenza)
   const repeat = document.getElementById('fRepeat').checked;
+  const snap = budgetSnap(d, c);
   if(repeat){
     const rid = 'r' + Date.now().toString(36);
     const r = withTrip({id: rid, cat: c, amount: a, day: +d.slice(8, 10), tipo, note: n,
@@ -1366,7 +1467,9 @@ window.submitTx = function(e){
   document.getElementById('fAmount').value = '';
   document.getElementById('fNote').value = '';
   document.getElementById('fRepeat').checked = false;
-  toast((tipo === 'uscita' ? '−' : '+') + fmt.format(a) + (repeat ? ' · ripetuta ogni mese ✓' : ' salvato ✓'));
+  const al = tipo === 'uscita' ? budgetAlert(snap) : null;
+  if(al) toast('✓ Salvato · ' + al.msg, al.kind);
+  else toast((tipo === 'uscita' ? '−' : '+') + fmt.format(a) + (repeat ? ' · ripetuta ogni mese ✓' : ' salvato ✓'));
   render();
   return false;
 };
@@ -1427,11 +1530,11 @@ window.addProject = function(){
   projects.push(name);
   inp.value = '';
   saveLocal(); pushCloud(); render();
-  toast('Progetto "' + name + '" creato ✓');
+  toast('Viaggio "' + name + '" creato ✓');
 };
 window.delProject = function(e, name){
   e.stopPropagation();
-  if(confirm(`Eliminare il progetto "${name}"? Le spese restano nel bilancio.`)){
+  if(confirm(`Eliminare il viaggio "${name}"? Le spese restano nel bilancio.`)){
     projects = projects.filter(p => p !== name);
     tx.forEach(t => { if(t.trip === name) delete t.trip; });
     if(tripFilter === name) tripFilter = null;
@@ -1500,11 +1603,22 @@ function renderMese(){
   document.getElementById('catMonth').textContent = MESI[cur.m];
   const byCat = {};
   mt.filter(t=>t.tipo==='uscita').forEach(t => byCat[t.cat] = (byCat[t.cat]||0) + t.amount);
-  const entries = Object.entries(byCat).sort((a,b)=>b[1]-a[1]).slice(0,10);
-  const max = entries.length ? entries[0][1] : 1;
+  // le categorie con un budget compaiono sempre (anche a zero), le altre: le prime 10
+  const bud = settings.budgets || {};
+  Object.keys(bud).forEach(c => { if(!(c in byCat)) byCat[c] = 0; });
+  const entries = Object.entries(byCat).sort((a,b)=>b[1]-a[1]).filter(([c], i) => bud[c] || i < 10);
+  const max = Math.max(1, ...entries.map(e => e[1]));
   document.getElementById('catBars').innerHTML = entries.length
-    ? entries.map(([c,v]) => barRow(c, v, max, catPct ? pctFmt.format(v / outM) : undefined)).join('')
+    ? entries.map(([c,v]) => { const txt = catPct ? pctFmt.format(outM ? v / outM : 0) : undefined;
+        return bud[c] ? budgetRow(c, v, bud[c], txt) : barRow(c, v, max, txt); }).join('')
     : '<div class="empty">Nessuna spesa questo mese</div>';
+  const over = entries.filter(([c,v]) => bud[c] && v > bud[c]).length, warn = entries.filter(([c,v]) => bud[c] && v <= bud[c] && v >= bud[c] * .8).length;
+  const chip = document.getElementById('budChip');
+  chip.className = 'bud-chip' + (over ? ' over' : warn ? ' warn' : '');
+  document.getElementById('catHead').classList.toggle('has-chip', !!(over || warn));
+  chip.innerHTML = over ? `<i class="ti ti-alert-triangle"></i>${over}<span class="t"> ${over === 1 ? 'sforato' : 'sforati'}</span>`
+    : warn ? `<i class="ti ti-alert-circle"></i>${warn}<span class="t"> al limite</span>` : '';
+  renderBudgetTotal(outM);
 
   // trend 6 mesi: la finestra resta ferma sugli ultimi 6 mesi finché il mese scelto ci sta dentro,
   // così toccando le barre si sposta solo l'evidenziazione
@@ -1586,7 +1700,7 @@ function renderTxList(){
       <span class="amount ${t.tipo==='uscita'?'out':'in'}">${t.tipo==='uscita'?'−':'+'}${fmt.format(t.amount)}</span>
       <button class="del" aria-label="Elimina"><i class="ti ti-trash"></i></button></div>`;
   }).join('') + (list.length > shown.length ? `<div class="empty">… e altri ${list.length - shown.length}: usa la ricerca per restringere</div>` : '')
-    : '<div class="empty">' + (q || fc ? 'Nessun movimento trovato' : 'Nessun movimento' + (tripFilter ? ' per questo progetto' : txScope === 'tutti' ? '' : ' in questo mese')) + '</div>';
+    : '<div class="empty">' + (q || fc ? 'Nessun movimento trovato' : 'Nessun movimento' + (tripFilter ? ' per questo viaggio' : txScope === 'tutti' ? '' : ' in questo mese')) + '</div>';
 }
 // tocco su un movimento = modifica; cestino = elimina
 document.getElementById('txList').addEventListener('click', e => {
@@ -1864,9 +1978,26 @@ pieWrapEl.addEventListener('click', e => {
   const i = +el.dataset.i; pieLock = pieLock === i ? null : i; focusPie(pieLock);
 });
 
+// filtro per anno nella pagina Viaggi: un viaggio compare negli anni in cui ha spese
+// (quelli ancora senza spese compaiono sempre)
+let tripYear = new Date().getFullYear();   // anno, oppure 'tutti'
+window.setTripYear = function(y){ tripYear = y; renderProjs(); };
 function renderProjs(){
   const trips = tripTotals();
-  const all = [...new Set([...projects, ...Object.keys(trips)])].sort((a,b)=>(trips[b]?.total||0)-(trips[a]?.total||0));
+  const all0 = [...new Set([...projects, ...Object.keys(trips)])];
+  const tripTx = tx.filter(t => t.trip && t.tipo === 'uscita');
+  const nowY = new Date().getFullYear();
+  const years = [...new Set([nowY, ...tripTx.map(t => +t.date.slice(0, 4))])].sort((a, b) => b - a);
+  if(tripYear !== 'tutti' && !years.includes(tripYear)) tripYear = nowY;
+  document.getElementById('tripYearSeg').innerHTML = years.map(y =>
+    `<button class="${tripYear === y ? 'on' : ''}" onclick="setTripYear(${y})">${y}</button>`).join('') +
+    `<button class="${tripYear === 'tutti' ? 'on' : ''}" onclick="setTripYear('tutti')">Tutti</button>`;
+  const inYear = t => tripYear === 'tutti' || +t.date.slice(0, 4) === tripYear;
+  const all = all0.filter(n => !trips[n] || tripTx.some(t => t.trip === n && inYear(t)))
+    .sort((a,b)=>(trips[b]?.total||0)-(trips[a]?.total||0));
+  const spent = tripTx.filter(t => all.includes(t.trip) && inYear(t)).reduce((x, t) => x + t.amount, 0);
+  document.getElementById('tripSum').innerHTML = all.length
+    ? `${all.length} viagg${all.length === 1 ? 'io' : 'i'} · <b>${fmt.format(spent)}</b> ${tripYear === 'tutti' ? 'in totale' : 'spesi nel ' + tripYear}` : '';
   document.getElementById('projList').innerHTML = all.length ? all.map(name => {
     const o = trips[name];
     const open = openTrips.has(name) ? ' open' : '';
@@ -1886,7 +2017,7 @@ function renderProjs(){
       <div class="proj-detail">${rows}
         <div class="row" style="margin-top:6px"><button class="btn ghost" style="font-size:.75rem;padding:6px" onclick="filterTrip(event,'${esc(name)}')"><i class="ti ti-search"></i> Vedi tutte le spese</button></div>
       </div></div>`;
-  }).join('') : '<div class="empty">Nessun progetto: creane uno qui sopra</div>';
+  }).join('') : `<div class="empty">${all0.length ? 'Nessun viaggio nel ' + tripYear : 'Nessun viaggio: creane uno qui sopra'}</div>`;
 }
 
 function hash(s){ let h=0; for(let i=0;i<s.length;i++){ h=(h*31 + s.charCodeAt(i))|0; } return 'h' + Math.abs(h); }
@@ -1951,6 +2082,18 @@ function renderSettings(){
       <i class="ti ti-chevron-right"></i></div>`;
   }).join('');
 
+  // budget
+  const bud = settings.budgets || {}, plain = v => String(v).replace('.', ',');
+  const bt = document.getElementById('budTotal');
+  if(document.activeElement !== bt) bt.value = settings.budgetTotal ? plain(settings.budgetTotal) : '';
+  document.getElementById('budList').innerHTML = Object.keys(bud).sort((a, b) => label(a).localeCompare(label(b))).map(c => `
+    <div class="bud-row" data-key="${esc(c)}"><div class="dot">${ico(c)}</div><span class="nm">${esc(label(c))}</span>
+      <input type="text" inputmode="decimal" class="bud-in" value="${plain(bud[c])}" aria-label="Budget ${esc(label(c))}">
+      <button class="bud-x" aria-label="Togli budget"><i class="ti ti-x"></i></button></div>`).join('');
+  const free = catList('uscita').filter(c => !bud[c]);
+  document.getElementById('budCat').innerHTML = '<option value="">Scegli categoria</option>' +
+    free.map(c => `<option value="${esc(c)}">${label(c)}</option>`).join('');
+
   const acct = document.getElementById('accountBox');
   const demoLink = location.origin + location.pathname + '?demo';
   const demoRow = `<div class="row-btns"><button class="btn ghost" onclick="copyDemo()"><i class="ti ti-copy"></i> Copia link demo</button></div>`;
@@ -1961,6 +2104,25 @@ function renderSettings(){
     <p>Per far vedere l'app senza mostrare i tuoi dati, manda il link della demo.</p>${demoRow}`;
   else acct.innerHTML = `<p>Non hai fatto l'accesso: i dati restano solo su questo dispositivo. Accedi dal riquadro "Sincronizzazione" in alto.</p>${demoRow}`;
 }
+// budget: imposta / cambia / togli
+function setBudget(k, v){
+  const a = parseAmount(v);
+  if(a > 0) settings.budgets[k] = a; else delete settings.budgets[k];
+  saveLocal(); pushCloud(); render();
+}
+window.setBudgetTotal = function(v){ const a = parseAmount(v); settings.budgetTotal = a > 0 ? a : 0; saveLocal(); pushCloud(); render(); };
+window.addBudget = function(){
+  const k = document.getElementById('budCat').value, amt = document.getElementById('budAmt');
+  if(!k){ toast('Scegli una categoria'); return; }
+  if(!(parseAmount(amt.value) > 0)){ toast('Importo non valido'); amt.focus(); return; }
+  setBudget(k, amt.value); amt.value = ''; toast('Budget aggiunto ✓');
+};
+document.getElementById('budList').addEventListener('change', e => {
+  const row = e.target.closest('.bud-row'); if(row && e.target.matches('.bud-in')) setBudget(row.dataset.key, e.target.value);
+});
+document.getElementById('budList').addEventListener('click', e => {
+  const row = e.target.closest('.bud-row'); if(row && e.target.closest('.bud-x')) setBudget(row.dataset.key, 0);
+});
 window.copyDemo = function(){
   const link = location.origin + location.pathname + '?demo';
   (navigator.clipboard ? navigator.clipboard.writeText(link) : Promise.reject()).then(() => toast('Link copiato ✓'), () => prompt('Copia il link:', link));
@@ -2028,12 +2190,12 @@ window.deleteCatEdit = function(){
   const used = tx.filter(t => t.cat === k).length + recurring.filter(r => r.cat === k).length;
   if(used){ document.getElementById('ceErr').textContent = `È usata da ${used} moviment${used === 1 ? 'o' : 'i'}: invece di eliminarla puoi nasconderla.`; return; }
   if(!confirm(`Eliminare la categoria "${label(k)}"?`)) return;
-  delete settings.catMeta[k];
+  delete settings.catMeta[k]; delete settings.budgets[k];
   saveLocal(); pushCloud(); closeCatEdit(); fillCats(tipo, sel.value); render(); toast('Categoria eliminata');
 };
 
 window.exportCSV = function(){
-  const rows = [['Data','Tipo','Categoria','Importo','Progetto','Nota'],
+  const rows = [['Data','Tipo','Categoria','Importo','Viaggio','Nota'],
     ...tx.map(t=>[t.date, t.tipo, label(t.cat), t.amount.toFixed(2).replace('.',','), t.trip||'', t.note||''])];
   const csv = rows.map(r=>r.map(c=>`"${c}"`).join(';')).join('\n');
   download(new Blob(['\ufeff'+csv],{type:'text/csv'}), 'spese.csv');
@@ -2059,7 +2221,7 @@ window.importJSON = function(inp){
           recurring.forEach(x => { if(!keepR.has(x.id)) tomb.push(x.id); });
           recurring = d.recurring || [];
           projects = [...new Set([...(d.projects || [])])];
-          if(d.settings){ settings = {...DEFAULT_SETTINGS, ...d.settings, catMeta: d.settings.catMeta || {}}; applySettings(); }
+          if(d.settings){ settings = normSettings(d.settings); applySettings(); }
         }
         tomb = [...new Set(tomb)].filter(id => !keep.has(keyOf(id))).slice(-1000);
         tx = newTx;
