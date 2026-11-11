@@ -439,6 +439,42 @@
   #editDanger{display:flex; justify-content:center; gap:26px; flex-wrap:wrap;}
   .link-acc{background:none; border:none; color:var(--accent); font:inherit; font-size:.85rem; font-weight:600; cursor:pointer; padding:6px 4px;
     display:inline-flex; align-items:center; gap:5px;}
+  /* riepilogo del mese */
+  .sum-link{display:flex; align-items:center; gap:10px; width:calc(100% - 32px); margin:6px 16px 2px; padding:11px 14px; background:var(--card);
+    border:1px solid var(--line); border-radius:14px; color:var(--text); font:inherit; font-size:.88rem; font-weight:600; cursor:pointer; text-align:left;}
+  .sum-link > .ti:first-child{color:var(--accent); font-size:1.15rem;} .sum-link span:nth-child(2){flex:1;}
+  .sum-link > .ti-chevron-right{color:var(--muted);}
+  .sum-pdf{font-size:.66rem; font-weight:700; color:var(--accent); border:1px solid color-mix(in srgb,var(--accent) 45%,var(--line)); border-radius:6px; padding:2px 6px;}
+  .sum-card{background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 12%,var(--card)),var(--card) 70%); display:grid; gap:10px;}
+  .sum-card .card-head{margin-bottom:-4px;} .sum-card h2{margin-bottom:0;}
+  .sc-main{font-size:.95rem;} .sc-main b{font-size:1.15rem;} .sc-main .up,.sum-line .up,.sum-ch .up{color:var(--red);} .sc-main .down,.sum-line .down,.sum-ch .down{color:var(--green);}
+  .sc-main span{font-size:.8rem; font-weight:600; margin-left:4px;}
+  .sc-ups{display:flex; flex-wrap:wrap; gap:6px; align-items:center; font-size:.76rem; color:var(--muted);}
+  .sc-chip{display:inline-flex; align-items:center; gap:4px; background:var(--card2); border:1px solid var(--line); border-radius:16px; padding:3px 9px 3px 7px; color:var(--text);}
+  .sc-chip .ti{color:var(--accent);} .sc-chip b{color:var(--red); font-weight:700;}
+  .sc-bud{font-size:.8rem; display:flex; align-items:center; gap:6px;} .sc-bud.ok .ti{color:var(--green);} .sc-bud.ko{color:var(--red);}
+  .sc-open{width:100%; padding:11px; font-size:.88rem;}
+  .sum-box{max-width:520px; max-height:88vh; max-height:88dvh; overflow-y:auto; display:grid; gap:16px; padding:18px 18px 0;}
+  .sum-nav{display:flex; align-items:center; gap:6px;} .sum-nav h3{min-width:150px; text-align:center; justify-content:center;}
+  .sum-nav button{background:var(--card2); border:1px solid var(--line); color:var(--accent); width:34px; height:34px; border-radius:10px; cursor:pointer; font-size:1rem;}
+  .sum-nav button:disabled{opacity:.35; cursor:default;}
+  #sumBody{display:grid; gap:22px;}
+  .sum-range{font-size:.76rem; color:var(--muted); margin:-6px 0 -10px;}
+  .sum-kpis{display:grid; grid-template-columns:1fr 1fr; gap:8px;} .sum-kpis .kpi{padding:11px 13px;} .sum-kpis .kpi .val{font-size:1.15rem;}
+  .sum-sec{display:grid; gap:8px;} .sum-sec h4{font-size:.66rem; color:var(--muted); text-transform:uppercase; letter-spacing:.8px; font-weight:600;}
+  .sum-sec .bar-row{margin-bottom:4px;} .sum-sec .bar-row .amt small{color:var(--muted); font-weight:500; margin-left:4px;}
+  .sum-line{display:flex; justify-content:space-between; gap:10px; font-size:.84rem;} .sum-line small{color:var(--muted);} .sum-line b{font-variant-numeric:tabular-nums; white-space:nowrap;}
+  .sum-line .ti{color:var(--accent);}
+  .sum-ch{display:grid; grid-template-columns:minmax(0,1fr) auto auto; gap:10px; align-items:center; font-size:.84rem;}
+  .sum-ch .cat{display:flex; align-items:center; gap:7px; min-width:0;} .sum-ch .cat .ti{color:var(--muted);} .sum-ch .cat span{overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .sum-ch .was{font-size:.74rem; color:var(--muted); font-variant-numeric:tabular-nums;} .sum-ch b{font-variant-numeric:tabular-nums; min-width:62px; text-align:right;}
+  .sum-top{display:grid; grid-template-columns:48px minmax(0,1fr) auto; gap:10px; align-items:baseline; font-size:.84rem; padding:6px 0; border-bottom:1px solid var(--line);}
+  .sum-top:last-child{border-bottom:none;} .sum-top .d{color:var(--muted); font-size:.76rem;} .sum-top .n{min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .sum-top .n small{color:var(--muted); margin-left:6px;} .sum-top b{font-variant-numeric:tabular-nums;}
+  .sum-foot{position:sticky; bottom:0; background:linear-gradient(transparent,var(--card) 30%); padding:14px 0 18px; margin-top:-8px;}
+  .sum-foot .btn:disabled{opacity:.4;}
+  .sum-empty{text-align:center; color:var(--muted); padding:30px 0; font-size:.9rem;} .sum-empty .ti{display:block; font-size:1.8rem; margin-bottom:6px;}
+  @media (min-width:1024px){ .sum-link{width:auto; margin:-8px 16px 20px;} }
   .cp-modal{align-items:flex-start; padding-top:calc(env(safe-area-inset-top) + 18px);}
   .cp-box{max-width:420px; display:flex; flex-direction:column; gap:12px; padding:18px 16px 10px;
     max-height:calc(100vh - env(safe-area-inset-top) - 40px); max-height:calc(100dvh - env(safe-area-inset-top) - 40px);}
@@ -693,11 +729,13 @@
 
 <!-- ============ TAB MESE ============ -->
 <div class="tab" id="tab-mese">
+  <div id="sumCard"></div>
   <div class="kpis kpis-month">
     <div class="kpi hero"><div class="lbl">Spese mese<span class="rng" id="kpiRange"></span></div><div class="val" id="kpiMonth">—</div><div class="kpi-bud" id="kpiBud"></div><div class="cmp" id="kpiCmp"></div></div>
     <div class="kpi pos"><div class="lbl">Entrate mese</div><div class="val" id="kpiIn">—</div></div>
     <div class="kpi"><div class="lbl">Saldo mese</div><div class="val" id="kpiSaldo">—</div></div>
   </div>
+  <button type="button" class="sum-link" onclick="openSummary()"><i class="ti ti-report-analytics"></i><span id="sumLinkLbl">Riepilogo del mese</span><span class="sum-pdf">PDF</span><i class="ti ti-chevron-right"></i></button>
   <div class="cols wide-right"><div class="col">
   <div class="card">
     <div class="card-head" id="catHead">
@@ -983,6 +1021,22 @@
       <button class="btn ghost" type="button" onclick="closeImport()">Annulla</button>
       <button class="btn" type="button" id="impGo" onclick="confirmImport()" style="display:none"><i class="ti ti-check"></i> Importa</button>
     </div>
+  </div>
+</div>
+
+<!-- riepilogo del mese -->
+<div class="modal" id="sumModal" onclick="if(event.target===this)closeSummary()">
+  <div class="modal-box sum-box">
+    <div class="cmp-top">
+      <div class="sum-nav">
+        <button type="button" onclick="shiftSummary(-1)" aria-label="Mese precedente"><i class="ti ti-chevron-left"></i></button>
+        <h3 id="sumTitle">Riepilogo</h3>
+        <button type="button" id="sumNext" onclick="shiftSummary(1)" aria-label="Mese successivo"><i class="ti ti-chevron-right"></i></button>
+      </div>
+      <button class="cmp-x" type="button" onclick="closeSummary()" aria-label="Chiudi"><i class="ti ti-x"></i></button>
+    </div>
+    <div id="sumBody"></div>
+    <div class="sum-foot"><button class="btn" type="button" id="sumPdf" onclick="downloadSummaryPdf()"><i class="ti ti-file-type-pdf"></i> Scarica PDF</button></div>
   </div>
 </div>
 
@@ -2029,7 +2083,8 @@ function renderMese(){
   const outM = mt.filter(t=>t.tipo==='uscita').reduce((s,t)=>s+t.amount,0);
   const inM  = mt.filter(t=>t.tipo==='entrata').reduce((s,t)=>s+t.amount,0);
   document.getElementById('kpiMonth').textContent = fmt.format(outM);
-  renderCompare();
+  renderCompare(); renderSumCard();
+  document.getElementById('sumLinkLbl').textContent = `Riepilogo di ${MESI[cur.m]}`;
   document.getElementById('kpiIn').textContent = fmt.format(inM);
   const saldo = inM - outM;
   document.getElementById('kpiSaldo').textContent = (saldo>=0?'+':'') + fmt.format(saldo);
@@ -2193,7 +2248,7 @@ function openCmp(){ renderCmpModal(); document.getElementById('cmpModal').classL
 window.closeCmp = function(){ document.getElementById('cmpModal').classList.remove('show'); };
 window.setCmpRef = function(off){ cmpOff = off; renderCmpModal(); renderCompare(); };
 window.setCmpDays = function(v){ cmpDays = v; renderCmpModal(); renderCompare(); };
-document.addEventListener('keydown', e => { if(e.key === 'Escape'){ closeCmp(); closePicker(); closeCatPick(); } });
+document.addEventListener('keydown', e => { if(e.key === 'Escape'){ closeCmp(); closePicker(); closeCatPick(); closeSummary(); } });
 
 function renderCmpModal(){
   const c = cmpCtx();
@@ -3067,6 +3122,371 @@ if(DEMO){
 applySettings();
 showTab('mese');
 handleQuickAdd();
+
+// ================= Riepilogo del mese: scheda "in breve", finestra e PDF =================
+// tutti i numeri di un mese (se è il mese in corso, i confronti sono a parità di giorni)
+function monthSummary(y, m){
+  const [a, b] = periodRange(y, m), today = isoDay(new Date());
+  const partial = a <= today && today < b, nDays = dayIndex(b, y, m);
+  const upTo = partial ? dayIndex(today, y, m) : 99;
+  const list = tx.filter(t => inMonth(t, y, m)).sort((p, q) => p.date < q.date ? -1 : p.date > q.date ? 1 : 0);
+  const outs = list.filter(t => t.tipo === 'uscita');
+  const now = periodData(y, m, 99);
+  const pd = new Date(y, m - 1, 1), prev = {y: pd.getFullYear(), m: pd.getMonth()};
+  const prevD = periodData(prev.y, prev.m, upTo);
+  const hist = [];
+  for(let i = 1; i <= 6; i++){
+    const d = new Date(y, m - i, 1), yy = d.getFullYear(), mm = d.getMonth();
+    if(tx.some(t => inMonth(t, yy, mm))) hist.push(periodData(yy, mm, upTo).out);
+  }
+  const cats = [...new Set([...Object.keys(now.byCat), ...Object.keys(prevD.byCat)])];
+  const ch = cats.map(c => ({c, now: now.byCat[c] || 0, prev: prevD.byCat[c] || 0})).map(o => ({...o, d: o.now - o.prev}));
+  const B = budgetsFor(y, m);
+  const fixed = outs.filter(t => isFixed(t.cat)).reduce((s, t) => s + t.amount, 0);
+  const days = Array(nDays).fill(0);
+  outs.forEach(t => { const i = dayIndex(t.date, y, m) - 1; if(i >= 0 && i < nDays) days[i] += t.amount; });
+  const trend = [];
+  for(let i = 5; i >= 0; i--){ const d = new Date(y, m - i, 1); trend.push({y: d.getFullYear(), m: d.getMonth(), out: periodData(d.getFullYear(), d.getMonth(), 99).out}); }
+  const trips = {};
+  outs.forEach(t => { if(t.trip) trips[t.trip] = (trips[t.trip] || 0) + t.amount; });
+  return {y, m, a, b, partial, upTo, nDays, list, out: now.out, inc: now.inc, prev, prevOut: prevD.out,
+    prevHas: tx.some(t => inMonth(t, prev.y, prev.m)), avg6: hist.length ? hist.reduce((s, v) => s + v, 0) / hist.length : null, histN: hist.length,
+    ups: ch.filter(o => o.d >= 1).sort((p, q) => q.d - p.d).slice(0, 3), downs: ch.filter(o => o.d <= -1).sort((p, q) => p.d - q.d).slice(0, 3),
+    byCat: Object.entries(now.byCat).sort((p, q) => q[1] - p[1]),
+    T: budgetTotalFor(y, m), bud: Object.entries(B).map(([c, lim]) => ({c, lim, spent: now.byCat[c] || 0})).sort((p, q) => q.spent / q.lim - p.spent / p.lim),
+    fixed, variable: now.out - fixed, days, top: [...outs].sort((p, q) => q.amount - p.amount).slice(0, 5), trend,
+    trips: Object.entries(trips).sort((p, q) => q[1] - p[1])};
+}
+const sumName = s => `${MESI[s.m]} ${s.y}`;
+const sumVs = s => s.partial ? `primi ${s.upTo} giorni di ${MESI[s.prev.m]}` : MESI[s.prev.m];
+const sgn = v => v > 0 ? '+' : v < 0 ? '−' : '';
+const pctOf = (d, base) => base > 0 ? `${sgn(d)}${Math.round(Math.abs(d) / base * 100)}%` : '';
+const budLine = s => {
+  if(!s.T) return null;
+  const left = s.T - s.out;
+  if(s.partial) return {ok: left >= 0, txt: left >= 0 ? `finora ${fmt0.format(s.out)} su ${fmt0.format(s.T)}: restano ${fmt0.format(left)}` : `già sforato di ${fmt0.format(-left)} (budget ${fmt0.format(s.T)})`};
+  return {ok: left >= 0, txt: left >= 0 ? `rispettato: avanzano ${fmt0.format(left)} su ${fmt0.format(s.T)}` : `sforato di ${fmt0.format(-left)} (budget ${fmt0.format(s.T)})`};
+};
+
+// --- scheda "Ottobre in breve" in cima alla pagina Mese, nei primi 7 giorni del mese nuovo ---
+function renderSumCard(){
+  const el = document.getElementById('sumCard'), today = isoDay(new Date()), np = periodOf(today);
+  const pd = new Date(np.y, np.m - 1, 1), p = {y: pd.getFullYear(), m: pd.getMonth()}, key = ymKey(p.y, p.m);
+  let seen = ''; try { seen = localStorage.getItem('speseSumSeen') || ''; } catch(e){}
+  const show = cur.y === np.y && cur.m === np.m && dayIndex(today, np.y, np.m) <= 7 && seen !== key && tx.some(t => inMonth(t, p.y, p.m));
+  if(!show){ el.innerHTML = ''; return; }
+  const s = monthSummary(p.y, p.m), d = s.out - s.prevOut, bl = budLine(s);
+  el.innerHTML = `<div class="card sum-card">
+    <div class="card-head"><h2><i class="ti ti-sparkles"></i> ${capF(MESI[s.m])} in breve</h2>
+      <button class="cmp-x" type="button" onclick="dismissSumCard('${key}')" aria-label="Chiudi"><i class="ti ti-x"></i></button></div>
+    <div class="sc-main">Hai speso <b>${fmt.format(s.out)}</b>${s.prevHas && s.prevOut ? ` <span class="${d > 0 ? 'up' : 'down'}">${pctOf(d, s.prevOut)} vs ${MESI[s.prev.m]}</span>` : ''}</div>
+    ${s.ups.length ? `<div class="sc-ups"><span>Cresciute di più:</span>${s.ups.map(o => `<span class="sc-chip">${ico(o.c)}${esc(label(o.c))} <b>+${fmt0.format(o.d)}</b></span>`).join('')}</div>` : ''}
+    ${bl ? `<div class="sc-bud ${bl.ok ? 'ok' : 'ko'}"><i class="ti ti-${bl.ok ? 'circle-check' : 'alert-triangle'}"></i> Budget ${bl.txt}</div>` : ''}
+    <button class="btn ghost sc-open" type="button" onclick="openSummary(${s.y}, ${s.m})"><i class="ti ti-report-analytics"></i> Vedi riepilogo e PDF</button>
+  </div>`;
+}
+window.dismissSumCard = function(k){ try { localStorage.setItem('speseSumSeen', k); } catch(e){} renderSumCard(); };
+
+// --- finestra "Riepilogo" (dalla pagina Mese) ---
+let sumYM = {y: 0, m: 0};
+window.openSummary = function(y, m){
+  sumYM = {y: y ?? cur.y, m: m ?? cur.m}; renderSummary();
+  document.getElementById('sumModal').classList.add('show');
+  document.querySelector('#sumModal .sum-box').scrollTop = 0;
+};
+window.closeSummary = function(){ document.getElementById('sumModal').classList.remove('show'); };
+window.shiftSummary = function(d){ const x = new Date(sumYM.y, sumYM.m + d, 1); sumYM = {y: x.getFullYear(), m: x.getMonth()}; renderSummary(); };
+function renderSummary(){
+  const s = monthSummary(sumYM.y, sumYM.m), saldo = s.inc - s.out, np = periodOf(isoDay(new Date()));
+  document.getElementById('sumTitle').textContent = capF(sumName(s));
+  document.getElementById('sumNext').disabled = monIdx(s.y, s.m) >= monIdx(np.y, np.m);
+  document.getElementById('sumPdf').disabled = !s.list.length;
+  const body = document.getElementById('sumBody');
+  if(!s.list.length){ body.innerHTML = `<div class="sum-empty"><i class="ti ti-calendar-off"></i>Nessun movimento in ${sumName(s)}.</div>`; return; }
+  const dP = s.out - s.prevOut, dA = s.avg6 != null ? s.out - s.avg6 : null, bl = budLine(s), maxC = s.byCat.length ? s.byCat[0][1] : 1;
+  const chRow = o => `<div class="sum-ch"><span class="cat">${ico(o.c)}<span>${esc(label(o.c))}</span></span>
+    <span class="was">${fmt0.format(o.prev)} → ${fmt0.format(o.now)}</span><b class="${o.d > 0 ? 'up' : 'down'}">${sgn(o.d)}${fmt0.format(Math.abs(o.d))}</b></div>`;
+  const pctF = s.out ? s.fixed / s.out * 100 : 0;
+  body.innerHTML = `
+    <div class="sum-range">${shortDate(s.a)} – ${shortDate(s.b)}${s.partial ? ' · mese in corso, dati fino a oggi' : ''} · ${s.list.length} movimenti</div>
+    <div class="sum-kpis">
+      <div class="kpi hero"><div class="lbl">Spese</div><div class="val">${fmt.format(s.out)}</div></div>
+      <div class="kpi pos"><div class="lbl">Entrate</div><div class="val">${fmt.format(s.inc)}</div></div>
+      <div class="kpi"><div class="lbl">Saldo</div><div class="val" style="color:var(--${saldo >= 0 ? 'green' : 'red'})">${saldo >= 0 ? '+' : ''}${fmt.format(saldo)}</div></div>
+      <div class="kpi"><div class="lbl">Risparmiato</div><div class="val">${s.inc > 0 ? Math.round(saldo / s.inc * 100) + '%' : '—'}</div></div>
+    </div>
+    <div class="sum-sec"><h4>Confronto</h4>
+      ${s.prevHas ? `<div class="sum-line"><span>vs ${sumVs(s)} <small>(${fmt0.format(s.prevOut)})</small></span><b class="${dP > 0 ? 'up' : 'down'}">${pctOf(dP, s.prevOut) || '—'} · ${sgn(dP)}${fmt0.format(Math.abs(dP))}</b></div>` : ''}
+      ${dA != null ? `<div class="sum-line"><span>vs media ultimi ${s.histN} mesi <small>(${fmt0.format(s.avg6)})</small></span><b class="${dA > 0 ? 'up' : 'down'}">${pctOf(dA, s.avg6) || '—'} · ${sgn(dA)}${fmt0.format(Math.abs(dA))}</b></div>` : ''}
+      ${!s.prevHas && dA == null ? '<div class="sum-line"><span>Non ci sono mesi precedenti da confrontare.</span></div>' : ''}
+    </div>
+    ${s.prevHas && (s.ups.length || s.downs.length) ? `<div class="sum-sec"><h4>Cosa è cambiato rispetto a ${MESI[s.prev.m]}</h4>${[...s.ups, ...s.downs].map(chRow).join('')}</div>` : ''}
+    ${bl || s.bud.length ? `<div class="sum-sec"><h4>Budget</h4>
+      ${bl ? `<div class="sc-bud ${bl.ok ? 'ok' : 'ko'}"><i class="ti ti-${bl.ok ? 'circle-check' : 'alert-triangle'}"></i> Budget del mese ${bl.txt}</div>` : ''}
+      ${s.bud.map(o => budgetRow(o.c, o.spent, o.lim)).join('')}</div>` : ''}
+    <div class="sum-sec"><h4>Per categoria</h4>${s.byCat.map(([c, v]) => barRow(c, v, maxC, `${fmt.format(v)} <small>${Math.round(v / s.out * 100)}%</small>`)).join('')}</div>
+    <div class="sum-sec"><h4>Fisse e variabili</h4>
+      <div class="split">${s.fixed > 0 ? `<div class="fx" style="width:${pctF.toFixed(1)}%"></div>` : ''}${s.variable > 0 ? '<div class="vr" style="flex:1"></div>' : ''}</div>
+      <div class="split-legend"><span><i class="sw fx"></i>Fisse <b>${fmt.format(s.fixed)}</b></span><span><i class="sw vr"></i>Variabili <b>${fmt.format(s.variable)}</b></span></div></div>
+    <div class="sum-sec"><h4>Le spese più grandi</h4>${s.top.map(t => `<div class="sum-top"><span class="d">${shortDate(t.date)}</span>
+      <span class="n">${esc(label(t.cat))}${t.note ? `<small>${esc(t.note)}</small>` : ''}</span><b>${fmt.format(t.amount)}</b></div>`).join('')}</div>
+    ${s.trips.length ? `<div class="sum-sec"><h4>Viaggi</h4>${s.trips.map(([n, v]) => `<div class="sum-line"><span><i class="ti ti-luggage"></i> ${esc(n)}</span><b>${fmt.format(v)}</b></div>`).join('')}</div>` : ''}`;
+}
+
+// --- PDF (scritto a mano, come l'Excel: niente librerie esterne) ---
+// larghezze dei caratteri di Helvetica / Helvetica-Bold (codici 32-255, WinAnsi), servono per allineare i numeri a destra
+const HELV_W = [278,278,355,556,556,889,667,191,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,278,278,584,584,584,556,1015,667,667,722,722,667,611,778,722,278,500,667,556,833,722,778,667,778,722,667,611,722,667,944,667,667,611,278,278,278,469,556,333,556,556,500,556,556,278,556,556,222,222,500,222,833,556,556,556,556,333,500,278,556,500,722,500,500,500,334,260,334,584,350,556,350,222,556,333,1000,556,556,333,1000,667,333,1000,350,611,350,350,222,222,333,333,350,556,1000,333,1000,500,333,944,350,500,667,278,333,556,556,556,556,260,556,333,737,370,556,584,333,737,333,400,584,333,333,333,556,537,278,333,333,365,556,834,834,834,611,667,667,667,667,667,667,1000,722,667,667,667,667,278,278,278,278,722,722,778,778,778,778,778,584,778,722,722,722,722,667,667,611,556,556,556,556,556,556,889,500,556,556,556,556,278,278,278,278,556,556,556,556,556,556,556,584,611,556,556,556,556,500,556,500], HELVB_W = [278,333,474,556,556,889,722,238,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,333,333,584,584,584,611,975,722,722,722,722,667,611,778,722,278,556,722,611,833,722,778,667,778,722,667,611,722,667,944,667,667,611,333,278,333,584,556,333,556,611,556,611,556,333,611,611,278,278,556,278,889,611,611,611,611,389,556,333,611,556,778,556,556,500,389,280,389,584,350,556,350,278,556,500,1000,556,556,333,1000,667,333,1000,350,611,350,350,278,278,500,500,350,556,1000,333,1000,556,333,944,350,500,667,278,333,556,556,556,556,280,556,333,737,370,556,584,333,737,333,400,584,333,333,333,611,556,278,333,333,365,556,834,834,834,611,722,722,722,722,722,722,1000,722,667,667,667,667,278,278,278,278,722,722,778,778,778,778,778,584,778,722,722,722,722,667,667,611,556,556,556,556,556,556,889,556,556,556,556,556,278,278,278,278,611,611,611,611,611,611,611,584,611,611,611,611,611,556,611,556];
+const PDF_MAP = {'€': 128, '‚': 130, '„': 132, '…': 133, '‘': 145, '’': 146, '“': 147, '”': 148, '•': 149, '–': 150, '—': 151, '−': 45, ' ': 32, ' ': 32};
+function pdfEnc(str){
+  let o = '';
+  for(const ch of String(str ?? '')){
+    let c = PDF_MAP[ch] ?? ch.codePointAt(0);
+    if(c < 32) c = 32; else if(c > 255 || (c >= 128 && c < 160 && PDF_MAP[ch] == null)) c = 63;
+    o += String.fromCharCode(c);
+  }
+  return o;
+}
+const encW = (t, size, bold) => { const w = bold ? HELVB_W : HELV_W; let s = 0; for(let i = 0; i < t.length; i++) s += w[t.charCodeAt(i) - 32] || 500; return s * size / 1000; };
+function makePdf(){
+  const W = 595.28, H = 841.89, pages = [];
+  let ops = null;
+  const f = n => String(Math.round(n * 100) / 100);
+  const col = c => c.map(f).join(' ');
+  const roundPath = (x, Y, w, h, r) => { const k = r * .5523;
+    return `${f(x + r)} ${f(Y)} m ${f(x + w - r)} ${f(Y)} l ${f(x + w - r + k)} ${f(Y)} ${f(x + w)} ${f(Y + r - k)} ${f(x + w)} ${f(Y + r)} c ` +
+      `${f(x + w)} ${f(Y + h - r)} l ${f(x + w)} ${f(Y + h - r + k)} ${f(x + w - r + k)} ${f(Y + h)} ${f(x + w - r)} ${f(Y + h)} c ` +
+      `${f(x + r)} ${f(Y + h)} l ${f(x + r - k)} ${f(Y + h)} ${f(x)} ${f(Y + h - r + k)} ${f(x)} ${f(Y + h - r)} c ` +
+      `${f(x)} ${f(Y + r)} l ${f(x)} ${f(Y + r - k)} ${f(x + r - k)} ${f(Y)} ${f(x + r)} ${f(Y)} c f`; };
+  const api = {
+    W, H, pageCount: () => pages.length,
+    page(){ ops = []; pages.push(ops); },
+    // y = dall'alto della pagina
+    rect(x, y, w, h, c, r = 0){
+      if(w <= .05 || h <= .05) return;
+      r = Math.min(r, w / 2, h / 2); const Y = H - y - h;
+      ops.push(`${col(c)} rg ` + (r > .2 ? roundPath(x, Y, w, h, r) : `${f(x)} ${f(Y)} ${f(w)} ${f(h)} re f`));
+    },
+    line(x1, y1, x2, y2, c, w = .5){ ops.push(`${col(c)} RG ${f(w)} w ${f(x1)} ${f(H - y1)} m ${f(x2)} ${f(H - y2)} l S`); },
+    // triangolino ▲/▼ appoggiato sulla linea di base y
+    tri(x, y, s, up, c){ const Y = H - y; ops.push(`${col(c)} rg ` + (up
+      ? `${f(x)} ${f(Y)} m ${f(x + s)} ${f(Y)} l ${f(x + s / 2)} ${f(Y + s)} l f`
+      : `${f(x)} ${f(Y + s)} m ${f(x + s)} ${f(Y + s)} l ${f(x + s / 2)} ${f(Y)} l f`)); },
+    // testo: y = linea di base dall'alto; max = larghezza massima (taglia con …)
+    text(x, y, s, o = {}){
+      const size = o.size || 10, bold = !!o.bold; let t = pdfEnc(s);
+      if(o.max && encW(t, size, bold) > o.max){ while(t.length > 1 && encW(t + '\x85', size, bold) > o.max) t = t.slice(0, -1); t = t.trimEnd() + '\x85'; }
+      const tw = encW(t, size, bold), X = o.align === 'right' ? x - tw : o.align === 'center' ? x - tw / 2 : x;
+      ops.push(`BT /${bold ? 'F2' : 'F1'} ${f(size)} Tf ${col(o.color || [.11, .13, .16])} rg ${f(X)} ${f(H - y)} Td (${t.replace(/[\\()]/g, '\\$&')}) Tj ET`);
+      return tw;
+    },
+    width: (s, size, bold) => encW(pdfEnc(s), size, bold),
+    bytes(title){
+      const objs = [null, '<< /Type /Catalog /Pages 2 0 R >>', null,
+        '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>',
+        '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>'];
+      const kids = [];
+      pages.forEach(p => {
+        const data = p.join('\n'), pi = objs.length;
+        kids.push(`${pi} 0 R`);
+        objs.push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${W} ${H}] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents ${pi + 1} 0 R >>`);
+        objs.push(`<< /Length ${data.length} >>\nstream\n${data}\nendstream`);
+      });
+      objs[2] = `<< /Type /Pages /Kids [${kids.join(' ')}] /Count ${pages.length} >>`;
+      const d = new Date(), stamp = `${d.getFullYear()}${pad2(d.getMonth() + 1)}${pad2(d.getDate())}${pad2(d.getHours())}${pad2(d.getMinutes())}${pad2(d.getSeconds())}`;
+      objs.push(`<< /Title (${pdfEnc(title).replace(/[\\()]/g, '\\$&')}) /Producer (Spese Tracker) /CreationDate (D:${stamp}) >>`);
+      let out = '%PDF-1.4\n%\xE2\xE3\xCF\xD3\n'; const offs = [];
+      for(let i = 1; i < objs.length; i++){ offs[i] = out.length; out += `${i} 0 obj\n${objs[i]}\nendobj\n`; }
+      const xref = out.length;
+      out += `xref\n0 ${objs.length}\n0000000000 65535 f \n` + offs.slice(1).map(o => String(o).padStart(10, '0') + ' 00000 n \n').join('');
+      out += `trailer\n<< /Size ${objs.length} /Root 1 0 R /Info ${objs.length - 1} 0 R >>\nstartxref\n${xref}\n%%EOF`;
+      const bytes = new Uint8Array(out.length); for(let i = 0; i < out.length; i++) bytes[i] = out.charCodeAt(i) & 255;
+      return bytes;
+    }
+  };
+  return api;
+}
+// colore principale del tema, scurito quanto basta per stare bene sul bianco
+function pdfAccent(){
+  let h = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+  let m = /^#?([0-9a-f]{6})$/i.exec(h) || /^#?([0-9a-f]{3})$/i.exec(h);
+  let rgb = [.13, .66, .52];
+  if(m){ let x = m[1]; if(x.length === 3) x = x.split('').map(c => c + c).join(''); rgb = [0, 2, 4].map(i => parseInt(x.slice(i, i + 2), 16) / 255); }
+  const lum = .2126 * rgb[0] + .7152 * rgb[1] + .0722 * rgb[2];
+  return lum > .45 ? rgb.map(v => v * (.45 / lum)) : rgb;
+}
+function buildSummaryPdf(s){
+  const P = makePdf(), M = 40, CW = P.W - 2 * M, BOT = 800;
+  const INK = [.11, .13, .16], MUT = [.42, .46, .52], TRK = [.92, .935, .95], BOX = [.955, .962, .97], RED = [.82, .25, .25], GRN = [.1, .56, .38];
+  const ACC = pdfAccent(), ACC2 = ACC.map(v => v + (1 - v) * .55), FIX = [.62, .66, .72];
+  const money = v => fmt.format(v), money0 = v => fmt0.format(v);
+  const name = sumName(s), saldo = s.inc - s.out;
+  let y = 0;
+  const footer = () => P.text(P.W / 2, 822, `Spese Tracker · ${capF(name)} · pagina ${P.pageCount()}`, {size: 7.5, color: MUT, align: 'center'});
+  const newPage = () => { P.page(); y = 52; };
+  const need = h => { if(y + h > BOT){ footer(); newPage(); return true; } return false; };
+  const h2 = (x, yy, t) => P.text(x, yy, t.toUpperCase(), {size: 8, bold: true, color: MUT});
+  // barra con l'estremità arrotondata e la base dritta
+  const hbar = (x, yy, w, h, c) => { if(w <= 0) return; P.rect(x, yy, w, h, c, h / 2); P.rect(x, yy, Math.min(w, h / 2), h, c); };
+  const vbar = (x, base, w, h, c) => { if(h <= 0) return; const r = Math.min(2, w / 2); P.rect(x, base - h, w, h, c, r); P.rect(x, base - Math.min(h, r), w, Math.min(h, r), c); };
+
+  // ---------- pagina 1: il mese in una pagina ----------
+  newPage();
+  P.text(M, y, 'SPESE TRACKER', {size: 8, bold: true, color: ACC});
+  P.text(M, y + 26, `Riepilogo di ${name}`, {size: 22, bold: true});
+  P.text(M, y + 44, `${shortDate(s.a)} – ${shortDate(s.b)} ${s.y}${s.partial ? ' · mese in corso, dati fino a oggi' : ''} · ${s.list.length} movimenti · creato il ${new Date().toLocaleDateString('it-IT')}`, {size: 8.5, color: MUT});
+  y += 62;
+  const kp = [['Spese', money(s.out), INK], ['Entrate', money(s.inc), GRN], ['Saldo', (saldo >= 0 ? '+' : '') + money(saldo), saldo >= 0 ? GRN : RED],
+    ['Risparmiato', s.inc > 0 ? Math.round(saldo / s.inc * 100) + '%' : '—', INK]];
+  const kw = (CW - 30) / 4;
+  kp.forEach(([l, v, c], i) => { const x = M + i * (kw + 10);
+    P.rect(x, y, kw, 54, BOX, 8); h2(x + 12, y + 18, l);
+    const vw = P.text(x + 12, y + 40, v, {size: 15, bold: true, color: c, max: kw - 20});
+    if(i === 3 && s.inc > 0) P.text(x + 16 + vw, y + 40, 'delle entrate', {size: 8, color: MUT}); });
+  y += 76;
+  // confronto
+  const cmpLine = (lbl, d, base) => {
+    P.text(M, y, lbl, {size: 9.5, color: MUT});
+    const x = M + P.width(lbl, 9.5) + 6;
+    P.tri(x, y - 1, 6.5, d > 0, d > 0 ? RED : GRN);
+    P.text(x + 10, y, `${pctOf(d, base) || '—'}  (${sgn(d)}${money0(Math.abs(d))})`, {size: 9.5, bold: true});
+    y += 15;
+  };
+  if(s.prevHas) cmpLine(`Rispetto ${s.partial ? 'ai ' + sumVs(s) : 'a ' + sumVs(s)} (${money0(s.prevOut)}):`, s.out - s.prevOut, s.prevOut);
+  if(s.avg6 != null) cmpLine(`Rispetto alla media degli ultimi ${s.histN} mesi (${money0(s.avg6)}):`, s.out - s.avg6, s.avg6);
+  y += 14;
+
+  // due colonne: categorie a sinistra; cambiamenti, budget, fisse/variabili a destra
+  const top0 = y, LW = 290, RX = M + LW + 25, RW = CW - LW - 25;
+  h2(M, y, 'Spese per categoria'); let ly = y + 16;
+  const rows = s.byCat.slice(0, 10), rest = s.byCat.slice(10), maxC = rows.length ? rows[0][1] : 1;
+  if(rest.length) rows.push([`Altre (${rest.length})`, rest.reduce((t, r) => t + r[1], 0)]);
+  rows.forEach(([c, v]) => {
+    const nm = c.startsWith('Altre (') ? c : label(c);
+    P.text(M, ly, nm, {size: 9, max: LW - 110});
+    P.text(M + LW, ly, `${money(v)}`, {size: 9, bold: true, align: 'right'});
+    P.text(M + LW - 62, ly, `${Math.round(v / s.out * 100)}%`, {size: 8, color: MUT, align: 'right'});
+    P.rect(M, ly + 4, LW, 5, TRK, 2.5); hbar(M, ly + 4, Math.max(2, LW * v / maxC), 5, ACC);
+    ly += 21;
+  });
+  if(!rows.length){ P.text(M, ly, 'Nessuna spesa', {size: 9, color: MUT}); ly += 16; }
+
+  let ry = y;
+  if(s.prevHas && (s.ups.length || s.downs.length)){
+    h2(RX, ry, `Cosa è cambiato vs ${MESI[s.prev.m]}`); ry += 16;
+    [...s.ups, ...s.downs].forEach(o => {
+      P.tri(RX, ry - 1, 6, o.d > 0, o.d > 0 ? RED : GRN);
+      P.text(RX + 11, ry, label(o.c), {size: 9, max: RW - 75});
+      P.text(RX + RW, ry, `${sgn(o.d)}${money0(Math.abs(o.d))}`, {size: 9, bold: true, align: 'right'});
+      P.text(RX + 11, ry + 10, `da ${money0(o.prev)} a ${money0(o.now)}`, {size: 7.5, color: MUT});
+      ry += 22;
+    });
+    ry += 6;
+  }
+  const bl = budLine(s);
+  if(bl || s.bud.length){
+    h2(RX, ry, 'Budget'); ry += 16;
+    if(bl){ P.text(RX, ry, `Budget del mese: ${bl.ok ? (s.partial ? 'nei limiti' : 'rispettato') : 'sforato'}`, {size: 9, bold: true, color: bl.ok ? GRN : RED});
+      P.text(RX, ry + 11, bl.txt, {size: 8, color: MUT, max: RW}); ry += 26; }
+    s.bud.slice(0, 6).forEach(o => {
+      const over = o.spent > o.lim;
+      P.text(RX, ry, label(o.c), {size: 8.5, max: RW - 80});
+      P.text(RX + RW, ry, `${money0(o.spent)} / ${money0(o.lim)}`, {size: 8.5, bold: true, align: 'right', color: over ? RED : INK});
+      P.rect(RX, ry + 4, RW, 4, TRK, 2); hbar(RX, ry + 4, RW * Math.min(o.spent / o.lim, 1), 4, over ? RED : o.spent >= o.lim * .8 ? [.85, .6, .15] : ACC);
+      ry += 19;
+    });
+    ry += 6;
+  }
+  if(s.out > 0){
+    h2(RX, ry, 'Fisse e variabili'); ry += 10;
+    const fw = RW * s.fixed / s.out;
+    if(s.fixed > 0) P.rect(RX, ry, Math.max(fw - 1, 1), 8, FIX, 2);
+    if(s.variable > 0) P.rect(RX + fw + (s.fixed > 0 ? 1 : 0), ry, RW - fw - (s.fixed > 0 ? 1 : 0), 8, ACC, 2);
+    ry += 22;
+    P.rect(RX, ry - 7, 7, 7, FIX, 1.5); P.text(RX + 11, ry, `Fisse ${money(s.fixed)}`, {size: 8.5});
+    P.rect(RX + RW / 2, ry - 7, 7, 7, ACC, 1.5); P.text(RX + RW / 2 + 11, ry, `Variabili ${money(s.variable)}`, {size: 8.5});
+    ry += 18;
+  }
+  if(s.trips.length){
+    h2(RX, ry, 'Viaggi'); ry += 15;
+    s.trips.slice(0, 4).forEach(([n, v]) => { P.text(RX, ry, n, {size: 9, max: RW - 70}); P.text(RX + RW, ry, money(v), {size: 9, bold: true, align: 'right'}); ry += 14; });
+  }
+  y = Math.max(ly, ry) + 14;
+
+  // grafici affiancati: giorno per giorno (a sinistra) e ultimi 6 mesi (a destra)
+  need(100);
+  const DW = CW * .58, TX = M + DW + 25, TWW = CW - DW - 25, CH = 56;
+  h2(M, y, 'Spese giorno per giorno'); h2(TX, y, 'Ultimi 6 mesi');
+  y += 14;
+  const base = y + CH, dmax = Math.max(...s.days, 1), bw = DW / s.nDays;
+  P.text(M + DW, y - 14, `giorno più caro: ${money0(dmax)}`, {size: 7.5, color: MUT, align: 'right'});
+  s.days.forEach((v, i) => {
+    const future = s.partial && i + 1 > s.upTo;
+    if(future) P.rect(M + i * bw + .6, base - 2, bw - 1.2, 2, TRK);
+    else vbar(M + i * bw + .6, base, bw - 1.2, v > 0 ? Math.max(1.5, CH * v / dmax) : 0, ACC);
+  });
+  P.line(M, base + .5, M + DW, base + .5, [.8, .82, .85], .6);
+  for(let i = 0; i < s.nDays; i += 7){ const iso = isoDay(new Date(new Date(s.a + 'T00:00:00').getTime() + i * 864e5));
+    P.text(M + i * bw + bw / 2, base + 11, shortDate(iso), {size: 7, color: MUT, align: i ? 'center' : 'left'}); }
+  const tmax = Math.max(...s.trend.map(t => t.out), 1), tw = TWW / 6;
+  s.trend.forEach((t, i) => {
+    const x = TX + i * tw, last = i === 5, h = t.out > 0 ? Math.max(1.5, (CH - 12) * t.out / tmax) : 0;
+    vbar(x + tw * .22, base, tw * .56, h, last ? ACC : ACC2);
+    P.text(x + tw / 2, base - h - 4, money0(t.out).replace(/\s?€/, ''), {size: 7, bold: last, color: last ? INK : MUT, align: 'center'});
+    P.text(x + tw / 2, base + 11, MESI[t.m].slice(0, 3), {size: 7, bold: last, color: last ? INK : MUT, align: 'center'});
+  });
+  P.line(TX, base + .5, TX + TWW, base + .5, [.8, .82, .85], .6);
+  y = base + 28;
+
+  // le più grandi (se non stanno nella prima pagina, vanno in cima alla pagina dei movimenti)
+  const topBlock = () => {
+    h2(M, y, 'Le spese più grandi'); y += 14;
+    s.top.forEach(t => {
+      P.text(M, y, shortDate(t.date), {size: 9, color: MUT});
+      P.text(M + 50, y, label(t.cat), {size: 9, bold: true, max: 140});
+      if(t.note) P.text(M + 200, y, t.note, {size: 9, color: MUT, max: CW - 290});
+      P.text(M + CW, y, money(t.amount), {size: 9, bold: true, align: 'right'});
+      y += 14;
+    });
+    y += 12;
+  };
+  const topLater = s.top.length && y + 20 + s.top.length * 14 > BOT;
+  if(s.top.length && !topLater) topBlock();
+  footer();
+
+  // ---------- pagine seguenti: tutti i movimenti ----------
+  newPage();
+  if(topLater) topBlock();
+  P.text(M, y, `Tutti i movimenti di ${name}`, {size: 15, bold: true}); y += 14;
+  P.text(M, y, `${s.list.length} movimenti · uscite ${money(s.out)} · entrate ${money(s.inc)}`, {size: 8.5, color: MUT}); y += 20;
+  const cols = [[M, 'Data'], [M + 52, 'Categoria'], [M + 172, 'Nota'], [M + 372, 'Viaggio']];
+  const head = () => { cols.forEach(([x, t]) => h2(x, y, t)); P.text(M + CW, y, 'IMPORTO', {size: 8, bold: true, color: MUT, align: 'right'});
+    y += 6; P.line(M, y, M + CW, y, [.82, .84, .87], .6); y += 13; };
+  head();
+  s.list.forEach((t, i) => {
+    if(need(15)) head();
+    if(i % 2) P.rect(M - 4, y - 10.5, CW + 8, 15, [.972, .976, .98]);
+    const inc = t.tipo === 'entrata';
+    P.text(M, y, shortDate(t.date), {size: 8.5, color: MUT});
+    P.text(M + 52, y, label(t.cat), {size: 8.5, max: 114});
+    if(t.note) P.text(M + 172, y, t.note, {size: 8.5, color: MUT, max: 194});
+    if(t.trip) P.text(M + 372, y, t.trip, {size: 8.5, color: MUT, max: 70});
+    P.text(M + CW, y, (inc ? '+' : '−') + money(t.amount), {size: 8.5, bold: true, align: 'right', color: inc ? GRN : INK});
+    y += 15;
+  });
+  footer();
+  return P.bytes(`Riepilogo ${name}`);
+}
+window.downloadSummaryPdf = async function(){
+  const s = monthSummary(sumYM.y, sumYM.m); if(!s.list.length) return;
+  const bytes = buildSummaryPdf(s), fname = `Spese ${capF(MESI[s.m])} ${s.y}.pdf`;
+  const blob = new Blob([bytes], {type: 'application/pdf'});
+  // sul telefono: menu Condividi (salva in File, WhatsApp, Mail…); sul PC: download
+  try {
+    const file = new File([blob], fname, {type: 'application/pdf'});
+    if(matchMedia('(pointer:coarse)').matches && navigator.canShare && navigator.canShare({files: [file]})){ await navigator.share({files: [file], title: fname}); return; }
+  } catch(e){ if(e && e.name === 'AbortError') return; }
+  download(blob, fname); toast('PDF scaricato ✓');
+};
 
 // link rapido, per Siri / app Comandi:
 //   ?nuova&importo=4,50&categoria=caffe&nota=bar sotto casa&tipo=entrata&salva=1
