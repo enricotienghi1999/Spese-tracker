@@ -283,6 +283,7 @@
   #nav-wup .fab{background:var(--grad-worth); box-shadow:0 8px 20px rgba(224,149,43,.4);}
   #nav-wup.dot::after{content:''; position:absolute; top:-26px; right:calc(50% - 30px); width:11px; height:11px; border-radius:50%; background:var(--red); border:2px solid var(--bg1);}
   body[data-app="spend"] [data-app="worth"], body[data-app="worth"] [data-app="spend"]{display:none !important;}
+  .bottomnav .nav-grp{display:none;} /* intestazioni di sezione: solo nella barra laterale del PC */
 
   /* month picker */
   .modal{display:none; position:fixed; inset:0; background:rgba(4,6,10,.72); backdrop-filter:blur(4px);
@@ -736,8 +737,20 @@
     .bottomnav button:hover{background:var(--card2); color:var(--text);}
     .bottomnav button.active{background:var(--accent-dk); color:var(--accent);}
     .bottomnav button.active .ico{transform:none;}
-    header .app-h1{position:fixed; top:24px; left:24px; z-index:60;}
-    .bottomnav .nav-fab{order:-1; border-radius:12px; background:var(--grad); color:#0a0f0c; font-weight:700; justify-content:center; margin-bottom:18px;
+    /* sul PC le sezioni stanno tutte nella barra laterale: il selettore in alto non serve */
+    header .app-h1{display:none;}
+    .bottomnav{padding-top:22px !important;}
+    body[data-app] .bottomnav button[data-app]:not(.nav-fab){display:flex !important;}
+    .bottomnav .nav-grp{display:flex; align-items:center; gap:10px; margin:18px 0 4px; padding:8px 10px; border-radius:12px; background:none; border:none;
+      color:var(--muted); font:inherit; font-size:1rem; font-weight:700; cursor:pointer; text-align:left;}
+    .bottomnav .nav-grp:hover{background:var(--card2); color:var(--text);}
+    .bottomnav .nav-grp small{margin-left:auto; font-size:.7rem; font-weight:500; color:var(--muted);}
+    .bottomnav .nav-grp .logo{width:28px; height:28px; border-radius:9px; font-size:.95rem; opacity:.75;}
+    body[data-app="spend"] .nav-grp[data-grp="spend"], body[data-app="worth"] .nav-grp[data-grp="worth"]{color:var(--text);}
+    body[data-app="spend"] .nav-grp[data-grp="spend"] .logo, body[data-app="worth"] .nav-grp[data-grp="worth"] .logo{opacity:1;}
+    .nav-grp[data-grp="spend"]{order:1; margin-top:0 !important;} #nav-add{order:2;} #nav-dash{order:3;} #nav-mese{order:4;} #nav-projs{order:5;}
+    .nav-grp[data-grp="worth"]{order:6;} #nav-wup{order:7;} #nav-wpan{order:8;} #nav-whist{order:9;} #nav-wacc{order:10;} #nav-sett{order:11;}
+    .bottomnav .nav-fab{border-radius:12px; background:var(--grad); color:#0a0f0c; font-weight:700; justify-content:center; margin:2px 0 8px;
       box-shadow:0 4px 14px color-mix(in srgb,var(--accent) 28%,transparent);}
     .bottomnav .nav-fab:hover,.bottomnav .nav-fab.active{background:var(--grad); color:#0a0f0c; filter:brightness(1.05);}
     .nav-fab .fab{width:auto; height:auto; margin:0; border:none; background:none; box-shadow:none; color:inherit; font-size:1.2rem;}
@@ -1111,10 +1124,12 @@
 
 <!-- bottom nav -->
 <nav class="bottomnav">
+  <button class="nav-grp" data-grp="spend" onclick="setApp('spend')"><span class="logo spend"><i class="ti ti-wallet"></i></span>iSpend<small>spese</small></button>
   <button id="nav-dash" data-app="spend" onclick="showTab('dash')"><i class="ti ti-layout-dashboard ico"></i>Dashboard</button>
   <button id="nav-mese" data-app="spend" onclick="showTab('mese')"><i class="ti ti-calendar-month ico"></i>Mese</button>
   <button id="nav-add" class="nav-fab" data-app="spend" onclick="openAdd()" aria-label="Aggiungi movimento"><span class="fab"><i class="ti ti-plus"></i></span><span class="nav-lbl">Nuovo movimento</span></button>
   <button id="nav-projs" data-app="spend" onclick="showTab('projs')"><i class="ti ti-luggage ico"></i>Viaggi</button>
+  <button class="nav-grp" data-grp="worth" onclick="setApp('worth')"><span class="logo worth"><i class="ti ti-diamond"></i></span>iWorth<small>patrimonio</small></button>
   <button id="nav-wpan" data-app="worth" onclick="showTab('wpan')"><i class="ti ti-chart-donut ico"></i>Panoramica</button>
   <button id="nav-whist" data-app="worth" onclick="showTab('whist')"><i class="ti ti-history ico"></i>Storico</button>
   <button id="nav-wup" class="nav-fab" data-app="worth" onclick="openUpdate()" aria-label="Aggiorna i saldi"><span class="fab"><i class="ti ti-refresh"></i></span><span class="nav-lbl">Aggiorna i saldi</span></button>
