@@ -424,6 +424,7 @@
   .quick-cats{display:flex; gap:6px; margin:8px -16px 0 0; padding-right:16px; overflow-x:auto; scrollbar-width:none; -webkit-overflow-scrolling:touch;
     -webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent); mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent);}
   .quick-cats::-webkit-scrollbar{display:none;}
+  @media (min-width:1024px){ .quick-cats{flex-wrap:wrap; overflow:visible; margin-right:0; padding-right:0; -webkit-mask-image:none; mask-image:none;} }
   .qc{display:inline-flex; align-items:center; gap:5px; padding:6px 11px 6px 8px; border-radius:20px; border:1px solid var(--line);
     background:var(--card2); color:var(--text); font:inherit; font-size:.8rem; font-weight:500; cursor:pointer; flex-shrink:0;}
   .qc span{white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
@@ -1443,13 +1444,13 @@ function syncCatBtn(){
     : `<span class="dot ph"><i class="ti ti-category"></i></span><span class="nm">Scegli categoria</span>`) + '<i class="ti ti-chevron-down"></i>';
   renderQuickCats(); noteSugView();
 }
-// le categorie che usi di più (ultimi 90 giorni, senza le ricorrenti): un tocco e sono scelte
+// le 8 categorie che usi di più (ultimi 90 giorni, senza le ricorrenti): un tocco e sono scelte
 function topCats(t){
   const count = from => { const m = {}; tx.forEach(x => { if(x.tipo === t && !x.rid && x.date >= from) m[x.cat] = (m[x.cat] || 0) + 1; }); return m; };
   let m = count(isoDay(new Date(Date.now() - 90 * 864e5)));
   if(Object.keys(m).length < 3) m = count('');
   const ok = new Set(catList(t));
-  return Object.keys(m).filter(c => ok.has(c)).sort((a, b) => m[b] - m[a] || byLabel(a, b)).slice(0, 5);
+  return Object.keys(m).filter(c => ok.has(c)).sort((a, b) => m[b] - m[a] || byLabel(a, b)).slice(0, 8);
 }
 function renderQuickCats(){
   const box = document.getElementById('quickCats'), list = topCats(tipo);
@@ -1460,15 +1461,96 @@ document.getElementById('quickCats').addEventListener('click', e => { const b = 
 
 // nota -> categoria: guarda con che categoria hai salvato in passato note simili (es. "esselunga" -> Spesa)
 let autoCat = null; // categoria messa in automatico dalla nota (cambia se cambi la nota)
+// --- nota -> categoria ---
+// Impara dai tuoi movimenti: per ogni nota che scrivi cerca le note simili già salvate e guarda che categoria avevi scelto.
+// - tollera gli errori di battitura (esselunag = esselunga) e le parole a metà mentre scrivi (essel…)
+// - le scelte recenti contano di più (il peso si dimezza ogni ~4 mesi): se cambi abitudine, si adegua
+// - se non hai ancora movimenti simili, usa un elenco di negozi e parole tipiche (Esselunga, Eni, Glovo…)
+const NOTE_STOP = new Set('di da del della dello dei degli delle con per al alla allo ai agli il la le lo i gli un una uno e a ad in su sul sulla the and pos pagamento pagam carta acquisto addebito presso op nr'.split(' '));
+const tokCache = new Map();
+function noteToks(s){
+  let r = tokCache.get(s);
+  // via le parole vuote, i numeri e i codici (restano q8, a2a)
+  if(!r){ r = normTxt(s).split(' ').filter(w => w && !NOTE_STOP.has(w) && !/^\d+$/.test(w) && !/\d.*\d.*\d/.test(w)); if(tokCache.size > 5000) tokCache.clear(); tokCache.set(s, r); }
+  return r;
+}
+// distanza tra due parole (lettere sbagliate, mancanti, in più o scambiate)
+function wordDist(a, b){
+  if(Math.abs(a.length - b.length) > 2) return 9;
+  const d = Array.from({length: a.length + 1}, (_, i) => [i, ...Array(b.length).fill(0)]);
+  for(let j = 1; j <= b.length; j++) d[0][j] = j;
+  for(let i = 1; i <= a.length; i++) for(let j = 1; j <= b.length; j++){
+    d[i][j] = Math.min(d[i-1][j] + 1, d[i][j-1] + 1, d[i-1][j-1] + (a[i-1] === b[j-1] ? 0 : 1));
+    if(i > 1 && j > 1 && a[i-1] === b[j-2] && a[i-2] === b[j-1]) d[i][j] = Math.min(d[i][j], d[i-2][j-2] + 1);
+  }
+  return d[a.length][b.length];
+}
+// la parola a (scritta da te) corrisponde a b? pre = a può essere a metà
+function wordHit(a, b, pre){
+  if(a === b) return true;
+  if(pre && a.length >= 3 && b.startsWith(a)) return true;
+  if(a.length < 5 || b.length < 4 || a[0] !== b[0]) return false;
+  if(b.length >= 5 && wordDist(a, b) <= (Math.max(a.length, b.length) >= 8 ? 2 : 1)) return true;
+  return pre && b.length > a.length && wordDist(a, b.slice(0, a.length)) <= 1;
+}
+// 1 = una nota contiene l'altra, 0.35 = una parola importante in comune, 0 = niente
+function noteSim(typed, past){
+  if(!typed.length || !past.length) return 0;
+  const L = typed.length - 1;
+  if(typed.every((w, i) => past.some(p => wordHit(w, p, i === L)))) return 1;
+  if(past.every(p => typed.some((w, i) => wordHit(p, w, false) || wordHit(w, p, i === L)))) return 1;
+  return typed.some((w, i) => w.length >= 4 && past.some(p => wordHit(w, p, i === L))) ? .35 : 0;
+}
+// parole tipiche per iniziare (contano solo se non hai movimenti simili)
+const NOTE_DICT = {
+  'SPESA (SUPER)': 'esselunga, coop, ipercoop, conad, carrefour, lidl, eurospin, pam, unes, iper, bennet, aldi, despar, eurospar, penny, tigros, crai, sigma, naturasi, supermercato, spesa, gigante, simply, todis, tuodi, famila, basko',
+  'BENZINA': 'eni, enilive, q8, tamoil, esso, shell, api, benzina, carburante, gasolio, diesel, rifornimento, metano, gpl, totalenergies',
+  'FOOD DELIVERY': 'glovo, deliveroo, justeat, just eat, ubereats, uber eats, delivery',
+  'UBER / TAXI': 'uber, taxi, freenow, free now, cabify, bolt, itaxi',
+  'TRASPORTI PUBBLICI': 'atm, trenitalia, italo, trenord, metro, metropolitana, tram, autobus, bus, treno, frecciarossa, flixbus',
+  'PARCHEGGI & PEDAGGI': 'parcheggio, telepass, autostrada, pedaggio, easypark, strisce blu, parking',
+  'ABBONAMENTI': 'netflix, spotify, disney, amazon prime, dazn, now tv, sky, icloud, apple music, youtube premium, palestra, abbonamento, chatgpt, google one',
+  'BOLLETTE': 'enel, a2a, iren, hera, edison, luce, gas, acqua, bolletta, tim, vodafone, wind, iliad, fastweb, internet, tari',
+  'AFFITTO & BOLLETTE': 'affitto, mutuo, condominio',
+  'BAR & COLAZIONE': 'bar, colazione, cornetto, brioche, cappuccino',
+  'CAFFÈ': 'caffe, espresso, starbucks',
+  'PRANZI & CENE': 'ristorante, pizzeria, pizza, trattoria, osteria, pranzo, cena, sushi, mcdonald, burger king, kebab, poke, mensa, panino',
+  'DRINK & APERITIVI': 'aperitivo, spritz, birra, cocktail, pub, drink, vino, enoteca',
+  'GELATI & SNACK': 'gelato, gelateria, snack, macchinetta',
+  'SIGARETTE': 'sigarette, tabacchi, tabaccheria, iqos, heets, terea, tabacco',
+  'VESTITI': 'zara, uniqlo, primark, bershka, pull bear, zalando, vestiti, scarpe, jeans, ovs, benetton, calzedonia, intimissimi',
+  'ENTRATE DISCO': 'discoteca, disco, serata, ingresso, club',
+  'REGALI': 'regalo, regali, compleanno',
+  'MEDICINE & VISITE': 'farmacia, parafarmacia, medicine, medicina, visita, dentista, medico, analisi, oculista, ospedale',
+  'VIAGGI': 'hotel, airbnb, booking, ryanair, easyjet, volo, aereo, wizz, vueling, albergo, ostello',
+  'DEBITI': 'prestito, debito',
+  'STIPENDIO': 'stipendio, busta paga, cedolino, tredicesima, quattordicesima',
+  'RIMBORSI': 'rimborso, rimborsi, nota spese',
+  'REGALI RICEVUTI': 'regalo, regali',
+  'VENDITE': 'vinted, vendita, subito, ebay',
+  'INTERESSI & DIVIDENDI': 'interessi, dividendi, dividendo, cedola'
+};
+// ogni voce = elenco di parole (es. "uber eats" -> ["uber", "eats"])
+const DICT_TOKS = Object.fromEntries(Object.entries(NOTE_DICT).map(([k, v]) => [k, v.split(',').map(e => noteToks(e)).filter(e => e.length)]));
 function suggestCat(note, t){
-  const q = normTxt(note); if(q.length < 3) return null;
-  const m = {}, last = {};
+  const typed = noteToks(note); if(normTxt(note).length < 2 || !typed.length) return null; // 2 lettere bastano solo se la parola è identica (es. Q8)
+  const ok = new Set(catList(t)), full = {}, part = {}, now = Date.now();
   tx.forEach(x => {
-    if(x.tipo !== t || !x.note || !(' ' + normTxt(x.note)).includes(' ' + q)) return;
-    m[x.cat] = (m[x.cat] || 0) + 1; if(!last[x.cat] || x.date > last[x.cat]) last[x.cat] = x.date;
+    if(x.tipo !== t || !x.note || !ok.has(x.cat)) return;
+    const sim = noteSim(typed, noteToks(x.note)); if(!sim) return;
+    const w = Math.pow(.5, Math.max(0, now - Date.parse(x.date)) / 864e5 / 120);
+    const into = sim === 1 ? full : part; into[x.cat] = (into[x.cat] || 0) + w;
   });
-  const ok = new Set(catList(t));
-  return Object.keys(m).filter(c => ok.has(c)).sort((a, b) => m[b] - m[a] || (last[b] > last[a] ? 1 : -1))[0] || null;
+  const best = o => Object.keys(o).sort((a, b) => o[b] - o[a])[0] || null;
+  if(best(full)) return best(full);
+  // parole tipiche: "esselunga milano" -> Spesa; "essel" mentre scrivi -> Spesa
+  const L = typed.length - 1, dict = {};
+  for(const [c, entries] of Object.entries(DICT_TOKS)){
+    if(!ok.has(c)) continue;
+    const n = entries.filter(e => e.every(p => typed.some((w, i) => wordHit(p, w, false) || (e.length === 1 && wordHit(w, p, i === L))))).length;
+    if(n) dict[c] = n;
+  }
+  return best(dict) || best(part);
 }
 function noteSugView(){
   const box = document.getElementById('noteSug'), s = suggestCat(document.getElementById('fNote').value, tipo);
@@ -2848,7 +2930,7 @@ function rowsToMovements(rows){
     if(m.date !== undefined && m.amount !== undefined){ hi = i; map = m; }
   }
   if(hi < 0) throw new Error('intestazione');
-  const body = rows.slice(hi + 1), ready = [], problems = [], warnings = [];
+  const body = rows.slice(hi + 1), ready = [], problems = [], warnings = []; let guessed = 0;
   const anyNeg = map.tipo === undefined && body.some(r => toAmount(r[map.amount]) < 0);
   body.forEach((r, i) => {
     const line = hi + i + 2;
@@ -2859,11 +2941,19 @@ function rowsToMovements(rows){
     let tp;
     if(map.tipo !== undefined){ const tv = normTxt(r[map.tipo]); tp = /^(entr|accredit|income|in$|e$|\+)/.test(tv) ? 'entrata' : 'uscita'; }
     else tp = anyNeg && a > 0 ? 'entrata' : 'uscita';
-    const fc = findCat(map.cat !== undefined ? r[map.cat] : '', tp);
+    const note = map.note !== undefined ? String(r[map.note] ?? '').trim() : '';
+    const raw = map.cat !== undefined ? String(r[map.cat] ?? '').trim() : '';
+    let fc = findCat(raw, tp);
+    // categoria vuota o sconosciuta (es. estratto conto della banca): la deduco dalla descrizione, come nel modulo
+    if((!raw || fc.warn) && note){
+      const sg = suggestCat(note, tp);
+      if(sg){ fc = {cat: sg, warn: raw ? `categoria "${raw}" non trovata → ${label(sg)} (dalla descrizione)` : null}; if(!raw) guessed++; }
+    }
     if(fc.warn) warnings.push(`Riga ${line}: ${fc.warn}`);
     ready.push({date, tipo: tp, cat: fc.cat, amount: Math.round(Math.abs(a) * 100) / 100,
-      note: map.note !== undefined ? String(r[map.note] ?? '').trim() : '', trip: map.trip !== undefined ? String(r[map.trip] ?? '').trim() : ''});
+      note, trip: map.trip !== undefined ? String(r[map.trip] ?? '').trim() : ''});
   });
+  if(guessed) warnings.unshift(`${guessed} moviment${guessed === 1 ? 'o' : 'i'} senza categoria: l'ho dedotta dalla descrizione (controlla nell'anteprima)`);
   return {ready, problems, warnings};
 }
 
