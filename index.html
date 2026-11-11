@@ -241,6 +241,10 @@
     box-shadow:0 6px 20px rgba(0,0,0,.4); width:max-content; max-width:calc(100vw - 32px); text-align:center; line-height:1.35;}
   .toast.warn{background:var(--gold); color:#1d1606;} .toast.over{background:var(--red); color:#fff;}
   .toast.show{transform:translateX(-50%) translateY(0);}
+  .toast.act{display:flex; align-items:center; gap:12px; padding:7px 7px 7px 20px; text-align:left; pointer-events:none;}
+  .toast.act .toast-btn{pointer-events:auto;}
+  .toast-btn{background:rgba(0,0,0,.2); color:inherit; border:none; border-radius:18px; padding:8px 14px; font:inherit; font-weight:700;
+    font-size:.86rem; cursor:pointer; flex-shrink:0;}
   .auth-form{display:grid; gap:10px;}
   .auth-actions{display:flex; gap:8px; margin-top:2px;}
   .auth-actions .btn{flex:1; padding:12px; font-size:.88rem;}
@@ -408,6 +412,54 @@
   .tag{font-size:.64rem; font-weight:600; padding:2px 7px; border-radius:6px; background:var(--card2); color:var(--muted); border:1px solid var(--line);}
   .tag.acc{background:var(--accent-dk); color:var(--accent); border-color:transparent;}
   .add-cat{margin-top:12px;}
+  /* campo Categoria nel modulo + finestra di scelta con ricerca */
+  .cat-field{width:100%; display:flex; align-items:center; gap:10px; background:var(--card2); border:1px solid var(--line); color:var(--text);
+    border-radius:12px; padding:7px 12px 7px 7px; font:inherit; font-size:1rem; cursor:pointer; text-align:left; transition:border-color .2s;}
+  .cat-field .dot{width:34px; height:34px; font-size:1.05rem; border-radius:10px; flex-shrink:0;}
+  .cat-field .dot.ph{background:var(--card); color:var(--muted);}
+  .cat-field .nm{flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .cat-field.empty .nm{color:var(--muted);}
+  .cat-field > .ti-chevron-down{color:var(--muted); font-size:1.25rem;}
+  .cat-field:focus-visible{outline:none; border-color:var(--accent); box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 15%, transparent);}
+  .quick-cats{display:flex; gap:6px; margin:8px -16px 0 0; padding-right:16px; overflow-x:auto; scrollbar-width:none; -webkit-overflow-scrolling:touch;
+    -webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent); mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent);}
+  .quick-cats::-webkit-scrollbar{display:none;}
+  .qc{display:inline-flex; align-items:center; gap:5px; padding:6px 11px 6px 8px; border-radius:20px; border:1px solid var(--line);
+    background:var(--card2); color:var(--text); font:inherit; font-size:.8rem; font-weight:500; cursor:pointer; flex-shrink:0;}
+  .qc span{white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .qc .ti{color:var(--accent); font-size:.95rem;}
+  .qc.on{background:color-mix(in srgb,var(--accent) 16%,transparent); border-color:color-mix(in srgb,var(--accent) 55%,var(--line)); color:var(--accent); font-weight:600;}
+  .note-sug:empty{display:none;} .note-sug{margin-top:8px;}
+  .ns-btn{display:flex; align-items:center; gap:7px; width:100%; padding:8px 8px 8px 11px; border-radius:11px; font:inherit; font-size:.8rem; text-align:left;
+    border:1px dashed color-mix(in srgb,var(--accent) 50%,var(--line)); background:color-mix(in srgb,var(--accent) 7%,transparent); color:var(--muted); cursor:pointer;}
+  .ns-btn > span:first-of-type{flex:1;} .ns-btn b{color:var(--text); font-weight:600;} .ns-btn .ti{color:var(--accent);}
+  .ns-use{color:var(--accent); font-weight:700; padding:3px 8px;}
+  .ns-auto{font-size:.74rem; color:var(--muted);} .ns-auto .ti{color:var(--accent);}
+  #editDanger{display:flex; justify-content:center; gap:26px; flex-wrap:wrap;}
+  .link-acc{background:none; border:none; color:var(--accent); font:inherit; font-size:.85rem; font-weight:600; cursor:pointer; padding:6px 4px;
+    display:inline-flex; align-items:center; gap:5px;}
+  .cp-modal{align-items:flex-start; padding-top:calc(env(safe-area-inset-top) + 18px);}
+  .cp-box{max-width:420px; display:flex; flex-direction:column; gap:12px; padding:18px 16px 10px;
+    max-height:calc(100vh - env(safe-area-inset-top) - 40px); max-height:calc(100dvh - env(safe-area-inset-top) - 40px);}
+  .cp-search{position:relative; flex-shrink:0;}
+  .cp-search > .ti-search{position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--muted); font-size:1.1rem; pointer-events:none;}
+  .cp-search input{padding-left:42px; padding-right:42px;}
+  .cp-search button{position:absolute; right:6px; top:50%; transform:translateY(-50%); width:34px; height:34px; border-radius:9px;
+    background:none; border:none; color:var(--muted); cursor:pointer; font-size:1rem;}
+  .cp-list{overflow-y:auto; -webkit-overflow-scrolling:touch; margin:0 -6px; padding:0 6px 6px; overscroll-behavior:contain;}
+  .cp-row{display:flex; align-items:center; gap:12px; width:100%; padding:7px 8px; border:none; border-radius:12px; background:none;
+    color:var(--text); font:inherit; font-size:.95rem; text-align:left; cursor:pointer;}
+  .cp-row .dot{width:36px; height:36px; font-size:1.1rem; flex-shrink:0;}
+  .cp-row .nm{flex:1; min-width:0; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  @media (hover:hover){ .cp-row:hover{background:var(--card2);} }
+  .cp-row.on{background:color-mix(in srgb,var(--accent) 12%,transparent);}
+  .cp-row.on .nm{color:var(--accent); font-weight:600;} .cp-row > .ti-check{color:var(--accent); font-size:1.1rem;}
+  .cp-empty{text-align:center; color:var(--muted); font-size:.88rem; padding:26px 10px; line-height:1.5;}
+  .cp-empty .ti{display:block; font-size:1.6rem; margin-bottom:6px;} .cp-empty small{display:block; font-size:.78rem; margin-top:2px;}
+  @media (min-width:1024px){ .cp-modal{align-items:center; padding-top:24px;} .cp-box{max-height:min(640px, 86vh);} }
+  .cat-more{display:flex; align-items:center; justify-content:center; gap:6px; width:100%; padding:13px 4px 3px; background:none; border:none;
+    color:var(--accent); font:inherit; font-size:.85rem; font-weight:600; cursor:pointer;}
+  .cat-more .ti{font-size:1rem;}
   .cat-box{max-width:420px; display:grid; gap:14px; max-height:88vh; overflow-y:auto;}
   .icon-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(42px,1fr)); gap:6px; max-height:186px; overflow-y:auto; padding:2px;}
   .icon-grid button{height:42px; border-radius:10px; background:var(--card2); border:1px solid var(--line); color:var(--text);
@@ -418,6 +470,12 @@
   .acct p{color:var(--muted);} .acct b{color:var(--text); font-weight:600;}
   .acct .row-btns{display:flex; gap:8px; flex-wrap:wrap;}
   .acct .btn{width:auto; padding:10px 14px; font-size:.85rem;}
+  .siri-how summary{cursor:pointer; color:var(--accent); font-weight:600; font-size:.85rem; list-style:none; display:flex; align-items:center; gap:6px;}
+  .siri-how summary::-webkit-details-marker{display:none;}
+  .siri-how summary::before{content:'\203A'; display:inline-block; font-size:1.15rem; line-height:1; transition:transform .2s;}
+  .siri-how[open] summary::before{transform:rotate(90deg);}
+  .siri-how ol{margin:10px 0 8px 20px; display:grid; gap:7px; color:var(--muted); font-size:.84rem;}
+  .siri-how code{background:var(--card2); padding:1px 5px; border-radius:5px; color:var(--text); font-size:.8rem;}
   a.btn{text-decoration:none;}
 
   /* budget */
@@ -507,6 +565,8 @@
   /* schermi piccoli: nel trend annuale mostra solo il valore del mese selezionato */
   .mtable td{white-space:nowrap;}
   @media (max-width:520px){
+    .kpis-month{grid-template-columns:1fr 1fr;}
+    .kpis-month .hero{grid-column:1 / -1;}
     #dTrend .trend-col:not(.cur) .v{visibility:hidden;}
     .sync-status{padding:5px 10px;}
     .mtable td{padding:10px 4px; font-size:.78rem;}
@@ -632,7 +692,7 @@
 
 <!-- ============ TAB MESE ============ -->
 <div class="tab" id="tab-mese">
-  <div class="kpis">
+  <div class="kpis kpis-month">
     <div class="kpi hero"><div class="lbl">Spese mese<span class="rng" id="kpiRange"></span></div><div class="val" id="kpiMonth">—</div><div class="kpi-bud" id="kpiBud"></div><div class="cmp" id="kpiCmp"></div></div>
     <div class="kpi pos"><div class="lbl">Entrate mese</div><div class="val" id="kpiIn">—</div></div>
     <div class="kpi"><div class="lbl">Saldo mese</div><div class="val" id="kpiSaldo">—</div></div>
@@ -720,7 +780,9 @@
       </div>
       <div class="full">
         <label>Categoria</label>
-        <select id="fCat"></select>
+        <select id="fCat" hidden></select>
+        <button type="button" class="cat-field empty" id="fCatBtn" onclick="openCatPick()"></button>
+        <div class="quick-cats" id="quickCats" aria-label="Categorie usate più spesso"></div>
       </div>
       <div class="full">
         <label>Viaggio (opzionale)</label>
@@ -728,7 +790,8 @@
       </div>
       <div class="full">
         <label>Nota (opzionale)</label>
-        <input type="text" id="fNote" placeholder="es. cena con amici">
+        <input type="text" id="fNote" placeholder="es. cena con amici" autocomplete="off">
+        <div class="note-sug" id="noteSug"></div>
       </div>
       <div class="full" id="repeatBox">
         <label class="switch-row"><input type="checkbox" id="fRepeat">
@@ -738,7 +801,8 @@
         <button class="btn ghost" type="button" id="btnCancel" onclick="cancelEdit()" style="display:none">Annulla</button>
         <button class="btn" type="submit" id="btnSubmit"><i class="ti ti-check"></i> Salva</button>
       </div>
-      <div class="full" id="editDanger" style="display:none; text-align:center">
+      <div class="full" id="editDanger" style="display:none">
+        <button type="button" class="link-acc" id="btnRepeatToday" onclick="repeatToday()"><i class="ti ti-copy"></i> Ripeti oggi</button>
         <button type="button" class="link-danger" id="btnDanger" onclick="dangerEdit()"></button>
       </div>
     </form>
@@ -839,6 +903,23 @@
     <input type="file" id="xlsFile" accept=".xlsx,.csv,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" style="display:none" onchange="importExcel(this)">
   </div>
   <div class="card">
+    <h2><i class="ti ti-microphone"></i> Aggiungi con Siri</h2>
+    <div class="acct">
+      <p>Con un comando dell'app <b>Comandi</b> dici «Ehi Siri, spesa», rispondi importo e categoria e la spesa è salvata.</p>
+      <div class="row-btns"><button class="btn ghost" onclick="copySiriLink()"><i class="ti ti-copy"></i> Copia link per Comandi</button></div>
+      <details class="siri-how"><summary>Come creare il comando</summary>
+        <ol>
+          <li>Apri <b>Comandi</b>, tocca <b>+</b> e chiama il comando «Spesa».</li>
+          <li>Aggiungi <b>Chiedi input</b>: tipo <i>Numero</i>, domanda «Quanto?».</li>
+          <li>Aggiungi <b>Elenco</b> con le tue categorie, una parola e senza accenti (Caffe, Pranzi, Spesa, Benzina…), poi <b>Scegli da elenco</b>.</li>
+          <li>Aggiungi <b>Testo</b>: incolla il link copiato, in fondo inserisci la variabile <i>Elemento scelto</i>, scrivi <code>&amp;importo=</code> e inserisci <i>Input fornito</i>.</li>
+          <li>Aggiungi <b>Apri URL</b>. Fatto: «Ehi Siri, spesa».</li>
+        </ol>
+        <p>Il link si apre in Safari: la prima volta fai l'accesso lì, poi le spese arrivano anche nell'app.</p>
+      </details>
+    </div>
+  </div>
+  <div class="card">
     <h2><i class="ti ti-user"></i> Account</h2>
     <div class="acct" id="accountBox"></div>
   </div>
@@ -901,6 +982,22 @@
       <button class="btn ghost" type="button" onclick="closeImport()">Annulla</button>
       <button class="btn" type="button" id="impGo" onclick="confirmImport()" style="display:none"><i class="ti ti-check"></i> Importa</button>
     </div>
+  </div>
+</div>
+
+<!-- scegli categoria (modulo Aggiungi) -->
+<div class="modal cp-modal" id="cpModal" onclick="if(event.target===this)closeCatPick()">
+  <div class="modal-box cp-box">
+    <div class="cmp-top">
+      <h3 id="cpTitle">Categoria</h3>
+      <button class="cmp-x" type="button" onclick="closeCatPick()" aria-label="Chiudi"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="cp-search">
+      <i class="ti ti-search"></i>
+      <input type="text" id="cpQ" placeholder="Cerca categoria" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="done" aria-label="Cerca categoria">
+      <button type="button" id="cpClear" onclick="clearCatPick()" aria-label="Cancella ricerca"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="cp-list" id="cpList"></div>
   </div>
 </div>
 
@@ -975,10 +1072,13 @@ const ico = c => `<i class="ti ti-${meta(c).icon || ICONS[c] || 'package'}"></i>
 const label = c => meta(c).label || defLabel(c);
 const isFixed = c => meta(c).fixed ?? FISSE.has(c);
 const catTipo = c => meta(c).tipo || (CATS_IN[c] ? 'entrata' : 'uscita');
+const LAST_CATS = new Set(['ALTRO', 'ALTRE ENTRATE']); // restano in fondo
+const byLabel = (a, b) => (LAST_CATS.has(a) - LAST_CATS.has(b)) || label(a).localeCompare(label(b), 'it', {sensitivity: 'base'});
+// categorie di un tipo, in ordine alfabetico
 function catList(t, withHidden){
   const base = t === 'entrata' ? catNamesIn : catNames;
   const custom = Object.keys(settings.catMeta).filter(k => settings.catMeta[k].custom && settings.catMeta[k].tipo === t);
-  return [...base, ...custom].filter(c => withHidden || !meta(c).hidden);
+  return [...base, ...custom].filter(c => withHidden || !meta(c).hidden).sort(byLabel);
 }
 
 // valuta: cambia solo il simbolo (niente conversioni)
@@ -1328,9 +1428,97 @@ const sel = document.getElementById('fCat');
 function fillCats(t, keep){
   const list = catList(t);
   const opts = keep && !list.includes(keep) ? [...list, keep] : list; // es. vecchie entrate salvate come "ALTRO"
-  sel.innerHTML = opts.map(c => `<option value="${esc(c)}">${label(c)}</option>`).join('');
-  if(keep) sel.value = keep;
+  sel.innerHTML = '<option value="">Scegli categoria</option>' + opts.map(c => `<option value="${esc(c)}">${label(c)}</option>`).join('');
+  sel.value = keep || '';
+  autoCat = null;
+  syncCatBtn();
 }
+// scelta fatta da te (finestra, chip o suggerimento)
+function pickCat(c){ sel.value = c; autoCat = null; syncCatBtn(); sel.dispatchEvent(new Event('change')); }
+// quello che si vede al posto della tendina: icona + nome della categoria scelta
+function syncCatBtn(){
+  const c = sel.value, b = document.getElementById('fCatBtn');
+  b.classList.toggle('empty', !c);
+  b.innerHTML = (c ? `<span class="dot${catTipo(c) === 'entrata' ? ' in' : ''}">${ico(c)}</span><span class="nm">${esc(label(c))}</span>`
+    : `<span class="dot ph"><i class="ti ti-category"></i></span><span class="nm">Scegli categoria</span>`) + '<i class="ti ti-chevron-down"></i>';
+  renderQuickCats(); noteSugView();
+}
+// le categorie che usi di più (ultimi 90 giorni, senza le ricorrenti): un tocco e sono scelte
+function topCats(t){
+  const count = from => { const m = {}; tx.forEach(x => { if(x.tipo === t && !x.rid && x.date >= from) m[x.cat] = (m[x.cat] || 0) + 1; }); return m; };
+  let m = count(isoDay(new Date(Date.now() - 90 * 864e5)));
+  if(Object.keys(m).length < 3) m = count('');
+  const ok = new Set(catList(t));
+  return Object.keys(m).filter(c => ok.has(c)).sort((a, b) => m[b] - m[a] || byLabel(a, b)).slice(0, 5);
+}
+function renderQuickCats(){
+  const box = document.getElementById('quickCats'), list = topCats(tipo);
+  box.style.display = list.length >= 2 ? '' : 'none';
+  box.innerHTML = list.map(c => `<button type="button" class="qc${c === sel.value ? ' on' : ''}" data-key="${esc(c)}">${ico(c)}<span>${esc(label(c))}</span></button>`).join('');
+}
+document.getElementById('quickCats').addEventListener('click', e => { const b = e.target.closest('.qc'); if(b) pickCat(b.dataset.key); });
+
+// nota -> categoria: guarda con che categoria hai salvato in passato note simili (es. "esselunga" -> Spesa)
+let autoCat = null; // categoria messa in automatico dalla nota (cambia se cambi la nota)
+function suggestCat(note, t){
+  const q = normTxt(note); if(q.length < 3) return null;
+  const m = {}, last = {};
+  tx.forEach(x => {
+    if(x.tipo !== t || !x.note || !(' ' + normTxt(x.note)).includes(' ' + q)) return;
+    m[x.cat] = (m[x.cat] || 0) + 1; if(!last[x.cat] || x.date > last[x.cat]) last[x.cat] = x.date;
+  });
+  const ok = new Set(catList(t));
+  return Object.keys(m).filter(c => ok.has(c)).sort((a, b) => m[b] - m[a] || (last[b] > last[a] ? 1 : -1))[0] || null;
+}
+function noteSugView(){
+  const box = document.getElementById('noteSug'), s = suggestCat(document.getElementById('fNote').value, tipo);
+  if(s && s !== sel.value)
+    box.innerHTML = `<button type="button" class="ns-btn" data-key="${esc(s)}"><i class="ti ti-sparkles"></i><span>Di solito è <b>${esc(label(s))}</b></span><span class="ns-use">Usa</span></button>`;
+  else if(s && s === autoCat)
+    box.innerHTML = `<span class="ns-auto"><i class="ti ti-sparkles"></i> Categoria scelta in base alla nota</span>`;
+  else box.innerHTML = '';
+}
+document.getElementById('noteSug').addEventListener('click', e => { const b = e.target.closest('.ns-btn'); if(b) pickCat(b.dataset.key); });
+document.getElementById('fNote').addEventListener('input', () => {
+  // categoria ancora vuota (o messa prima dalla nota): la scelgo io; se l'hai scelta tu, mostro solo il suggerimento
+  if(!editMode && (!sel.value || sel.value === autoCat)){
+    const s = suggestCat(document.getElementById('fNote').value, tipo);
+    if((s || '') !== sel.value){ sel.value = s || ''; syncCatBtn(); }
+    autoCat = s;
+  }
+  noteSugView();
+});
+// finestra "Scegli categoria" con ricerca
+window.openCatPick = function(){
+  const q = document.getElementById('cpQ'); q.value = '';
+  document.getElementById('cpTitle').textContent = tipo === 'entrata' ? 'Categoria entrata' : 'Categoria spesa';
+  renderCatPick();
+  document.getElementById('cpModal').classList.add('show');
+  const list = document.getElementById('cpList'), on = list.querySelector('.cp-row.on');
+  list.scrollTop = 0; if(on) on.scrollIntoView({block: 'nearest'});
+  if(matchMedia('(hover:hover) and (pointer:fine)').matches) q.focus(); // sul PC scrivi subito; sul telefono la tastiera si apre solo se tocchi la lente
+};
+window.closeCatPick = function(){ document.getElementById('cpModal').classList.remove('show'); };
+function renderCatPick(){
+  const qv = document.getElementById('cpQ').value, n = normTxt(qv), curC = sel.value;
+  const all = catList(tipo); if(curC && !all.includes(curC)) all.push(curC);
+  // prima quelle in cui una parola inizia con quello che scrivi (es. "ca" -> Caffè prima di Pranzi & cene), poi le altre
+  const startsWord = c => (' ' + normTxt(label(c))).includes(' ' + n) ? 0 : 1;
+  const list = n ? all.filter(c => normTxt(label(c)).includes(n)).sort((x, y) => startsWord(x) - startsWord(y)) : all;
+  document.getElementById('cpClear').style.display = qv ? '' : 'none';
+  document.getElementById('cpList').innerHTML = list.length ? list.map(c => `<button type="button" class="cp-row${c === curC ? ' on' : ''}" data-key="${esc(c)}">
+      <span class="dot${tipo === 'entrata' ? ' in' : ''}">${ico(c)}</span><span class="nm">${esc(label(c))}</span>${c === curC ? '<i class="ti ti-check"></i>' : ''}</button>`).join('')
+    : `<div class="cp-empty"><i class="ti ti-mood-empty"></i>Nessuna categoria con "${esc(qv)}".<small>Puoi crearla in Opzioni → Categorie.</small></div>`;
+}
+document.getElementById('cpList').addEventListener('click', e => {
+  const b = e.target.closest('.cp-row'); if(!b) return;
+  pickCat(b.dataset.key); closeCatPick();
+});
+document.getElementById('cpQ').addEventListener('input', renderCatPick);
+document.getElementById('cpQ').addEventListener('keydown', e => {
+  if(e.key === 'Enter'){ e.preventDefault(); const first = document.querySelector('#cpList .cp-row'); if(first) first.click(); }
+});
+window.clearCatPick = function(){ const q = document.getElementById('cpQ'); q.value = ''; renderCatPick(); q.focus(); };
 fillCats('uscita');
 // riga "categoria + importo" con barra sotto (usata in Mese e Dashboard)
 // txt (opzionale) sostituisce l'importo, es. la percentuale
@@ -1389,12 +1577,21 @@ function budgetAlert(sn){
 document.getElementById('fDate').value = isoDay(new Date());
 
 // kind: '' (normale), 'warn' (arancione), 'over' (rosso)
-function toast(msg, kind){
+// action (opzionale) = {label, fn}: bottone nel messaggio, es. "Annulla"
+function toast(msg, kind, action){
   document.querySelectorAll('.toast').forEach(x => x.remove());
-  const t = document.createElement('div'); t.className = 'toast' + (kind ? ' ' + kind : ''); t.textContent = msg;
+  const t = document.createElement('div'); t.className = 'toast' + (kind ? ' ' + kind : '');
+  if(action){
+    t.classList.add('act');
+    const m = document.createElement('span'); m.textContent = msg;
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'toast-btn'; b.textContent = action.label;
+    b.onclick = () => { t.remove(); action.fn(); };
+    t.append(m, b);
+    document.addEventListener('input', () => { t.classList.remove('show'); setTimeout(() => t.remove(), 400); }, {once: true});
+  } else t.textContent = msg;
   document.body.appendChild(t);
   requestAnimationFrame(()=>t.classList.add('show'));
-  setTimeout(()=>{ t.classList.remove('show'); setTimeout(()=>t.remove(), 400); }, kind ? 3200 : 1600);
+  setTimeout(()=>{ t.classList.remove('show'); setTimeout(()=>t.remove(), 400); }, action ? 5000 : kind ? 3200 : 1600);
 }
 window.setType = function(t, keepCat){
   const changed = t !== tipo;
@@ -1404,6 +1601,7 @@ window.setType = function(t, keepCat){
   if(changed || keepCat) fillCats(t, keepCat);
 };
 window.showTab = function(t){
+  closeCatPick();
   if(['dash', 'projs', 'sett'].includes(t)) resetTxFilters();
   tab = t;
   document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
@@ -1469,6 +1667,7 @@ function setFormMode(mode, info){
   document.getElementById('fDate').required = !isRec;
   document.getElementById('fDay').required = !!isRec;
   document.getElementById('editDanger').style.display = mode ? '' : 'none';
+  document.getElementById('btnRepeatToday').style.display = isTx ? '' : 'none';
   document.getElementById('btnDanger').innerHTML = isRec ? '<i class="ti ti-player-stop"></i> Interrompi ricorrenza'
     : '<i class="ti ti-trash"></i> Elimina movimento';
   document.getElementById('recCard').style.display = mode ? 'none' : '';
@@ -1479,7 +1678,7 @@ function setFormMode(mode, info){
 function resetForm(){
   document.getElementById('txForm').reset();
   document.getElementById('fDate').value = isoDay(new Date());
-  setType('uscita', catList('uscita')[0]);
+  setType('uscita'); fillCats('uscita');
   setFormMode(null);
 }
 function fillForm(o){
@@ -1489,7 +1688,10 @@ function fillForm(o){
   document.getElementById('fTrip').value = o.trip || '';
 }
 // "+" in basso: modulo vuoto
-window.openAdd = function(){ resetTxFilters(); resetForm(); showTab('add'); };
+window.openAdd = function(){
+  resetTxFilters(); resetForm(); showTab('add');
+  document.getElementById('fAmount').focus(); // sul telefono si apre subito la tastiera numerica
+};
 // azzera ricerca, filtro categoria, "Tutti" e filtro progetto dei Movimenti
 // (non quando tocchi un movimento per modificarlo: al ritorno ritrovi la tua ricerca)
 function resetTxFilters(){
@@ -1527,6 +1729,7 @@ window.submitTx = function(e){
   const n = document.getElementById('fNote').value.trim();
   const tr = document.getElementById('fTrip').value;
   if(!(a > 0)){ toast('Importo non valido'); document.getElementById('fAmount').focus(); return false; }
+  if(!c){ toast('Scegli una categoria'); openCatPick(); return false; }
   const withTrip = o => { if(tr) o.trip = tr; else delete o.trip; return o; };
 
   if(editMode && editMode.kind === 'rec'){
@@ -1573,14 +1776,54 @@ window.submitTx = function(e){
     tx.push(withTrip({id: Date.now() + Math.random(), date: d, amount: a, cat: c, note: n, tipo}));
   }
   saveLocal(); pushCloud();
+  const added = {id: repeat ? null : tx[tx.length - 1].id, rid: repeat ? recurring[recurring.length - 1].id : null,
+    form: {tipo, cat: c, amount: a, note: n, date: d, trip: tr, repeat}};
   document.getElementById('fAmount').value = '';
   document.getElementById('fNote').value = '';
   document.getElementById('fRepeat').checked = false;
+  autoCat = null; noteSugView();
+  const act = {label: 'Annulla', fn: () => undoAdd(added)};
   const al = tipo === 'uscita' ? budgetAlert(snap) : null;
-  if(al) toast('✓ Salvato · ' + al.msg, al.kind);
-  else toast((tipo === 'uscita' ? '−' : '+') + fmt.format(a) + (repeat ? ' · ripetuta ogni mese ✓' : ' salvato ✓'));
+  if(al) toast('✓ Salvato · ' + al.msg, al.kind, act);
+  else toast((tipo === 'uscita' ? '−' : '+') + fmt.format(a) + (repeat ? ' · ripetuta ogni mese ✓' : ' salvato ✓'), null, act);
   render();
   return false;
+};
+// "Annulla" nel messaggio dopo il salvataggio: toglie il movimento (o la ricorrenza appena creata)
+// e, se sei ancora nel modulo vuoto, lo rimette lì per correggerlo
+function undoAdd(added){
+  const ids = new Set(added.id != null ? [added.id] : []);
+  if(added.rid){
+    tx.filter(t => t.rid === added.rid).forEach(t => ids.add(t.id));
+    recurring = recurring.filter(r => r.id !== added.rid); tomb.push(added.rid);
+  }
+  tx = tx.filter(t => !ids.has(t.id));
+  tomb.push(...ids); tomb = tomb.slice(-1000);
+  saveLocal(); pushCloud(); render();
+  const f = added.form, amt = document.getElementById('fAmount');
+  if(f && tab === 'add' && !editMode && !amt.value){
+    setType(f.tipo, f.cat);
+    amt.value = Number(f.amount).toFixed(2).replace('.', ',');
+    document.getElementById('fNote').value = f.note || '';
+    document.getElementById('fDate').value = f.date;
+    document.getElementById('fTrip').value = f.trip || '';
+    document.getElementById('fRepeat').checked = !!f.repeat;
+    toast('Annullato: correggilo e salva');
+  } else toast('Annullato');
+}
+// "Ripeti oggi" (modificando un movimento): lo stesso movimento con la data di oggi
+window.repeatToday = function(){
+  const t = editMode && editMode.kind === 'tx' && tx.find(x => x.id === editMode.id); if(!t) return;
+  const today = isoDay(new Date());
+  const nt = {id: Date.now() + Math.random(), date: today, amount: t.amount, cat: t.cat, note: t.note || '', tipo: t.tipo};
+  if(t.trip) nt.trip = t.trip;
+  const snap = budgetSnap(today, nt.cat);
+  tx.push(nt); saveLocal(); pushCloud();
+  const back = returnTab; resetForm(); showTab(back);
+  const act = {label: 'Annulla', fn: () => undoAdd({id: nt.id})};
+  const al = nt.tipo === 'uscita' ? budgetAlert(snap) : null;
+  if(al) toast('✓ Ripetuto oggi · ' + al.msg, al.kind, act);
+  else toast(`${label(nt.cat)} ${fmt.format(nt.amount)} ripetuto oggi ✓`, null, act);
 };
 
 // elimina un movimento (se viene da una ricorrente, quel mese non verrà più rigenerato)
@@ -1690,6 +1933,7 @@ function render(){
   fTrip.innerHTML = '<option value="">— nessuno —</option>' +
     projects.map(p => `<option value="${esc(p)}">${esc(p)}</option>`).join('');
   fTrip.value = projects.includes(keepTrip) ? keepTrip : '';
+  renderQuickCats(); // le più usate cambiano man mano che aggiungi movimenti
 
   renderMese();
   renderDash();
@@ -1867,7 +2111,7 @@ function openCmp(){ renderCmpModal(); document.getElementById('cmpModal').classL
 window.closeCmp = function(){ document.getElementById('cmpModal').classList.remove('show'); };
 window.setCmpRef = function(off){ cmpOff = off; renderCmpModal(); renderCompare(); };
 window.setCmpDays = function(v){ cmpDays = v; renderCmpModal(); renderCompare(); };
-document.addEventListener('keydown', e => { if(e.key === 'Escape'){ closeCmp(); closePicker(); } });
+document.addEventListener('keydown', e => { if(e.key === 'Escape'){ closeCmp(); closePicker(); closeCatPick(); } });
 
 function renderCmpModal(){
   const c = cmpCtx();
@@ -2163,8 +2407,16 @@ window.setSetting = function(k, v){
   saveLocal(); pushCloud(); render();
 };
 
-let catType = 'uscita';
+let catType = 'uscita', catOpen = false;
 window.setCatType = function(t){ catType = t; renderSettings(); };
+const CAT_PREVIEW = 5; // categorie visibili prima di "Mostra tutte"
+window.toggleCatOpen = function(){
+  catOpen = !catOpen; renderSettings();
+  if(!catOpen){ // chiudendo, riporta in vista l'inizio del riquadro se eri sceso
+    const card = document.getElementById('catSettList').closest('.card');
+    if(card.getBoundingClientRect().top < 0) card.scrollIntoView({block: 'start', behavior: 'smooth'});
+  }
+};
 
 function renderSettings(){
   document.getElementById('themeGrid').innerHTML = Object.entries(THEMES).map(([k, t]) => `
@@ -2183,14 +2435,17 @@ function renderSettings(){
     .map(([c, n]) => `<option value="${c}"${c === settings.currency ? ' selected' : ''}>${n} (${c})</option>`).join('');
 
   document.querySelectorAll('#catTypeSeg button').forEach((b, i) => b.classList.toggle('on', (i === 1) === (catType === 'entrata')));
-  document.getElementById('catSettList').innerHTML = catList(catType, true).map(c => {
+  const allCats = catList(catType, true), canFold = allCats.length > CAT_PREVIEW + 1;
+  document.getElementById('catSettList').innerHTML = (canFold && !catOpen ? allCats.slice(0, CAT_PREVIEW) : allCats).map(c => {
     const m = meta(c);
     return `<div class="cat-row${m.hidden ? ' hid' : ''}" data-key="${esc(c)}">
       <div class="dot${catType === 'entrata' ? ' in' : ''}">${ico(c)}</div>
       <span class="nm">${esc(label(c))}</span>
       <span class="tags">${catType === 'uscita' && isFixed(c) ? '<span class="tag acc">fissa</span>' : ''}${m.hidden ? '<span class="tag">nascosta</span>' : ''}${m.custom ? '<span class="tag">tua</span>' : ''}</span>
       <i class="ti ti-chevron-right"></i></div>`;
-  }).join('');
+  }).join('') + (canFold ? `<button type="button" class="cat-more" onclick="toggleCatOpen()">${catOpen
+      ? 'Mostra meno <i class="ti ti-chevron-up"></i>'
+      : `Mostra tutte (${allCats.length}) <i class="ti ti-chevron-down"></i>`}</button>` : '');
 
   // budget: "Tutti i mesi" oppure "Un mese"
   const plain = v => String(v).replace('.', ',');
@@ -2343,6 +2598,7 @@ window.saveCatEdit = function(){
     const key = name.toUpperCase();
     if(ICONS[key] || settings.catMeta[key]){ err.textContent = 'Esiste già una categoria con questo nome'; return; }
     settings.catMeta[key] = {custom: true, tipo: catType, label: name, icon: catEditIcon, ...(catType === 'uscita' && fixed ? {fixed: true} : {})};
+    catOpen = true; // così vedi subito la nuova categoria in fondo alla lista
   } else if(meta(catEditKey).custom){
     const m = meta(catEditKey);
     settings.catMeta[catEditKey] = {custom: true, tipo: m.tipo, label: name, icon: catEditIcon,
@@ -2559,7 +2815,7 @@ function readCsv(buf){
 }
 
 // --- dalle righe del file ai movimenti ---
-const normTxt = s => String(s ?? '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
+function normTxt(s){ return String(s ?? '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, ' ').trim(); }
 const XL_NAMES = {date: ['data', 'date', 'giorno', 'data operazione', 'data contabile'], tipo: ['tipo', 'type', 'entrata uscita', 'segno'],
   cat: ['categoria', 'category', 'cat'], amount: ['importo', 'amount', 'euro', 'valore', 'totale', 'prezzo', 'importo eur'],
   trip: ['viaggio', 'progetto', 'trip', 'evento'], note: ['nota', 'note', 'descrizione', 'description', 'dettaglio', 'causale']};
@@ -2720,6 +2976,41 @@ if(DEMO){
 }
 applySettings();
 showTab('mese');
+handleQuickAdd();
+
+// link rapido, per Siri / app Comandi:
+//   ?nuova&importo=4,50&categoria=caffe&nota=bar sotto casa&tipo=entrata&salva=1
+// apre il modulo già compilato; con "salva" registra subito (e mostra Annulla)
+function matchCat(v, t){
+  const n = normTxt(v); if(!n) return null;
+  for(const tp of [t, t === 'uscita' ? 'entrata' : 'uscita']){
+    const list = catList(tp);
+    const hit = list.find(c => normTxt(label(c)) === n || normTxt(c) === n)
+      || list.find(c => (' ' + normTxt(label(c))).includes(' ' + n));
+    if(hit) return hit;
+  }
+  return null;
+}
+function handleQuickAdd(){
+  const p = new URLSearchParams(location.search);
+  if(!p.has('nuova')) return;
+  history.replaceState(null, '', location.pathname + (DEMO ? '?demo' : '')); // così ricaricando non la salva due volte
+  resetTxFilters(); resetForm(); showTab('add');
+  const c = matchCat(p.get('categoria') || '', /^entr/i.test(p.get('tipo') || '') ? 'entrata' : 'uscita');
+  const t = c ? catTipo(c) : /^entr/i.test(p.get('tipo') || '') ? 'entrata' : 'uscita';
+  setType(t);
+  if(c) pickCat(c);
+  const a = parseAmount(p.get('importo') || '');
+  if(a > 0) document.getElementById('fAmount').value = a.toFixed(2).replace('.', ',');
+  if(p.get('nota')){ const f = document.getElementById('fNote'); f.value = p.get('nota'); f.dispatchEvent(new Event('input')); }
+  if(p.has('salva') && a > 0 && sel.value) submitTx({preventDefault(){}});
+  else if(!(a > 0)) document.getElementById('fAmount').focus();
+  else if(!sel.value) openCatPick();
+}
+window.copySiriLink = function(){
+  const link = location.origin + location.pathname + '?nuova&salva=1&categoria=';
+  (navigator.clipboard ? navigator.clipboard.writeText(link) : Promise.reject()).then(() => toast('Link copiato ✓'), () => prompt('Copia il link:', link));
+};
 
 // app installabile: il service worker serve per l'icona "Installa" e per aprirla anche offline
 if('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
