@@ -421,6 +421,25 @@
   .cat-field.empty .nm{color:var(--muted);}
   .cat-field > .ti-chevron-down{color:var(--muted); font-size:1.25rem;}
   .cat-field:focus-visible{outline:none; border-color:var(--accent); box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 15%, transparent);}
+  .split-box{display:grid; gap:10px; margin-top:-2px;}
+  .sp-btns{display:flex; gap:8px;}
+  .sp-btn{flex:1; display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:9px 10px; border-radius:12px; border:1px dashed var(--line);
+    background:none; color:var(--muted); font:inherit; font-size:.82rem; font-weight:600; cursor:pointer;}
+  .sp-btn.on{border-style:solid; border-color:color-mix(in srgb,var(--accent) 60%,var(--line)); background:color-mix(in srgb,var(--accent) 12%,transparent); color:var(--accent);}
+  .sp-panel:empty{display:none;}
+  .sp-panel{display:grid; gap:9px; background:var(--card2); border:1px solid var(--line); border-radius:12px; padding:12px;}
+  .sp-panel label{margin:0;}
+  .sp-row{display:flex; align-items:center; gap:10px; flex-wrap:wrap; font-size:.88rem;} .sp-row small{color:var(--muted);}
+  .sp-step{display:inline-flex; align-items:center; gap:4px; background:var(--card); border:1px solid var(--line); border-radius:11px; padding:3px;}
+  .sp-step button{width:32px; height:32px; border-radius:8px; border:none; background:none; color:var(--accent); font-size:1rem; cursor:pointer;}
+  .sp-step b{min-width:24px; text-align:center; font-size:1.05rem;}
+  .sp-calc{display:flex; gap:8px;} .sp-calc input{flex:1; min-width:0;}
+  .sp-calc button{width:48px; flex-shrink:0; border-radius:12px; border:1px solid var(--line); background:var(--card); color:var(--accent); font-size:1.2rem; cursor:pointer;}
+  .sp-res{display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 12px; font-size:.86rem; color:var(--muted);}
+  .sp-res b{color:var(--text); font-size:1.05rem;} .sp-res .sp-sum{width:100%; font-size:.78rem;} .sp-res .sp-oth{font-size:.78rem;}
+  .sp-res.bad{color:var(--red);}
+  .tx .amount .split-tag{display:flex; align-items:center; justify-content:flex-end; gap:3px; font-size:.7rem; font-weight:500; color:var(--muted); margin-top:2px;}
+  .split-tag .ti{font-size:.95em;}
   .quick-cats{display:flex; gap:6px; margin:8px -16px 0 0; padding-right:16px; overflow-x:auto; scrollbar-width:none; -webkit-overflow-scrolling:touch;
     -webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent); mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent);}
   .quick-cats::-webkit-scrollbar{display:none;}
@@ -816,6 +835,13 @@
       <div id="dayBox" style="display:none">
         <label>Giorno del mese</label>
         <input type="number" id="fDay" min="1" max="31" step="1" inputmode="numeric" placeholder="1–31">
+      </div>
+      <div class="full split-box" id="splitBox">
+        <div class="sp-btns">
+          <button type="button" class="sp-btn" id="spEqBtn" onclick="setSplit('eq')"><i class="ti ti-users"></i> Spesa divisa</button>
+          <button type="button" class="sp-btn" id="spCalcBtn" onclick="setSplit('calc')"><i class="ti ti-calculator"></i> Calcolatore</button>
+        </div>
+        <div class="sp-panel" id="spPanel"></div>
       </div>
       <div class="full">
         <label>Categoria</label>
@@ -1735,6 +1761,8 @@ window.setType = function(t, keepCat){
   document.getElementById('btnOut').className = t==='uscita' ? 'active-out' : '';
   document.getElementById('btnIn').className  = t==='entrata' ? 'active-in' : '';
   if(changed || keepCat) fillCats(t, keepCat);
+  if(changed && t === 'entrata') split = null; // le entrate non si dividono
+  renderSplit();
 };
 window.showTab = function(t){
   closeCatPick();
@@ -1785,6 +1813,7 @@ window.pickMonth = function(m){
 };
 
 // ---------- modulo: nuovo movimento, modifica movimento, modifica ricorrente ----------
+let split = null;         // spesa divisa: {mode: 'eq', n} | {mode: 'calc', expr}
 let editMode = null;      // null = nuovo | {kind:'tx', id} | {kind:'rec', id}
 let returnTab = 'mese';   // dove tornare dopo "Salva modifiche" / "Annulla"
 const keyOf = id => String(id);
@@ -1792,6 +1821,7 @@ const findTx = key => tx.find(t => keyOf(t.id) === key);
 
 function setFormMode(mode, info){
   editMode = mode;
+  renderSplit(); // nelle ricorrenti niente divisione
   const isTx = mode && mode.kind === 'tx', isRec = mode && mode.kind === 'rec';
   document.getElementById('formTitle').innerHTML = isTx ? '<i class="ti ti-pencil"></i> Modifica movimento'
     : isRec ? '<i class="ti ti-repeat"></i> Modifica ricorrente' : '<i class="ti ti-plus"></i> Aggiungi movimento';
@@ -1816,13 +1846,74 @@ function resetForm(){
   document.getElementById('fDate').value = isoDay(new Date());
   setType('uscita'); fillCats('uscita');
   setFormMode(null);
+  setSplitState(null);
 }
 function fillForm(o){
   setType(o.tipo, o.cat);
-  document.getElementById('fAmount').value = Number(o.amount).toFixed(2).replace('.', ',');
+  // spesa divisa: nel campo torna quello che hai pagato in tutto, e il modo in cui l'hai divisa
+  document.getElementById('fAmount').value = Number(o.split ? o.split.paid : o.amount).toFixed(2).replace('.', ',');
+  setSplitState(o.split ? (o.split.n ? {mode: 'eq', n: o.split.n} : {mode: 'calc', expr: o.split.expr || String(o.split.others).replace('.', ',')}) : null);
   document.getElementById('fNote').value = o.note || '';
   document.getElementById('fTrip').value = o.trip || '';
 }
+
+// ---------- spesa divisa ----------
+// "Spesa divisa": hai pagato tutto tu, si divide in N parti uguali (te compreso)
+// "Calcolatore": scrivi la parte degli altri (anche 18+12), la tua è il resto
+// Nei totali, nei budget e nei grafici conta solo la tua parte; il movimento si ricorda quanto hai pagato.
+const r2 = v => Math.round(v * 100) / 100;
+function splitCalc(){
+  if(!split) return null;
+  const paid = parseAmount(document.getElementById('fAmount').value);
+  if(!(paid > 0)) return {ok: false, why: 'Scrivi quanto hai pagato'};
+  if(split.mode === 'eq'){ const share = r2(paid / split.n); return {ok: true, paid, share, others: r2(paid - share), n: split.n}; }
+  const parts = String(split.expr || '').split('+').map(x => x.trim()).filter(Boolean);
+  if(!parts.length) return {ok: false, paid, why: 'Scrivi la parte degli altri'};
+  const vals = parts.map(parseAmount);
+  if(vals.some(v => !(v > 0))) return {ok: false, paid, why: 'Controlla i numeri della parte degli altri'};
+  const others = r2(vals.reduce((t, v) => t + v, 0)), share = r2(paid - others);
+  if(share <= 0) return {ok: false, paid, others, parts: vals, why: 'La parte degli altri è uguale o più grande di quello che hai pagato'};
+  return {ok: true, paid, share, others, parts: vals, expr: parts.join('+')};
+}
+function setSplitState(st){ split = st; renderSplit(); }
+window.setSplit = function(mode){
+  if(split && split.mode === mode) setSplitState(null); // ritocco = spento
+  else setSplitState(mode === 'eq' ? {mode, n: split && split.n || 2} : {mode, expr: ''});
+  if(split && split.mode === 'calc') document.getElementById('spOthers').focus();
+};
+window.splitN = function(d){ split.n = Math.min(30, Math.max(2, split.n + d)); renderSplitRes(); document.getElementById('spN').textContent = split.n; };
+window.splitPlus = function(){
+  const f = document.getElementById('spOthers'); const v = f.value.replace(/\+\s*$/, '');
+  if(v) f.value = v + '+'; f.focus(); split.expr = f.value; renderSplitRes();
+};
+function renderSplit(){
+  const box = document.getElementById('splitBox'), panel = document.getElementById('spPanel');
+  box.style.display = tipo === 'uscita' && !(editMode && editMode.kind === 'rec') ? '' : 'none';
+  document.getElementById('spEqBtn').classList.toggle('on', !!split && split.mode === 'eq');
+  document.getElementById('spCalcBtn').classList.toggle('on', !!split && split.mode === 'calc');
+  document.getElementById('amountLbl').textContent = (split ? 'Hai pagato ' : 'Importo ') + curSym;
+  if(!split){ panel.innerHTML = ''; return; }
+  panel.innerHTML = (split.mode === 'eq'
+    ? `<div class="sp-row"><span>Divisa tra</span>
+        <span class="sp-step"><button type="button" onclick="splitN(-1)" aria-label="Meno"><i class="ti ti-minus"></i></button><b id="spN">${split.n}</b><button type="button" onclick="splitN(1)" aria-label="Più"><i class="ti ti-plus"></i></button></span>
+        <span>persone</span></div>`
+    : `<label for="spOthers">Parte degli altri</label>
+       <div class="sp-calc"><input type="text" id="spOthers" inputmode="decimal" autocomplete="off" placeholder="es. 30 oppure 18+12" value="${esc(split.expr || '')}">
+         <button type="button" onclick="splitPlus()" aria-label="Aggiungi un'altra parte"><i class="ti ti-plus"></i></button></div>`)
+    + '<div class="sp-res" id="spRes"></div>';
+  const o = document.getElementById('spOthers');
+  if(o) o.addEventListener('input', () => { split.expr = o.value; renderSplitRes(); });
+  renderSplitRes();
+}
+function renderSplitRes(){
+  const el = document.getElementById('spRes'); if(!el) return;
+  const r = splitCalc();
+  if(!r.ok){ el.className = 'sp-res ' + (r.paid ? 'bad' : ''); el.innerHTML = r.why + (r.others ? ` <small>(altri: ${fmt.format(r.others)})</small>` : ''); return; }
+  el.className = 'sp-res';
+  el.innerHTML = `${r.parts && r.parts.length > 1 ? `<span class="sp-sum">${r.parts.map(v => fmt.format(v)).join(' + ')} = ${fmt.format(r.others)}</span>` : ''}
+    <span>La tua parte${r.n ? ` (1 di ${r.n})` : ''}: <b>${fmt.format(r.share)}</b></span><span class="sp-oth">agli altri ${fmt.format(r.others)}</span>`;
+}
+document.getElementById('fAmount').addEventListener('input', () => { if(split) renderSplitRes(); });
 // "+" in basso: modulo vuoto
 window.openAdd = function(){
   resetTxFilters(); resetForm(); showTab('add');
@@ -1859,7 +1950,12 @@ window.cancelEdit = function(){ const back = returnTab; resetForm(); showTab(bac
 
 window.submitTx = function(e){
   e.preventDefault();
-  const a = parseAmount(document.getElementById('fAmount').value);
+  let a = parseAmount(document.getElementById('fAmount').value);
+  const sp = tipo === 'uscita' && !(editMode && editMode.kind === 'rec') ? splitCalc() : null;
+  if(sp && !sp.ok){ toast(sp.why); return false; }
+  const paid = a, spInfo = sp ? (sp.n ? {paid: sp.paid, n: sp.n} : {paid: sp.paid, others: sp.others, expr: sp.expr}) : null;
+  if(sp) a = sp.share;
+  const withSplit = o => { if(spInfo) o.split = spInfo; else delete o.split; return o; };
   const d = document.getElementById('fDate').value;
   const c = sel.value;
   const n = document.getElementById('fNote').value.trim();
@@ -1890,7 +1986,7 @@ window.submitTx = function(e){
   if(editMode && editMode.kind === 'tx'){
     const t = tx.find(x => x.id === editMode.id);
     const snap = budgetSnap(d, c);
-    if(t){ Object.assign(t, {date: d, amount: a, cat: c, note: n, tipo}); withTrip(t); }
+    if(t){ Object.assign(t, {date: d, amount: a, cat: c, note: n, tipo}); withTrip(t); withSplit(t); }
     saveLocal(); pushCloud();
     const al = tipo === 'uscita' ? budgetAlert(snap) : null;
     if(al) toast('✓ Modificato · ' + al.msg, al.kind); else toast('Movimento modificato ✓');
@@ -1909,19 +2005,20 @@ window.submitTx = function(e){
     tx.push(withTrip({id: `${rid}-${d.slice(0,7)}`, date: d, amount: a, cat: c, note: n, tipo, rid}));
     applyRecurring();
   } else {
-    tx.push(withTrip({id: Date.now() + Math.random(), date: d, amount: a, cat: c, note: n, tipo}));
+    tx.push(withSplit(withTrip({id: Date.now() + Math.random(), date: d, amount: a, cat: c, note: n, tipo})));
   }
   saveLocal(); pushCloud();
   const added = {id: repeat ? null : tx[tx.length - 1].id, rid: repeat ? recurring[recurring.length - 1].id : null,
-    form: {tipo, cat: c, amount: a, note: n, date: d, trip: tr, repeat}};
+    form: {tipo, cat: c, amount: a, note: n, date: d, trip: tr, repeat, split: spInfo}};
   document.getElementById('fAmount').value = '';
+  setSplitState(null); // la prossima spesa parte intera (meglio non dividere per sbaglio)
   document.getElementById('fNote').value = '';
   document.getElementById('fRepeat').checked = false;
   autoCat = null; noteSugView();
   const act = {label: 'Annulla', fn: () => undoAdd(added)};
   const al = tipo === 'uscita' ? budgetAlert(snap) : null;
   if(al) toast('✓ Salvato · ' + al.msg, al.kind, act);
-  else toast((tipo === 'uscita' ? '−' : '+') + fmt.format(a) + (repeat ? ' · ripetuta ogni mese ✓' : ' salvato ✓'), null, act);
+  else toast((tipo === 'uscita' ? '−' : '+') + fmt.format(a) + (repeat ? ' · ripetuta ogni mese ✓' : spInfo ? ' (la tua parte) salvato ✓' : ' salvato ✓'), null, act);
   render();
   return false;
 };
@@ -1938,8 +2035,7 @@ function undoAdd(added){
   saveLocal(); pushCloud(); render();
   const f = added.form, amt = document.getElementById('fAmount');
   if(f && tab === 'add' && !editMode && !amt.value){
-    setType(f.tipo, f.cat);
-    amt.value = Number(f.amount).toFixed(2).replace('.', ',');
+    fillForm({tipo: f.tipo, cat: f.cat, amount: f.amount, split: f.split, note: f.note, trip: f.trip});
     document.getElementById('fNote').value = f.note || '';
     document.getElementById('fDate').value = f.date;
     document.getElementById('fTrip').value = f.trip || '';
@@ -1953,6 +2049,7 @@ window.repeatToday = function(){
   const today = isoDay(new Date());
   const nt = {id: Date.now() + Math.random(), date: today, amount: t.amount, cat: t.cat, note: t.note || '', tipo: t.tipo};
   if(t.trip) nt.trip = t.trip;
+  if(t.split) nt.split = {...t.split};
   const snap = budgetSnap(today, nt.cat);
   tx.push(nt); saveLocal(); pushCloud();
   const back = returnTab; resetForm(); showTab(back);
@@ -2061,7 +2158,7 @@ function render(){
   document.getElementById('monthBtn').innerHTML =
     `<i class="ti ti-calendar-month"></i>${MESI[cur.m].slice(0,3)} ${cur.y}<i class="ti ti-chevron-down"></i>`;
   document.getElementById('yearSwitchLbl').textContent = cur.y;
-  document.getElementById('amountLbl').textContent = `Importo ${curSym}`;
+  document.getElementById('amountLbl').textContent = `${split ? 'Hai pagato' : 'Importo'} ${curSym}`;
   const pr = periodRange(cur.y, cur.m);
   document.getElementById('kpiRange').textContent = (settings.startDay || 1) === 1 ? '' : `${shortDate(pr[0])} – ${shortDate(pr[1])}`;
 
@@ -2188,7 +2285,8 @@ function renderTxList(){
       <div class="info"><div class="cat-name">${label(t.cat)}${t.rid ? '<i class="ti ti-repeat rep-ico" title="Ricorrente"></i>' : ''}${t.trip ? `<span class="trip-badge"><i class="ti ti-tag"></i>${esc(t.trip)}</span>` : ''}</div>
         ${t.note ? `<div class="note">${esc(t.note)}</div>` : ''}
         <div class="date">${d.getDate()} ${MESI[d.getMonth()].slice(0,3)} ${d.getFullYear()}</div></div>
-      <span class="amount ${t.tipo==='uscita'?'out':'in'}">${t.tipo==='uscita'?'−':'+'}${fmt.format(t.amount)}</span>
+      <span class="amount ${t.tipo==='uscita'?'out':'in'}">${t.tipo==='uscita'?'−':'+'}${fmt.format(t.amount)}${t.split
+        ? `<small class="split-tag" title="Spesa divisa: hai pagato ${fmt.format(t.split.paid)}"><i class="ti ti-users"></i>${t.split.n ? `÷${t.split.n} · ` : ''}su ${fmt.format(t.split.paid)}</small>` : ''}</span>
       <button class="del" aria-label="Elimina"><i class="ti ti-trash"></i></button></div>`;
   }).join('') + (list.length > shown.length ? `<div class="empty">… e altri ${list.length - shown.length}: usa la ricerca per restringere</div>` : '')
     : '<div class="empty">' + (q || fc ? 'Nessun movimento trovato' : 'Nessun movimento' + (tripFilter ? ' per questo viaggio' : txScope === 'tutti' ? '' : ' in questo mese')) + '</div>';
