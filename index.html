@@ -370,12 +370,15 @@
   /* impostazioni */
   .lbl-long{display:none;}
   .kpi .lbl .rng{text-transform:none; letter-spacing:0; font-weight:500; margin-left:6px;}
-  .theme-grid{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px;}
-  .theme-opt{background:var(--card2); border:2px solid var(--line); border-radius:14px; padding:7px 7px 9px; cursor:pointer; color:var(--text);
-    font-family:inherit; display:grid; gap:7px; text-align:center;}
+  .theme-grid{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px;}
+  @media (min-width:600px){ .theme-grid{grid-template-columns:repeat(4,minmax(0,1fr));} }
+  .theme-opt{-webkit-appearance:none; appearance:none; position:relative; min-width:0; width:100%; overflow:hidden; margin:0;
+    background:var(--card2); border:2px solid var(--line); border-radius:14px; padding:7px 7px 9px; cursor:pointer; color:var(--text);
+    font-family:inherit; display:flex; flex-direction:column; gap:7px; text-align:center;}
   .theme-opt.on{border-color:var(--accent);}
-  .theme-opt .nm{font-size:.8rem; font-weight:600; display:flex; align-items:center; justify-content:center; gap:4px;}
-  .theme-opt .nm .ti{color:var(--accent);}
+  .theme-opt .nm{font-size:.82rem; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .theme-opt .chk{position:absolute; top:12px; right:12px; width:20px; height:20px; border-radius:50%; background:var(--accent); color:var(--card);
+    display:flex; align-items:center; justify-content:center; font-size:.78rem;}
   .sw-prev{display:block; height:58px; border-radius:9px; padding:8px; border:1px solid rgba(128,128,128,.25);}
   .sw-prev span{height:100%; border-radius:6px; padding:7px; display:flex; flex-direction:column; gap:5px;}
   .sw-prev i{display:block; height:6px; border-radius:3px; width:70%;}
@@ -1194,6 +1197,7 @@ window.setType = function(t, keepCat){
   if(changed || keepCat) fillCats(t, keepCat);
 };
 window.showTab = function(t){
+  if(['dash', 'projs', 'sett'].includes(t)) resetTxFilters();
   tab = t;
   document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
   document.getElementById('tab-' + t).classList.add('active');
@@ -1278,7 +1282,14 @@ function fillForm(o){
   document.getElementById('fTrip').value = o.trip || '';
 }
 // "+" in basso: modulo vuoto
-window.openAdd = function(){ resetForm(); showTab('add'); };
+window.openAdd = function(){ resetTxFilters(); resetForm(); showTab('add'); };
+// azzera ricerca, filtro categoria, "Tutti" e filtro progetto dei Movimenti
+// (non quando tocchi un movimento per modificarlo: al ritorno ritrovi la tua ricerca)
+function resetTxFilters(){
+  document.getElementById('txSearch').value = '';
+  document.getElementById('txCat').value = '';
+  txScope = 'mese'; tripFilter = null;
+}
 // tocco su un movimento: modulo già compilato
 window.editTx = function(key){
   const t = findTx(key); if(!t) return;
@@ -1918,7 +1929,7 @@ function renderSettings(){
   document.getElementById('themeGrid').innerHTML = Object.entries(THEMES).map(([k, t]) => `
     <button class="theme-opt${settings.theme === k ? ' on' : ''}" onclick="setSetting('theme','${k}')" aria-pressed="${settings.theme === k}">
       <span class="sw-prev" style="background:${t.bg}"><span style="background:${t.card}"><i style="background:${t.acc}"></i><i></i></span></span>
-      <span class="nm">${settings.theme === k ? '<i class="ti ti-check"></i>' : ''}${t.name}</span></button>`).join('');
+      ${settings.theme === k ? '<span class="chk"><i class="ti ti-check"></i></span>' : ''}<span class="nm">${t.name}</span></button>`).join('');
 
   const sd = settings.startDay || 1;
   document.getElementById('setStartDay').innerHTML = Array.from({length: 28}, (_, i) => i + 1)
