@@ -244,6 +244,8 @@
   .auth-form{display:grid; gap:10px;}
   .auth-actions{display:flex; gap:8px; margin-top:2px;}
   .auth-actions .btn{flex:1; padding:12px; font-size:.88rem;}
+  .auth-forgot{justify-self:start; padding:2px 0; font-size:.78rem;}
+  .auth-ok{color:var(--green); font-size:.78rem; line-height:1.45;} .auth-ok:empty{display:none;}
 
   /* bottom nav con FAB centrale */
   .bottomnav{position:fixed; bottom:calc(14px + env(safe-area-inset-bottom)); left:12px; right:12px; max-width:520px; margin:0 auto;
@@ -926,7 +928,7 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -1203,6 +1205,7 @@ function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').repla
 // ---------- firebase ----------
 const fbApp = initializeApp(firebaseConfig);
 const auth = getAuth(fbApp);
+auth.languageCode = 'it'; // email di Firebase (es. reset password) in italiano
 const db = getFirestore(fbApp);
 let unsub = null;
 let lastPushJson = '';
@@ -1250,27 +1253,50 @@ function renderAuth(user){
         <button class="btn" onclick="doLogin()">Accedi</button>
         <button class="btn ghost" onclick="doRegister()">Crea account</button>
       </div>
+      <button type="button" class="link-btn auth-forgot" onclick="doReset()">Hai dimenticato la password?</button>
       <div id="authErr" style="color:var(--red); font-size:.78rem;"></div>
+      <div id="authOk" class="auth-ok"></div>
     </div>`;
   }
 }
 window.doLogin = async () => {
-  const err = document.getElementById('authErr'); err.textContent = '';
+  const err = document.getElementById('authErr'); err.textContent = ''; document.getElementById('authOk').textContent = '';
   try { await signInWithEmailAndPassword(auth, document.getElementById('aEmail').value.trim(), document.getElementById('aPass').value); }
   catch(e){ err.textContent = mapAuthErr(e); }
 };
 window.doRegister = async () => {
-  const err = document.getElementById('authErr'); err.textContent = '';
+  const err = document.getElementById('authErr'); err.textContent = ''; document.getElementById('authOk').textContent = '';
   try { await createUserWithEmailAndPassword(auth, document.getElementById('aEmail').value.trim(), document.getElementById('aPass').value); }
   catch(e){ err.textContent = mapAuthErr(e); }
 };
 window.doSignOut = async () => { await signOut(auth); };
+// password dimenticata: Firebase manda un'email con il link per sceglierne una nuova
+window.doReset = async () => {
+  const err = document.getElementById('authErr'), ok = document.getElementById('authOk');
+  err.textContent = ''; ok.textContent = '';
+  const inp = document.getElementById('aEmail'), email = inp.value.trim();
+  if(!email){ err.textContent = 'Scrivi qui sopra la tua email, poi tocca di nuovo "Hai dimenticato la password?"'; inp.focus(); return; }
+  try {
+    await sendPasswordResetEmail(auth, email);
+    ok.textContent = `Fatto: se ${email} ha un account, tra poco ti arriva un'email con il link per scegliere una nuova password. Controlla anche nello spam.`;
+  } catch(e){ err.textContent = mapAuthErr(e); }
+};
+// da Opzioni → Account: stesso link, alla tua email
+window.doChangePass = async () => {
+  const email = auth.currentUser && auth.currentUser.email;
+  if(!email) return;
+  try {
+    await sendPasswordResetEmail(auth, email);
+    toast(`Email inviata a ${email}: apri il link per scegliere la nuova password`, 'ok');
+  } catch(e){ toast(mapAuthErr(e), 'over'); }
+};
 function mapAuthErr(e){
   const m = {
     'auth/invalid-email':'Email non valida','auth/user-not-found':'Account non trovato — usa "Crea account"',
     'auth/wrong-password':'Password errata','auth/invalid-credential':'Credenziali errate',
     'auth/email-already-in-use':'Email già registrata — usa "Accedi"','auth/weak-password':'Password troppo corta (min. 6 caratteri)',
-    'auth/too-many-requests':'Troppi tentativi, riprova tra poco','auth/network-request-failed':'Problema di rete'
+    'auth/too-many-requests':'Troppi tentativi, riprova tra poco','auth/network-request-failed':'Problema di rete',
+    'auth/missing-email':'Scrivi la tua email'
   };
   return m[e.code] || ('Errore: ' + e.code);
 }
@@ -2216,7 +2242,7 @@ function renderSettings(){
   if(DEMO) acct.innerHTML = `<p>Stai guardando la <b>demo</b>: i dati sono di esempio e non vengono salvati.</p>
     <div class="row-btns"><a class="btn ghost" href="${location.pathname}"><i class="ti ti-logout"></i> Esci dalla demo</a></div>`;
   else if(auth.currentUser) acct.innerHTML = `<p>Accesso con <b>${esc(auth.currentUser.email || '')}</b>. I dati sono sincronizzati su tutti i tuoi dispositivi.</p>
-    <div class="row-btns"><button class="btn ghost" onclick="doSignOut()"><i class="ti ti-logout"></i> Esci</button></div>
+    <div class="row-btns"><button class="btn ghost" onclick="doChangePass()"><i class="ti ti-key"></i> Cambia password</button><button class="btn ghost" onclick="doSignOut()"><i class="ti ti-logout"></i> Esci</button></div>
     <p>Per far vedere l'app senza mostrare i tuoi dati, manda il link della demo.</p>${demoRow}`;
   else acct.innerHTML = `<p>Non hai fatto l'accesso: i dati restano solo su questo dispositivo. Accedi dal riquadro "Sincronizzazione" in alto.</p>${demoRow}`;
 }
