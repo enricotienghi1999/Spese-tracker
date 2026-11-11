@@ -422,6 +422,10 @@
   .cat-field > .ti-chevron-down{color:var(--muted); font-size:1.25rem;}
   .cat-field:focus-visible{outline:none; border-color:var(--accent); box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 15%, transparent);}
   .split-box{display:grid; gap:10px; margin-top:-2px;}
+  .trip-btn{flex:none; justify-content:flex-start; padding:9px 14px;}
+  .trip-row{display:flex; gap:8px;} .trip-row select{flex:1; min-width:0;}
+  .trip-x{width:48px; flex-shrink:0; border-radius:12px; border:1px solid var(--line); background:var(--card2); color:var(--muted); font-size:1rem; cursor:pointer;}
+  [hidden]{display:none !important;}
   .sp-btns{display:flex; gap:8px;}
   .sp-btn{flex:1; display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:9px 10px; border-radius:12px; border:1px dashed var(--line);
     background:none; color:var(--muted); font:inherit; font-size:.82rem; font-weight:600; cursor:pointer;}
@@ -480,6 +484,7 @@
   #sumBody{display:grid; gap:22px;}
   .sum-range{font-size:.76rem; color:var(--muted); margin:-6px 0 -10px;}
   .sum-kpis{display:grid; grid-template-columns:1fr 1fr; gap:8px;} .sum-kpis .kpi{padding:11px 13px;} .sum-kpis .kpi .val{font-size:1.15rem;}
+  .sum-sec h4 small{text-transform:none; letter-spacing:0; font-weight:500;}
   .sum-sec{display:grid; gap:8px;} .sum-sec h4{font-size:.66rem; color:var(--muted); text-transform:uppercase; letter-spacing:.8px; font-weight:600;}
   .sum-sec .bar-row{margin-bottom:4px;} .sum-sec .bar-row .amt small{color:var(--muted); font-weight:500; margin-left:4px;}
   .sum-line{display:flex; justify-content:space-between; gap:10px; font-size:.84rem;} .sum-line small{color:var(--muted);} .sum-line b{font-variant-numeric:tabular-nums; white-space:nowrap;}
@@ -492,8 +497,15 @@
   .sum-top .n small{color:var(--muted); margin-left:6px;} .sum-top b{font-variant-numeric:tabular-nums;}
   .sum-foot{position:sticky; bottom:0; background:linear-gradient(transparent,var(--card) 30%); padding:14px 0 18px; margin-top:-8px;}
   .sum-foot .btn:disabled{opacity:.4;}
+  .sum-mrow{display:grid; grid-template-columns:34px minmax(0,1fr) 64px 58px; gap:10px; align-items:center; font-size:.84rem; cursor:pointer; padding:2px 0;}
+  .sum-mrow .mn{color:var(--muted); font-size:.78rem;} .sum-mrow.hi .mn{color:var(--text); font-weight:600;}
+  .sum-mrow .mb{height:7px; background:var(--card2); border-radius:4px; overflow:hidden;} .sum-mrow .mb i{display:block; height:100%; background:var(--accent); border-radius:0 4px 4px 0;}
+  .sum-mrow b{text-align:right; font-variant-numeric:tabular-nums;} .sum-mrow small{text-align:right; font-size:.72rem; font-variant-numeric:tabular-nums;}
+  .sum-mrow small.pos{color:var(--green);} .sum-mrow small.neg{color:var(--red);}
+  .sum-note{font-size:.7rem; color:var(--muted);}
   .sum-empty{text-align:center; color:var(--muted); padding:30px 0; font-size:.9rem;} .sum-empty .ti{display:block; font-size:1.8rem; margin-bottom:6px;}
-  @media (min-width:1024px){ .sum-link{width:auto; margin:-8px 16px 20px;} }
+  .sum-link.in-col{margin:0 16px 12px;}
+  @media (min-width:1024px){ .sum-link{width:auto; margin:-8px 16px 20px;} .cols .sum-link.in-col{width:100%; margin:-8px 0 20px;} }
   .cp-modal{align-items:flex-start; padding-top:calc(env(safe-area-inset-top) + 18px);}
   .cp-box{max-width:420px; display:flex; flex-direction:column; gap:12px; padding:18px 16px 10px;
     max-height:calc(100vh - env(safe-area-inset-top) - 40px); max-height:calc(100dvh - env(safe-area-inset-top) - 40px);}
@@ -704,6 +716,7 @@
 
 <!-- ============ TAB DASHBOARD ============ -->
 <div class="tab" id="tab-dash">
+  <div id="yearCard"></div>
   <div class="kpis">
     <div class="kpi hero"><div class="lbl">Spese anno</div><div class="val" id="dYearOut">—</div></div>
     <div class="kpi pos"><div class="lbl">Entrate anno</div><div class="val" id="dYearIn">—</div></div>
@@ -715,6 +728,7 @@
     <h2><i class="ti ti-calendar-stats"></i> I tuoi mesi · <span id="dYearLabel"></span></h2>
     <table class="mtable" id="dMonths"></table>
   </div>
+  <button type="button" class="sum-link in-col" onclick="openYearSummary()"><i class="ti ti-report-analytics"></i><span id="yearLinkLbl">Riepilogo dell'anno</span><span class="sum-pdf">PDF</span><i class="ti ti-chevron-right"></i></button>
   <div class="card">
     <h2><i class="ti ti-chart-bar"></i> Spese per mese</h2>
     <div class="trend" id="dTrend"></div>
@@ -849,9 +863,13 @@
         <button type="button" class="cat-field empty" id="fCatBtn" onclick="openCatPick()"></button>
         <div class="quick-cats" id="quickCats" aria-label="Categorie usate più spesso"></div>
       </div>
-      <div class="full">
-        <label>Viaggio (opzionale)</label>
-        <select id="fTrip"><option value="">— nessuno —</option></select>
+      <div class="full trip-box" id="tripBox">
+        <button type="button" class="sp-btn trip-btn" id="tripBtn" onclick="openTrip()"><i class="ti ti-luggage"></i> Aggiungi a un viaggio</button>
+        <div id="tripField" hidden>
+          <label for="fTrip">Viaggio</label>
+          <div class="trip-row"><select id="fTrip"><option value="">— nessuno —</option></select>
+            <button type="button" class="trip-x" onclick="closeTrip()" aria-label="Togli il viaggio"><i class="ti ti-x"></i></button></div>
+        </div>
       </div>
       <div class="full">
         <label>Nota (opzionale)</label>
@@ -1847,7 +1865,19 @@ function resetForm(){
   setType('uscita'); fillCats('uscita');
   setFormMode(null);
   setSplitState(null);
+  tripOpen = false; syncTrip();
 }
+// il campo Viaggio compare solo se lo chiedi (o se il movimento ha già un viaggio)
+let tripOpen = false;
+function syncTrip(){
+  const f = document.getElementById('fTrip'), open = tripOpen || !!f.value;
+  document.getElementById('tripBox').style.display = projects.length || f.value ? '' : 'none'; // nessun viaggio creato: niente pulsante
+  document.getElementById('tripField').hidden = !open;
+  document.getElementById('tripBtn').hidden = open;
+}
+window.openTrip = function(){ tripOpen = true; syncTrip(); document.getElementById('fTrip').focus(); };
+window.closeTrip = function(){ document.getElementById('fTrip').value = ''; tripOpen = false; syncTrip(); };
+document.getElementById('fTrip').addEventListener('change', syncTrip);
 function fillForm(o){
   setType(o.tipo, o.cat);
   // spesa divisa: nel campo torna quello che hai pagato in tutto, e il modo in cui l'hai divisa
@@ -1855,6 +1885,7 @@ function fillForm(o){
   setSplitState(o.split ? (o.split.n ? {mode: 'eq', n: o.split.n} : {mode: 'calc', expr: o.split.expr || String(o.split.others).replace('.', ',')}) : null);
   document.getElementById('fNote').value = o.note || '';
   document.getElementById('fTrip').value = o.trip || '';
+  tripOpen = false; syncTrip();
 }
 
 // ---------- spesa divisa ----------
@@ -2038,7 +2069,7 @@ function undoAdd(added){
     fillForm({tipo: f.tipo, cat: f.cat, amount: f.amount, split: f.split, note: f.note, trip: f.trip});
     document.getElementById('fNote').value = f.note || '';
     document.getElementById('fDate').value = f.date;
-    document.getElementById('fTrip').value = f.trip || '';
+    document.getElementById('fTrip').value = f.trip || ''; syncTrip();
     document.getElementById('fRepeat').checked = !!f.repeat;
     toast('Annullato: correggilo e salva');
   } else toast('Annullato');
@@ -2166,6 +2197,7 @@ function render(){
   fTrip.innerHTML = '<option value="">— nessuno —</option>' +
     projects.map(p => `<option value="${esc(p)}">${esc(p)}</option>`).join('');
   fTrip.value = projects.includes(keepTrip) ? keepTrip : '';
+  syncTrip();
   renderQuickCats(); // le più usate cambiano man mano che aggiungi movimenti
 
   renderMese();
@@ -2414,6 +2446,8 @@ function renderRecurring(){
 function renderDash(){
   const y = cur.y;
   document.getElementById('dYearLabel').textContent = y;
+  document.getElementById('yearLinkLbl').textContent = `Riepilogo del ${y}`;
+  renderYearCard();
   const yt = tx.filter(t => periodOf(t.date).y === y);
   const yOut = yt.filter(t=>t.tipo==='uscita').reduce((s,t)=>s+t.amount,0);
   const yIn  = yt.filter(t=>t.tipo==='entrata').reduce((s,t)=>s+t.amount,0);
@@ -3252,7 +3286,7 @@ function monthSummary(y, m){
     ups: ch.filter(o => o.d >= 1).sort((p, q) => q.d - p.d).slice(0, 3), downs: ch.filter(o => o.d <= -1).sort((p, q) => p.d - q.d).slice(0, 3),
     byCat: Object.entries(now.byCat).sort((p, q) => q[1] - p[1]),
     T: budgetTotalFor(y, m), bud: Object.entries(B).map(([c, lim]) => ({c, lim, spent: now.byCat[c] || 0})).sort((p, q) => q.spent / q.lim - p.spent / p.lim),
-    fixed, variable: now.out - fixed, days, top: [...outs].sort((p, q) => q.amount - p.amount).slice(0, 5), trend,
+    fixed, variable: now.out - fixed, days, top: outs.filter(t => !t.rid).sort((p, q) => q.amount - p.amount).slice(0, 5), trend,
     trips: Object.entries(trips).sort((p, q) => q[1] - p[1])};
 }
 const sumName = s => `${MESI[s.m]} ${s.y}`;
@@ -3286,15 +3320,20 @@ function renderSumCard(){
 window.dismissSumCard = function(k){ try { localStorage.setItem('speseSumSeen', k); } catch(e){} renderSumCard(); };
 
 // --- finestra "Riepilogo" (dalla pagina Mese) ---
-let sumYM = {y: 0, m: 0};
+let sumYM = {kind: 'm', y: 0, m: 0}; // kind: 'm' = mese, 'y' = anno
 window.openSummary = function(y, m){
-  sumYM = {y: y ?? cur.y, m: m ?? cur.m}; renderSummary();
+  sumYM = {kind: 'm', y: y ?? cur.y, m: m ?? cur.m}; renderSummary();
   document.getElementById('sumModal').classList.add('show');
   document.querySelector('#sumModal .sum-box').scrollTop = 0;
 };
 window.closeSummary = function(){ document.getElementById('sumModal').classList.remove('show'); };
-window.shiftSummary = function(d){ const x = new Date(sumYM.y, sumYM.m + d, 1); sumYM = {y: x.getFullYear(), m: x.getMonth()}; renderSummary(); };
+window.shiftSummary = function(d){
+  if(sumYM.kind === 'y') sumYM.y += d;
+  else { const x = new Date(sumYM.y, sumYM.m + d, 1); sumYM = {kind: 'm', y: x.getFullYear(), m: x.getMonth()}; }
+  renderSummary();
+};
 function renderSummary(){
+  if(sumYM.kind === 'y') return renderYearSummary();
   const s = monthSummary(sumYM.y, sumYM.m), saldo = s.inc - s.out, np = periodOf(isoDay(new Date()));
   document.getElementById('sumTitle').textContent = capF(sumName(s));
   document.getElementById('sumNext').disabled = monIdx(s.y, s.m) >= monIdx(np.y, np.m);
@@ -3326,7 +3365,7 @@ function renderSummary(){
     <div class="sum-sec"><h4>Fisse e variabili</h4>
       <div class="split">${s.fixed > 0 ? `<div class="fx" style="width:${pctF.toFixed(1)}%"></div>` : ''}${s.variable > 0 ? '<div class="vr" style="flex:1"></div>' : ''}</div>
       <div class="split-legend"><span><i class="sw fx"></i>Fisse <b>${fmt.format(s.fixed)}</b></span><span><i class="sw vr"></i>Variabili <b>${fmt.format(s.variable)}</b></span></div></div>
-    <div class="sum-sec"><h4>Le spese più grandi</h4>${s.top.map(t => `<div class="sum-top"><span class="d">${shortDate(t.date)}</span>
+    <div class="sum-sec"><h4>Le spese più grandi <small>(senza le ricorrenti)</small></h4>${s.top.map(t => `<div class="sum-top"><span class="d">${shortDate(t.date)}</span>
       <span class="n">${esc(label(t.cat))}${t.note ? `<small>${esc(t.note)}</small>` : ''}</span><b>${fmt.format(t.amount)}</b></div>`).join('')}</div>
     ${s.trips.length ? `<div class="sum-sec"><h4>Viaggi</h4>${s.trips.map(([n, v]) => `<div class="sum-line"><span><i class="ti ti-luggage"></i> ${esc(n)}</span><b>${fmt.format(v)}</b></div>`).join('')}</div>` : ''}`;
 }
@@ -3537,7 +3576,7 @@ function buildSummaryPdf(s){
 
   // le più grandi (se non stanno nella prima pagina, vanno in cima alla pagina dei movimenti)
   const topBlock = () => {
-    h2(M, y, 'Le spese più grandi'); y += 14;
+    h2(M, y, 'Le spese più grandi (senza le ricorrenti)'); y += 14;
     s.top.forEach(t => {
       P.text(M, y, shortDate(t.date), {size: 9, color: MUT});
       P.text(M + 50, y, label(t.cat), {size: 9, bold: true, max: 140});
@@ -3575,8 +3614,8 @@ function buildSummaryPdf(s){
   return P.bytes(`Riepilogo ${name}`);
 }
 window.downloadSummaryPdf = async function(){
-  const s = monthSummary(sumYM.y, sumYM.m); if(!s.list.length) return;
-  const bytes = buildSummaryPdf(s), fname = `Spese ${capF(MESI[s.m])} ${s.y}.pdf`;
+  const yearly = sumYM.kind === 'y', s = yearly ? yearSummary(sumYM.y) : monthSummary(sumYM.y, sumYM.m); if(!s.list.length) return;
+  const bytes = yearly ? buildYearPdf(s) : buildSummaryPdf(s), fname = yearly ? `Spese anno ${s.y}.pdf` : `Spese ${capF(MESI[s.m])} ${s.y}.pdf`;
   const blob = new Blob([bytes], {type: 'application/pdf'});
   // sul telefono: menu Condividi (salva in File, WhatsApp, Mail…); sul PC: download
   try {
@@ -3585,6 +3624,269 @@ window.downloadSummaryPdf = async function(){
   } catch(e){ if(e && e.name === 'AbortError') return; }
   download(blob, fname); toast('PDF scaricato ✓');
 };
+
+// ================= Riepilogo dell'anno (Dashboard): stessa finestra e stesso PDF, ma per anno =================
+// se è l'anno in corso, il confronto con l'anno prima è sullo stesso periodo (gen → oggi)
+function yearSummary(y){
+  const today = isoDay(new Date()), np = periodOf(today);
+  const partial = y === np.y, lastM = y > np.y ? -1 : partial ? np.m : 11;
+  const upTo = partial ? dayIndex(today, np.y, np.m) : 99;
+  const months = [], pAgg = {out: 0, inc: 0, byCat: {}}, byCat = {};
+  let out = 0, inc = 0;
+  for(let m = 0; m < 12; m++){
+    if(m > lastM){ months.push({m, out: null, inc: null}); continue; }
+    const d = periodData(y, m, 99), p = periodData(y - 1, m, partial && m === lastM ? upTo : 99);
+    months.push({m, out: d.out, inc: d.inc, partial: partial && m === lastM});
+    out += d.out; inc += d.inc;
+    for(const [c, v] of Object.entries(d.byCat)) byCat[c] = (byCat[c] || 0) + v;
+    pAgg.out += p.out; pAgg.inc += p.inc;
+    for(const [c, v] of Object.entries(p.byCat)) pAgg.byCat[c] = (pAgg.byCat[c] || 0) + v;
+  }
+  const list = tx.filter(t => { const p = periodOf(t.date); return p.y === y && p.m <= lastM; })
+    .sort((p, q) => p.date < q.date ? -1 : p.date > q.date ? 1 : 0);
+  const outs = list.filter(t => t.tipo === 'uscita');
+  const prevHas = tx.some(t => periodOf(t.date).y === y - 1);
+  const cats = [...new Set([...Object.keys(byCat), ...Object.keys(pAgg.byCat)])];
+  const ch = cats.map(c => ({c, now: byCat[c] || 0, prev: pAgg.byCat[c] || 0})).map(o => ({...o, d: o.now - o.prev}));
+  const full = months.filter(o => o.out != null && !o.partial && o.out > 0);
+  const withOut = months.filter(o => o.out > 0);
+  const bud = {ok: 0, ko: 0};
+  months.forEach(o => { if(o.out == null || o.partial) return; const T = budgetTotalFor(y, o.m); if(T > 0) bud[o.out <= T ? 'ok' : 'ko']++; });
+  const fixed = outs.filter(t => isFixed(t.cat)).reduce((s, t) => s + t.amount, 0);
+  const trips = {};
+  outs.forEach(t => { if(t.trip) trips[t.trip] = (trips[t.trip] || 0) + t.amount; });
+  return {y, partial, lastM, upTo, months, list, out, inc, prevOut: pAgg.out, prevInc: pAgg.inc, prevHas, prevByCat: pAgg.byCat,
+    avg: withOut.length ? out / withOut.length : 0,
+    best: full.length ? full.reduce((a, b) => b.out < a.out ? b : a) : null, worst: full.length ? full.reduce((a, b) => b.out > a.out ? b : a) : null,
+    ups: ch.filter(o => o.d >= 5).sort((p, q) => q.d - p.d).slice(0, 3), downs: ch.filter(o => o.d <= -5).sort((p, q) => p.d - q.d).slice(0, 3),
+    byCat: Object.entries(byCat).sort((p, q) => q[1] - p[1]), bud, fixed, variable: out - fixed,
+    top: outs.filter(t => !t.rid).sort((p, q) => q.amount - p.amount).slice(0, 5), trips: Object.entries(trips).sort((p, q) => q[1] - p[1])};
+}
+const yearVs = s => s.partial ? `stesso periodo del ${s.y - 1}` : String(s.y - 1);
+const chRowHtml = o => `<div class="sum-ch"><span class="cat">${ico(o.c)}<span>${esc(label(o.c))}</span></span>
+    <span class="was">${fmt0.format(o.prev)} → ${fmt0.format(o.now)}</span><b class="${o.d > 0 ? 'up' : 'down'}">${sgn(o.d)}${fmt0.format(Math.abs(o.d))}</b></div>`;
+
+// --- scheda "Il tuo 2026 in breve" nella Dashboard, nelle prime due settimane di gennaio ---
+function renderYearCard(){
+  const el = document.getElementById('yearCard'), today = isoDay(new Date()), np = periodOf(today), py = np.y - 1;
+  let seen = ''; try { seen = localStorage.getItem('speseYearSeen') || ''; } catch(e){}
+  const show = np.m === 0 && dayIndex(today, np.y, 0) <= 15 && cur.y === np.y && seen !== String(py) && tx.some(t => periodOf(t.date).y === py);
+  if(!show){ el.innerHTML = ''; return; }
+  const s = yearSummary(py), d = s.out - s.prevOut;
+  el.innerHTML = `<div class="card sum-card">
+    <div class="card-head"><h2><i class="ti ti-confetti"></i> Il tuo ${py} in breve</h2>
+      <button class="cmp-x" type="button" onclick="dismissYearCard(${py})" aria-label="Chiudi"><i class="ti ti-x"></i></button></div>
+    <div class="sc-main">Hai speso <b>${fmt0.format(s.out)}</b>${s.prevHas && s.prevOut ? ` <span class="${d > 0 ? 'up' : 'down'}">${pctOf(d, s.prevOut)} vs ${py - 1}</span>` : ''}</div>
+    <div class="sc-bud ok"><i class="ti ti-pig-money"></i> Hai messo da parte ${fmt0.format(Math.max(0, s.inc - s.out))}${s.inc > 0 ? ` (${Math.round((s.inc - s.out) / s.inc * 100)}% delle entrate)` : ''}</div>
+    ${s.worst ? `<div class="sc-bud"><i class="ti ti-calendar-stats"></i> Mese più caro: ${MESI[s.worst.m]} (${fmt0.format(s.worst.out)})</div>` : ''}
+    <button class="btn ghost sc-open" type="button" onclick="openYearSummary(${py})"><i class="ti ti-report-analytics"></i> Vedi riepilogo dell'anno e PDF</button>
+  </div>`;
+}
+window.dismissYearCard = function(y){ try { localStorage.setItem('speseYearSeen', String(y)); } catch(e){} renderYearCard(); };
+window.openYearSummary = function(y){
+  sumYM = {kind: 'y', y: y ?? cur.y, m: 0}; renderSummary();
+  document.getElementById('sumModal').classList.add('show');
+  document.querySelector('#sumModal .sum-box').scrollTop = 0;
+};
+function renderYearSummary(){
+  const s = yearSummary(sumYM.y), saldo = s.inc - s.out, np = periodOf(isoDay(new Date()));
+  document.getElementById('sumTitle').textContent = `Anno ${s.y}`;
+  document.getElementById('sumNext').disabled = s.y >= np.y;
+  document.getElementById('sumPdf').disabled = !s.list.length;
+  const body = document.getElementById('sumBody');
+  if(!s.list.length){ body.innerHTML = `<div class="sum-empty"><i class="ti ti-calendar-off"></i>Nessun movimento nel ${s.y}.</div>`; return; }
+  const dP = s.out - s.prevOut, maxC = s.byCat.length ? s.byCat[0][1] : 1, maxM = Math.max(...s.months.map(o => o.out || 0), 1);
+  const pctF = s.out ? s.fixed / s.out * 100 : 0;
+  body.innerHTML = `
+    <div class="sum-range">${s.partial ? `gennaio – oggi · anno in corso` : `gennaio – dicembre`} · ${s.list.length} movimenti</div>
+    <div class="sum-kpis">
+      <div class="kpi hero"><div class="lbl">Spese</div><div class="val">${fmt0.format(s.out)}</div></div>
+      <div class="kpi pos"><div class="lbl">Entrate</div><div class="val">${fmt0.format(s.inc)}</div></div>
+      <div class="kpi"><div class="lbl">Saldo</div><div class="val" style="color:var(--${saldo >= 0 ? 'green' : 'red'})">${saldo >= 0 ? '+' : ''}${fmt0.format(saldo)}</div></div>
+      <div class="kpi"><div class="lbl">Risparmiato</div><div class="val">${s.inc > 0 ? Math.round(saldo / s.inc * 100) + '%' : '—'}</div></div>
+    </div>
+    <div class="sum-sec"><h4>Confronto</h4>
+      ${s.prevHas ? `<div class="sum-line"><span>Spese vs ${yearVs(s)} <small>(${fmt0.format(s.prevOut)})</small></span><b class="${dP > 0 ? 'up' : 'down'}">${pctOf(dP, s.prevOut) || '—'} · ${sgn(dP)}${fmt0.format(Math.abs(dP))}</b></div>` : ''}
+      <div class="sum-line"><span>Media al mese</span><b>${fmt0.format(s.avg)}</b></div>
+      ${s.best && s.worst && s.best !== s.worst ? `<div class="sum-line"><span>Mese più leggero / più caro</span><b>${MESI[s.best.m].slice(0, 3)} ${fmt0.format(s.best.out)} · ${MESI[s.worst.m].slice(0, 3)} ${fmt0.format(s.worst.out)}</b></div>` : ''}
+    </div>
+    <div class="sum-sec"><h4>Mese per mese</h4>
+      ${s.months.filter(o => o.out != null).map(o => `<div class="sum-mrow${o === s.worst ? ' hi' : ''}" onclick="closeSummary(); gotoMonth(${o.m})">
+        <span class="mn">${MESI[o.m].slice(0, 3)}</span><span class="mb"><i style="width:${(o.out / maxM * 100).toFixed(1)}%"></i></span>
+        <b>${fmt0.format(o.out)}</b><small class="${o.inc - o.out >= 0 ? 'pos' : 'neg'}">${o.inc - o.out >= 0 ? '+' : '−'}${fmt0.format(Math.abs(o.inc - o.out))}</small></div>`).join('')}
+      <div class="sum-note">Barra = spese · a destra il saldo del mese · tocca un mese per aprirlo</div>
+    </div>
+    ${s.prevHas && (s.ups.length || s.downs.length) ? `<div class="sum-sec"><h4>Cosa è cambiato rispetto al ${yearVs(s)}</h4>${[...s.ups, ...s.downs].map(chRowHtml).join('')}</div>` : ''}
+    ${s.bud.ok + s.bud.ko ? `<div class="sum-sec"><h4>Budget</h4><div class="sc-bud ${s.bud.ko ? 'ko' : 'ok'}"><i class="ti ti-${s.bud.ko ? 'alert-triangle' : 'circle-check'}"></i>
+      Budget del mese rispettato in ${s.bud.ok} ${s.bud.ok === 1 ? 'mese' : 'mesi'} su ${s.bud.ok + s.bud.ko}</div></div>` : ''}
+    <div class="sum-sec"><h4>Per categoria</h4>${s.byCat.map(([c, v]) => barRow(c, v, maxC, `${fmt0.format(v)} <small>${Math.round(v / s.out * 100)}%</small>`)).join('')}</div>
+    <div class="sum-sec"><h4>Fisse e variabili</h4>
+      <div class="split">${s.fixed > 0 ? `<div class="fx" style="width:${pctF.toFixed(1)}%"></div>` : ''}${s.variable > 0 ? '<div class="vr" style="flex:1"></div>' : ''}</div>
+      <div class="split-legend"><span><i class="sw fx"></i>Fisse <b>${fmt0.format(s.fixed)}</b></span><span><i class="sw vr"></i>Variabili <b>${fmt0.format(s.variable)}</b></span></div></div>
+    <div class="sum-sec"><h4>Le spese più grandi dell'anno <small>(senza le ricorrenti)</small></h4>${s.top.map(t => `<div class="sum-top"><span class="d">${shortDate(t.date)}</span>
+      <span class="n">${esc(label(t.cat))}${t.note ? `<small>${esc(t.note)}</small>` : ''}</span><b>${fmt.format(t.amount)}</b></div>`).join('')}</div>
+    ${s.trips.length ? `<div class="sum-sec"><h4>Viaggi</h4>${s.trips.map(([n, v]) => `<div class="sum-line"><span><i class="ti ti-luggage"></i> ${esc(n)}</span><b>${fmt0.format(v)}</b></div>`).join('')}</div>` : ''}`;
+}
+
+// --- PDF dell'anno: pagina 1 dashboard, pagina 2 mese per mese e categorie ---
+function buildYearPdf(s){
+  const P = makePdf(), M = 40, CW = P.W - 2 * M, BOT = 800;
+  const INK = [.11, .13, .16], MUT = [.42, .46, .52], TRK = [.92, .935, .95], BOX = [.955, .962, .97], RED = [.82, .25, .25], GRN = [.1, .56, .38];
+  const ACC = pdfAccent(), ACC2 = ACC.map(v => v + (1 - v) * .55), FIX = [.62, .66, .72];
+  const money = v => fmt.format(v), money0 = v => fmt0.format(v);
+  const saldo = s.inc - s.out;
+  let y = 0;
+  const footer = () => P.text(P.W / 2, 822, `Spese Tracker · Anno ${s.y} · pagina ${P.pageCount()}`, {size: 7.5, color: MUT, align: 'center'});
+  const newPage = () => { P.page(); y = 52; };
+  const need = h => { if(y + h > BOT){ footer(); newPage(); return true; } return false; };
+  const h2 = (x, yy, t) => P.text(x, yy, t.toUpperCase(), {size: 8, bold: true, color: MUT});
+  const hbar = (x, yy, w, h, c) => { if(w <= 0) return; P.rect(x, yy, w, h, c, h / 2); P.rect(x, yy, Math.min(w, h / 2), h, c); };
+  const vbar = (x, base, w, h, c) => { if(h <= 0) return; const r = Math.min(2, w / 2); P.rect(x, base - h, w, h, c, r); P.rect(x, base - Math.min(h, r), w, Math.min(h, r), c); };
+
+  newPage();
+  P.text(M, y, 'SPESE TRACKER', {size: 8, bold: true, color: ACC});
+  P.text(M, y + 26, `Riepilogo del ${s.y}`, {size: 22, bold: true});
+  P.text(M, y + 44, `${s.partial ? 'gennaio – oggi (anno in corso)' : 'gennaio – dicembre'} · ${s.list.length} movimenti · creato il ${new Date().toLocaleDateString('it-IT')}`, {size: 8.5, color: MUT});
+  y += 62;
+  const kp = [['Spese', money0(s.out), INK], ['Entrate', money0(s.inc), GRN], ['Saldo', (saldo >= 0 ? '+' : '') + money0(saldo), saldo >= 0 ? GRN : RED],
+    ['Risparmiato', s.inc > 0 ? Math.round(saldo / s.inc * 100) + '%' : '—', INK]];
+  const kw = (CW - 30) / 4;
+  kp.forEach(([l, v, c], i) => { const x = M + i * (kw + 10);
+    P.rect(x, y, kw, 54, BOX, 8); h2(x + 12, y + 18, l);
+    const vw = P.text(x + 12, y + 40, v, {size: 15, bold: true, color: c, max: kw - 20});
+    if(i === 3 && s.inc > 0) P.text(x + 16 + vw, y + 40, 'delle entrate', {size: 8, color: MUT}); });
+  y += 76;
+  const line = (lbl, val, d) => {
+    P.text(M, y, lbl, {size: 9.5, color: MUT}); let x = M + P.width(lbl, 9.5) + 6;
+    if(d != null){ P.tri(x, y - 1, 6.5, d > 0, d > 0 ? RED : GRN); x += 10; }
+    P.text(x, y, val, {size: 9.5, bold: true}); y += 15;
+  };
+  if(s.prevHas){ const d = s.out - s.prevOut; line(`Spese rispetto al ${yearVs(s)} (${money0(s.prevOut)}):`, `${pctOf(d, s.prevOut) || '—'}  (${sgn(d)}${money0(Math.abs(d))})`, d); }
+  line('Media al mese:', money0(s.avg));
+  if(s.best && s.worst && s.best !== s.worst) line('Mese più leggero e più caro:', `${MESI[s.best.m]} ${money0(s.best.out)} · ${MESI[s.worst.m]} ${money0(s.worst.out)}`);
+  y += 12;
+
+  // spese mese per mese
+  h2(M, y, 'Spese mese per mese'); y += 16;
+  const CH = 70, base = y + CH, mmax = Math.max(...s.months.map(o => o.out || 0), 1), bw = CW / 12;
+  s.months.forEach((o, i) => {
+    const x = M + i * bw;
+    if(o.out != null){
+      const h = o.out > 0 ? Math.max(1.5, (CH - 12) * o.out / mmax) : 0;
+      vbar(x + bw * .2, base, bw * .6, h, o.partial ? ACC2 : ACC);
+      P.text(x + bw / 2, base - h - 4, money0(o.out).replace(/\s?€/, ''), {size: 7, color: MUT, align: 'center'});
+    } else P.rect(x + bw * .2, base - 2, bw * .6, 2, TRK);
+    P.text(x + bw / 2, base + 11, MESI[i].slice(0, 3), {size: 7.5, color: o.out == null ? [.7, .72, .75] : MUT, align: 'center'});
+  });
+  P.line(M, base + .5, M + CW, base + .5, [.8, .82, .85], .6);
+  y = base + 34;
+
+  // due colonne
+  const LW = 290, RX = M + LW + 25, RW = CW - LW - 25;
+  h2(M, y, 'Spese per categoria'); let ly = y + 16;
+  const rows = s.byCat.slice(0, 10), rest = s.byCat.slice(10), maxC = rows.length ? rows[0][1] : 1;
+  if(rest.length) rows.push([`Altre (${rest.length})`, rest.reduce((t, r) => t + r[1], 0)]);
+  rows.forEach(([c, v]) => {
+    P.text(M, ly, c.startsWith('Altre (') ? c : label(c), {size: 9, max: LW - 110});
+    P.text(M + LW, ly, money0(v), {size: 9, bold: true, align: 'right'});
+    P.text(M + LW - 62, ly, `${Math.round(v / s.out * 100)}%`, {size: 8, color: MUT, align: 'right'});
+    P.rect(M, ly + 4, LW, 5, TRK, 2.5); hbar(M, ly + 4, Math.max(2, LW * v / maxC), 5, ACC);
+    ly += 21;
+  });
+  let ry = y;
+  if(s.prevHas && (s.ups.length || s.downs.length)){
+    h2(RX, ry, `Cosa è cambiato vs ${s.y - 1}`); ry += 16;
+    [...s.ups, ...s.downs].forEach(o => {
+      P.tri(RX, ry - 1, 6, o.d > 0, o.d > 0 ? RED : GRN);
+      P.text(RX + 11, ry, label(o.c), {size: 9, max: RW - 75});
+      P.text(RX + RW, ry, `${sgn(o.d)}${money0(Math.abs(o.d))}`, {size: 9, bold: true, align: 'right'});
+      P.text(RX + 11, ry + 10, `da ${money0(o.prev)} a ${money0(o.now)}`, {size: 7.5, color: MUT});
+      ry += 22;
+    });
+    ry += 6;
+  }
+  if(s.bud.ok + s.bud.ko){
+    h2(RX, ry, 'Budget'); ry += 15;
+    P.text(RX, ry, `Rispettato in ${s.bud.ok} ${s.bud.ok === 1 ? 'mese' : 'mesi'} su ${s.bud.ok + s.bud.ko}`, {size: 9, bold: true, color: s.bud.ko ? INK : GRN});
+    ry += 8; const bw2 = RW / (s.bud.ok + s.bud.ko);
+    for(let i = 0; i < s.bud.ok + s.bud.ko; i++) P.rect(RX + i * bw2, ry, bw2 - 2, 6, i < s.bud.ok ? GRN : RED, 1.5);
+    ry += 24;
+  }
+  if(s.out > 0){
+    h2(RX, ry, 'Fisse e variabili'); ry += 10;
+    const fw = RW * s.fixed / s.out;
+    if(s.fixed > 0) P.rect(RX, ry, Math.max(fw - 1, 1), 8, FIX, 2);
+    if(s.variable > 0) P.rect(RX + fw + (s.fixed > 0 ? 1 : 0), ry, RW - fw - (s.fixed > 0 ? 1 : 0), 8, ACC, 2);
+    ry += 22;
+    P.rect(RX, ry - 7, 7, 7, FIX, 1.5); P.text(RX + 11, ry, `Fisse ${money0(s.fixed)}`, {size: 8.5});
+    P.rect(RX + RW / 2, ry - 7, 7, 7, ACC, 1.5); P.text(RX + RW / 2 + 11, ry, `Variabili ${money0(s.variable)}`, {size: 8.5});
+    ry += 18;
+  }
+  if(s.trips.length){
+    h2(RX, ry, 'Viaggi'); ry += 15;
+    s.trips.slice(0, 5).forEach(([n, v]) => { P.text(RX, ry, n, {size: 9, max: RW - 70}); P.text(RX + RW, ry, money0(v), {size: 9, bold: true, align: 'right'}); ry += 14; });
+  }
+  y = Math.max(ly, ry) + 12;
+  if(s.top.length && y + 20 + s.top.length * 14 <= BOT){
+    h2(M, y, "Le spese più grandi dell'anno (senza le ricorrenti)"); y += 14;
+    s.top.forEach(t => {
+      P.text(M, y, shortDate(t.date), {size: 9, color: MUT});
+      P.text(M + 50, y, label(t.cat), {size: 9, bold: true, max: 140});
+      if(t.note) P.text(M + 200, y, t.note, {size: 9, color: MUT, max: CW - 290});
+      P.text(M + CW, y, money(t.amount), {size: 9, bold: true, align: 'right'});
+      y += 14;
+    });
+  }
+  footer();
+
+  // pagina 2: tabelle
+  newPage();
+  P.text(M, y, `Il ${s.y} mese per mese`, {size: 15, bold: true}); y += 24;
+  const C1 = [[M, 'Mese', 'left'], [M + 210, 'Spese', 'right'], [M + 310, 'Entrate', 'right'], [M + 410, 'Saldo', 'right'], [M + CW, 'Risparmio', 'right']];
+  C1.forEach(([x, t, a]) => P.text(x, y, t.toUpperCase(), {size: 8, bold: true, color: MUT, align: a}));
+  y += 6; P.line(M, y, M + CW, y, [.82, .84, .87], .6); y += 14;
+  s.months.forEach((o, i) => {
+    if(o.out == null) return;
+    if(i % 2) P.rect(M - 4, y - 10.5, CW + 8, 15, [.972, .976, .98]);
+    const sd = o.inc - o.out;
+    P.text(M, y, capF(MESI[o.m]) + (o.partial ? ' (in corso)' : ''), {size: 9});
+    P.text(M + 210, y, money(o.out), {size: 9, align: 'right'});
+    P.text(M + 310, y, o.inc ? money(o.inc) : '—', {size: 9, align: 'right', color: o.inc ? GRN : MUT});
+    P.text(M + 410, y, (sd >= 0 ? '+' : '−') + money(Math.abs(sd)), {size: 9, bold: true, align: 'right', color: sd >= 0 ? GRN : RED});
+    P.text(M + CW, y, o.inc > 0 ? Math.round(sd / o.inc * 100) + '%' : '—', {size: 9, align: 'right', color: MUT});
+    y += 15;
+  });
+  P.line(M, y - 9, M + CW, y - 9, [.82, .84, .87], .6); y += 4;
+  P.text(M, y, 'Totale', {size: 9, bold: true});
+  P.text(M + 210, y, money(s.out), {size: 9, bold: true, align: 'right'});
+  P.text(M + 310, y, money(s.inc), {size: 9, bold: true, align: 'right', color: GRN});
+  P.text(M + 410, y, (saldo >= 0 ? '+' : '−') + money(Math.abs(saldo)), {size: 9, bold: true, align: 'right', color: saldo >= 0 ? GRN : RED});
+  P.text(M + CW, y, s.inc > 0 ? Math.round(saldo / s.inc * 100) + '%' : '—', {size: 9, bold: true, align: 'right'});
+  y += 34;
+
+  need(60);
+  P.text(M, y, 'Le categorie', {size: 15, bold: true}); y += 14;
+  if(s.prevHas && s.partial){ P.text(M, y, `Il confronto con il ${s.y - 1} è sullo stesso periodo (da gennaio a oggi).`, {size: 8.5, color: MUT}); }
+  y += 14;
+  const C2 = [[M, 'Categoria', 'left'], [M + 240, String(s.y), 'right'], [M + 340, s.prevHas ? String(s.y - 1) : '', 'right'], [M + 430, s.prevHas ? 'Differenza' : '', 'right'], [M + CW, '% del totale', 'right']];
+  const head2 = () => { C2.forEach(([x, t, a]) => P.text(x, y, t.toUpperCase(), {size: 8, bold: true, color: MUT, align: a})); y += 6; P.line(M, y, M + CW, y, [.82, .84, .87], .6); y += 14; };
+  head2();
+  s.byCat.forEach(([c, v], i) => {
+    if(need(15)) head2();
+    if(i % 2) P.rect(M - 4, y - 10.5, CW + 8, 15, [.972, .976, .98]);
+    const pv = s.prevByCat[c] || 0, d = v - pv;
+    P.text(M, y, label(c), {size: 9, max: 160});
+    P.text(M + 240, y, money(v), {size: 9, bold: true, align: 'right'});
+    if(s.prevHas){
+      P.text(M + 340, y, pv ? money(pv) : '—', {size: 9, align: 'right', color: MUT});
+      P.text(M + 430, y, Math.abs(d) < .5 ? '=' : `${sgn(d)}${money0(Math.abs(d))}`, {size: 9, align: 'right', color: d > .5 ? RED : d < -.5 ? GRN : MUT});
+    }
+    P.text(M + CW, y, `${Math.round(v / s.out * 100)}%`, {size: 9, align: 'right', color: MUT});
+    y += 15;
+  });
+  footer();
+  return P.bytes(`Riepilogo ${s.y}`);
+}
 
 // link rapido, per Siri / app Comandi:
 //   ?nuova&importo=4,50&categoria=caffe&nota=bar sotto casa&tipo=entrata&salva=1
