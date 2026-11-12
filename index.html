@@ -562,6 +562,7 @@
   .w-acc > .ti-chevron-right{color:var(--muted);}
   .w-ico{width:36px; height:36px; border-radius:11px; background:var(--card2); display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0;}
   .w-upd{width:100%; margin-top:12px;}
+  .w-imp{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:10px; flex-wrap:wrap;} .w-imp .btn{flex:1; min-width:200px;}
   .w-arch{margin-top:14px;} .w-arch summary{cursor:pointer; color:var(--muted); font-size:.82rem; font-weight:600;}
   .wh-row{display:grid; grid-template-columns:minmax(0,1fr) auto 16px; gap:10px; align-items:center; padding:11px 0; border-bottom:1px solid var(--line); cursor:pointer;}
   .wh-row:last-child{border-bottom:none;} .wh-row small{display:block; font-size:.72rem; color:var(--muted); margin-top:2px;}
@@ -1095,6 +1096,7 @@
     <p class="sett-note"><b>Backup / Ripristina</b>: copia completa (movimenti, ricorrenti, viaggi, impostazioni); il ripristino sostituisce i dati.
       <b>Excel</b>: esporti i movimenti con il riepilogo dei mesi, oppure importi nuovi movimenti da un file, che si aggiungono a quelli che hai.</p>
     <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(this)">
+    <input type="file" id="wXlsFile" accept=".xlsx,.csv,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" style="display:none" onchange="importWorth(this)">
     <input type="file" id="xlsFile" accept=".xlsx,.csv,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" style="display:none" onchange="importExcel(this)">
   </div>
   <div class="card">
@@ -4291,6 +4293,8 @@ function renderWAcc(){
     ${act.length ? W_ORDER.map(t => { const l = act.filter(a => a.type === t); return l.length ? `<div class="w-grp">${W_TYPES[t].label}</div>` + l.map(row).join('') : ''; }).join('')
       : '<div class="empty">Nessun conto: aggiungine uno per iniziare.</div>'}
     <button class="btn" type="button" onclick="openAcc()"><i class="ti ti-plus"></i> Nuovo conto</button>
+    <div class="w-imp"><button class="btn ghost" type="button" onclick="document.getElementById('wXlsFile').click()"><i class="ti ti-file-import"></i> Importa saldi da Excel</button>
+      <button class="link-btn" type="button" onclick="downloadWorthTemplate()">Scarica il modello</button></div>
     ${arch.length ? `<details class="w-arch"><summary>Conti chiusi (${arch.length})</summary>${arch.map(row).join('')}</details>` : ''}`;
 }
 
@@ -4568,6 +4572,93 @@ function buildWorthPdf(s){
   footer();
   return P.bytes(`Patrimonio ${s.y}`);
 }
+
+// ================= iWorth: importa i saldi da Excel / CSV =================
+// colonne: Data | Conto | Tipo (facoltativo) | Saldo. Per ogni conto e mese tengo il saldo con la data più recente.
+const W_TYPE_WORDS = [['debt', /debit|mutuo|prestit|finanziam|carta di credito/], ['inv', /invest|etf|azion|fond|pension|titol|broker|trading/],
+  ['other', /altro|crypto|cripto|bitcoin|btc|eth|binance|coinbase|oro|buon/], ['liq', /liquid|conto|deposit|contant|risparm|carta|banca/]];
+const wGuessType = (tipo, name) => {
+  const t = normTxt(tipo);
+  if(t){ for(const [k, re] of W_TYPE_WORDS) if(re.test(t)) return k; }
+  const n = normTxt(name);
+  for(const [k, re] of W_TYPE_WORDS.slice(0, 3)) if(re.test(n)) return k;
+  return 'liq';
+};
+function wRowsToSnaps(rows){
+  const isH = (c, re) => re.test(normTxt(c));
+  let hi = -1, map = {};
+  for(let i = 0; i < Math.min(rows.length, 15); i++){
+    const r = rows[i].map(c => String(c ?? ''));
+    const d = r.findIndex(c => isH(c, /^(data|date|giorno)\b/)), a = r.findIndex(c => isH(c, /^(conto|account|nome|rapporto)\b/)),
+      v = r.findIndex(c => isH(c, /^(saldo|valore|importo|balance|controvalore)\b/)), t = r.findIndex(c => isH(c, /^(tipo|type|categoria)\b/));
+    if(d >= 0 && a >= 0 && v >= 0){ hi = i; map = {d, a, v, t}; break; }
+  }
+  if(hi < 0) throw new Error('intestazione');
+  const best = {}, problems = []; let n = 0;
+  rows.slice(hi + 1).forEach((r, i) => {
+    if(!r || r.every(c => String(c ?? '').trim() === '')) return;
+    const date = toIsoDate(r[map.d]), name = String(r[map.a] ?? '').trim(), val = toAmount(r[map.v]);
+    if(!date || !name || isNaN(val)){ problems.push(`Riga ${hi + i + 2}: ${!date ? 'data' : !name ? 'conto' : 'saldo'} non valido`); return; }
+    const p = periodOf(date), k = ymKey(p.y, p.m), key = k + '|' + normTxt(name);
+    if(!best[key] || date >= best[key].date) best[key] = {k, date, name, val, tipo: map.t >= 0 ? r[map.t] : ''};
+    n++;
+  });
+  return {items: Object.values(best), problems, n};
+}
+let wImpUndo = null;
+window.downloadWorthTemplate = function(){
+  const d = new Date(), iso = (y, m, dd) => `${y}-${pad2(m)}-${pad2(dd)}`;
+  const y = d.getFullYear(), m = d.getMonth() + 1;
+  const ex = [['Conto corrente', 'Liquidità', 3200], ['Broker ETF', 'Investimenti', 21500], ['Mutuo', 'Debiti', 95000]];
+  const rows = [['Data', 'Conto', 'Tipo', 'Saldo'].map(H),
+    ...ex.map(([n, t, v]) => [{v: xlDate(iso(y, m, 1)), s: 2}, n, t, {v, s: 3}])];
+  const info = [[{v: 'Come compilare il foglio "Saldi"', s: 5}], [],
+    ['Data', 'il giorno del saldo, es. 31/10/2026'],
+    ['Conto', 'il nome del conto: se non esiste in iWorth lo creo io'],
+    ['Tipo', 'Liquidità, Investimenti, Altro oppure Debiti (se lo lasci vuoto lo indovino dal nome)'],
+    ['Saldo', 'quanto c\'era sul conto quel giorno (per i debiti: quanto devi ancora)'], [],
+    ['Una riga per conto e per mese. Se metti più righe dello stesso conto nello stesso mese, tengo la più recente.'],
+    ['Se un mese è già presente in iWorth, aggiorno solo i conti che trovo nel file.']];
+  download(buildXlsx([{name: 'Saldi', cols: [12, 26, 14, 14], freeze: true, rows}, {name: 'Istruzioni', cols: [14, 90], rows: info}]), 'modello-saldi-iworth.xlsx');
+};
+window.importWorth = async function(inp){
+  const f = inp.files[0]; inp.value = ''; if(!f) return;
+  let res;
+  try {
+    const buf = await f.arrayBuffer(), u = new Uint8Array(buf.slice(0, 2));
+    res = wRowsToSnaps(u[0] === 0x50 && u[1] === 0x4b ? await readXlsx(buf) : readCsv(buf));
+  } catch(e){
+    alert(e.message === 'intestazione' ? 'Non trovo le colonne "Data", "Conto" e "Saldo" nelle prime righe. Usa il modello.' : 'Non riesco a leggere il file. Usa un file Excel (.xlsx) o CSV, meglio partendo dal modello.');
+    return;
+  }
+  if(!res.items.length){ alert('Nel file non ho trovato saldi validi.' + (res.problems.length ? '\n' + res.problems.slice(0, 5).join('\n') : '')); return; }
+  const byName = new Map(wealth.accounts.map(a => [normTxt(a.name), a]));
+  const names = [...new Set(res.items.map(it => normTxt(it.name)))], nuovi = names.filter(n => !byName.has(n));
+  const months = [...new Set(res.items.map(it => it.k))].sort(), already = months.filter(k => wealth.snaps[k]);
+  const msg = `Trovati ${res.items.length} saldi di ${names.length} ${names.length === 1 ? 'conto' : 'conti'} in ${months.length} ${months.length === 1 ? 'mese' : 'mesi'} (${keyLabel(months[0])} → ${keyLabel(months[months.length - 1])}).`
+    + (nuovi.length ? `\nConti nuovi da creare: ${nuovi.length}.` : '')
+    + (already.length ? `\nMesi già presenti: ${already.length} (aggiorno solo questi conti).` : '')
+    + (res.problems.length ? `\nRighe saltate: ${res.problems.length}.` : '') + '\n\nImporto?';
+  if(!confirm(msg)) return;
+  wImpUndo = JSON.stringify(wealth);
+  res.items.forEach(it => {
+    let a = byName.get(normTxt(it.name));
+    if(!a){
+      const type = wGuessType(it.tipo, it.name);
+      a = {id: 'w' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), name: it.name, type, icon: W_TYPES[type].icon};
+      wealth.accounts.push(a); byName.set(normTxt(it.name), a);
+    }
+    const s = wealth.snaps[it.k] || (wealth.snaps[it.k] = {date: it.date, v: {}});
+    if(it.date > s.date) s.date = it.date;
+    s.v[a.id] = Math.round(Math.abs(it.val) * 100) / 100; s.ts = Date.now();
+    tomb = tomb.filter(x => x !== 'ws:' + it.k);
+  });
+  saveLocal(); pushCloud(); render(); showTab('wpan');
+  toast(`Importati ${res.items.length} saldi ✓`, null, {label: 'Annulla', fn: () => {
+    if(!wImpUndo) return; wealth = normWealth(JSON.parse(wImpUndo)); wImpUndo = null;
+    saveLocal(); pushCloud(); render(); toast('Import annullato');
+  }});
+};
 
 // link rapido, per Siri / app Comandi:
 //   ?nuova&importo=4,50&categoria=caffe&nota=bar sotto casa&tipo=entrata&salva=1
