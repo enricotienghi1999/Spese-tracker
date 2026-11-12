@@ -569,6 +569,7 @@
   .wh-row .r{text-align:right;} .wh-row .r b{font-variant-numeric:tabular-nums;} .wh-row > .ti{color:var(--muted);}
   .wh-split{grid-column:1 / -1; font-size:.72rem; color:var(--muted); margin-top:-4px;}
   .w-up-box, .w-acc-box{max-width:460px; max-height:88vh; max-height:88dvh; overflow-y:auto; display:grid; gap:12px;}
+  .w-up-box > *, .w-acc-box > *{min-width:0;} /* le righe lunghe (es. ETF) vanno a capo o si accorciano, la finestra non si allarga */
   .w-up-date{display:flex; align-items:center; gap:12px;} .w-up-date label{margin:0;} .w-up-date input{flex:1;}
   .w-up-note:empty{display:none;} .w-up-note{font-size:.78rem; color:#e0952b;}
   .w-up-row{display:grid; grid-template-columns:36px minmax(0,1fr) 130px; gap:10px; align-items:center; padding:5px 0;}
@@ -592,6 +593,49 @@
   .w-goal-add{display:flex; align-items:center; gap:6px; width:100%; padding:10px 12px; margin-bottom:10px; border-radius:12px; border:1px dashed var(--line);
     background:none; color:var(--muted); font:inherit; font-size:.84rem; font-weight:600; cursor:pointer;}
   .wh-note{grid-column:1 / -1; font-size:.74rem; color:var(--text); opacity:.85; margin-top:-4px;} .wh-note .ti{color:#e0952b;}
+  /* ETF di un conto: quote, prezzi, PAC */
+  .w-lbl-s{font-weight:400; text-transform:none; letter-spacing:0; color:var(--muted);}
+  .w-pos{display:flex; align-items:center; gap:10px; width:100%; padding:9px 0; border:none; border-bottom:1px solid var(--line); background:none;
+    color:var(--text); font:inherit; text-align:left; cursor:pointer;}
+  .w-pos .nm{flex:1; min-width:0; font-weight:500; font-size:.9rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .w-pos .nm small{display:block; font-size:.72rem; color:var(--muted); font-weight:400; overflow:hidden; text-overflow:ellipsis;}
+  .w-pos > b{font-variant-numeric:tabular-nums; font-size:.9rem;} .w-pos > .ti{color:var(--muted);}
+  .w-pos-tot{display:flex; justify-content:space-between; align-items:baseline; gap:8px; padding:9px 0 10px; font-size:.84rem; color:var(--muted);}
+  .w-pos-tot b{color:var(--text); font-variant-numeric:tabular-nums;}
+  #wPosList:empty + .w-goal-add{margin-top:0;} #wPosBox .w-goal-add{margin:10px 0 0;}
+  .w-key{display:grid; gap:8px; padding:12px; border-radius:12px; background:var(--card2); border:1px solid var(--line);}
+  .w-key-txt{font-size:.8rem; line-height:1.45;} .w-key-txt .ti{color:var(--gold);} .w-key-txt a{color:var(--accent); font-weight:600;}
+  .w-key-chg{justify-self:center; margin-top:-4px;}
+  .w-pos-q{display:flex; gap:8px;} .w-pos-q input{flex:1; min-width:0; text-transform:uppercase;} .w-pos-q input::placeholder{text-transform:none;}
+  .w-pos-q .btn{width:auto; flex:0 0 auto; padding:0 14px;}
+  #wPosRes:not(:empty){display:grid; gap:6px; margin-top:8px; max-height:240px; overflow-y:auto;}
+  .w-pos-hit{display:grid; gap:1px; text-align:left; padding:9px 11px; border-radius:11px; border:1px solid var(--line); background:var(--card2);
+    color:var(--text); font:inherit; cursor:pointer;}
+  .w-pos-hit b{font-size:.86rem;} .w-pos-hit span{font-size:.8rem;} .w-pos-hit small{font-size:.7rem; color:var(--muted);}
+  .w-pos-hit small i{color:#e0952b; font-style:normal;}
+  .w-pos-wait{font-size:.8rem; color:var(--muted); padding:4px 2px;} .w-pos-wait.err, #wPosPx .err, .w-px-line .err{color:var(--red);}
+  #wPosPx b{color:var(--text);}
+  .w-pac{display:grid; gap:4px; margin-top:-4px;}
+  .w-pac-row{display:flex; align-items:center; gap:8px; font-size:.86rem; color:var(--muted);}
+  .w-pac-row input{width:96px; text-align:right;} .w-pac-row input[type=number]{width:64px; text-align:center;}
+  .w-buys{font-size:.76rem; color:var(--muted); display:grid; gap:3px;} .w-buys b{color:var(--text); font-weight:600;}
+  .w-buy{display:flex; align-items:center; gap:10px; width:100%; padding:7px 0; border:none; border-bottom:1px solid var(--line); background:none;
+    color:var(--muted); font:inherit; font-size:.76rem; text-align:left; cursor:pointer;}
+  .w-buy span:first-child{min-width:58px; color:var(--text);} .w-buy span:first-child small{display:block; font-size:.66rem; color:var(--muted);}
+  .w-buy span:nth-child(2){flex:1;} .w-buy .ti{opacity:.55;}
+  .w-buy-add{justify-self:start; display:inline-flex; align-items:center; gap:4px; margin-top:6px; font-size:.78rem; text-decoration:none; color:var(--accent); font-weight:600;}
+  .w-buy-ed{display:grid; gap:8px; padding:10px; margin:4px 0; border:1px solid var(--line); border-radius:12px; background:var(--card2);}
+  .w-buy-row{display:flex; align-items:center; gap:8px; font-size:.8rem; color:var(--muted);} .w-buy-row input{flex:1; min-width:0; padding:9px 10px;}
+  .w-buy-row small{white-space:nowrap; color:var(--text); font-size:.78rem;}
+  .w-buy-act{display:flex; align-items:center; gap:14px;} .w-buy-act .btn{width:auto; padding:9px 14px; font-size:.82rem;}
+  .w-buy-act .link-danger{margin:0; padding:0;}
+  .w-px-man{display:inline-flex; align-items:center; gap:6px; flex-wrap:wrap;} .w-px-man input{width:96px; padding:7px 9px;}
+  .w-px-man .btn{width:auto; padding:7px 12px; font-size:.8rem;}
+  .w-buys-t{font-size:.66rem; text-transform:uppercase; letter-spacing:.8px; font-weight:600;}
+  .w-acc .val small.px{color:var(--muted);}
+  .w-px-line{display:flex; align-items:center; gap:6px; flex-wrap:wrap; font-size:.76rem; color:var(--muted); margin:6px 0 12px;} .w-px-line .ti{color:var(--accent);}
+  .w-px-line .link-btn{font-size:.76rem;}
+  .w-up-px{display:block; font-size:.72rem; color:var(--accent); font-weight:400;} .w-up-px .link-btn{font-size:.72rem; color:var(--accent);}
   @media (min-width:1024px){ .w-ins{margin:0;} .w-ins .card{margin:0 0 20px;} }
   .sum-empty{text-align:center; color:var(--muted); padding:30px 0; font-size:.9rem;} .sum-empty .ti{display:block; font-size:1.8rem; margin-bottom:6px;}
   .sum-link.in-col{margin:0 16px 12px;}
@@ -1238,9 +1282,42 @@
     <div><label>Tipo</label><div class="seg w-type" id="wAccType"></div><small class="w-hint" id="wAccTypeHint"></small></div>
     <div><label>Icona</label><div class="w-icons" id="wAccIcons"></div></div>
     <div id="wAccBalBox"><label for="wAccBal" id="wAccBalLbl">Saldo di oggi (facoltativo)</label><input type="text" id="wAccBal" inputmode="decimal" placeholder="0,00" autocomplete="off"></div>
+    <div id="wPosBox" hidden><label>ETF del conto <small class="w-lbl-s">prezzi automatici</small></label>
+      <div id="wPosList"></div>
+      <button class="w-goal-add" type="button" onclick="openPos()"><i class="ti ti-plus"></i> Aggiungi ETF</button>
+      <small class="w-hint">Con le quote (e l'eventuale PAC) calcolo da solo il valore del conto quando aggiorni i saldi.</small></div>
     <label class="switch-row" id="wAccArchRow"><input type="checkbox" id="wAccArch"><span>Conto chiuso<small>Resta nello storico ma non lo aggiorni più</small></span></label>
     <button class="btn" type="button" onclick="saveAcc()"><i class="ti ti-check"></i> Salva</button>
     <button class="link-danger" type="button" id="wAccDel" onclick="deleteAcc()">Elimina conto e saldi passati</button>
+  </div>
+</div>
+<!-- iWorth: ETF di un conto (quote, PAC) -->
+<div class="modal" id="wPosModal" onclick="if(event.target===this)closePos()">
+  <div class="modal-box w-acc-box">
+    <div class="cmp-top"><h3 id="wPosTitle">Aggiungi ETF</h3>
+      <button class="cmp-x" type="button" onclick="closePos()" aria-label="Chiudi"><i class="ti ti-x"></i></button></div>
+    <div class="w-key" id="wPosKeyBox">
+      <div class="w-key-txt"><i class="ti ti-key"></i> Per i prezzi serve una chiave gratuita di Alpha Vantage: <a href="https://www.alphavantage.co/support/#api-key" target="_blank" rel="noopener">prendila qui</a> (basta l'email) e incollala sotto. La inserisci una volta sola.</div>
+      <input type="text" id="wPosKey" placeholder="La tua chiave" autocomplete="off" spellcheck="false" autocapitalize="characters">
+    </div>
+    <div><label for="wPosSym">ETF</label>
+      <div class="w-pos-q"><input type="text" id="wPosSym" placeholder="es. EUNL" autocomplete="off" spellcheck="false" autocapitalize="characters">
+        <button class="btn ghost" type="button" onclick="wPosSearch()"><i class="ti ti-search"></i> Cerca</button></div>
+      <div id="wPosRes"></div>
+      <small class="w-hint" id="wPosPx"></small></div>
+    <div><label for="wPosName">Nome (facoltativo)</label><input type="text" id="wPosName" maxlength="60" placeholder="es. MSCI World" autocomplete="off"></div>
+    <div><label for="wPosQty">Quote che hai oggi</label><input type="text" id="wPosQty" inputmode="decimal" placeholder="es. 152,38" autocomplete="off">
+      <small class="w-hint">Le trovi nell'app del broker. Se non tornano, correggile qui quando vuoi.</small></div>
+    <label class="switch-row"><input type="checkbox" id="wPosPac" onchange="wPosSyncPac()"><span>PAC mensile<small>Ogni mese aggiungo da solo le quote comprate</small></span></label>
+    <div id="wPosPacBox" class="w-pac" hidden>
+      <div class="w-pac-row"><input type="text" id="wPosAmt" inputmode="decimal" placeholder="400" autocomplete="off"><span>€ ogni mese, il giorno</span>
+        <input type="number" id="wPosDay" min="1" max="31" value="10"></div>
+      <small class="w-hint" id="wPosPacHint"></small>
+    </div>
+    <div id="wPosBuys"></div>
+    <button class="btn" type="button" onclick="savePos()"><i class="ti ti-check"></i> Salva</button>
+    <button class="link-danger" type="button" id="wPosDel" onclick="deletePos()">Togli questo ETF</button>
+    <button class="link-btn w-key-chg" type="button" id="wPosKeyChg" onclick="wPosKeyEdit()"></button>
   </div>
 </div>
 
@@ -1334,7 +1411,7 @@ const ICONS = {...CATS, ...CATS_IN};
 // I movimenti salvano sempre il nome "interno" della categoria: rinominare non tocca i dati.
 // budgets[CATEGORIA] = importo al mese; budgetTotal = budget totale del mese (0 = nessuno)
 // budgetOverrides['AAAA-MM'] = {total?, cats: {CATEGORIA: importo}} = budget diverso solo per quel mese (0 = nessun limite)
-const DEFAULT_SETTINGS = {theme: 'smeraldo', currency: 'EUR', startDay: 1, catMeta: {}, budgets: {}, budgetTotal: 0, budgetOverrides: {}};
+const DEFAULT_SETTINGS = {theme: 'smeraldo', currency: 'EUR', startDay: 1, catMeta: {}, budgets: {}, budgetTotal: 0, budgetOverrides: {}, avKey: ''}; // avKey = chiave Alpha Vantage per i prezzi degli ETF
 const normSettings = o => ({...DEFAULT_SETTINGS, ...o, catMeta: {...((o && o.catMeta) || {})}, budgets: {...((o && o.budgets) || {})},
   budgetOverrides: JSON.parse(JSON.stringify((o && o.budgetOverrides) || {}))});
 let settings = normSettings({});
@@ -1519,8 +1596,11 @@ function demoData(){
     {id: 'wcc', name: 'Conto corrente', type: 'liq', icon: 'ti-building-bank'},
     {id: 'wdep', name: 'Conto deposito', type: 'liq', icon: 'ti-pig-money'},
     {id: 'wrev', name: 'Revolut', type: 'liq', icon: 'ti-credit-card'},
-    {id: 'wetf', name: 'Broker ETF', type: 'inv', icon: 'ti-chart-line'},
-    {id: 'wbtc', name: 'Crypto', type: 'other', icon: 'ti-currency-bitcoin'}], snaps: {}, goals: {net: 50000, em: 6, ts: 1}};
+    {id: 'wetf', name: 'Broker ETF', type: 'inv', icon: 'ti-chart-line', pos: [
+      {id: 'pdemo1', sym: 'EUNL.DEX', name: 'MSCI World', qty: 172.4316, pac: {amt: 400, day: 10}, pacLast: todayIso},
+      {id: 'pdemo2', sym: 'VGEA.DEX', name: 'Obbligazioni euro', qty: 268.1502, pac: {amt: 200, day: 10}, pacLast: todayIso}]},
+    {id: 'wbtc', name: 'Crypto', type: 'other', icon: 'ti-currency-bitcoin'}], snaps: {}, goals: {net: 50000, em: 6, ts: 1},
+    px: {'EUNL.DEX': {p: 104.62, d: todayIso, ts: 1}, 'VGEA.DEX': {p: 22.37, d: todayIso, ts: 1}}};
   let cc = 3900, dep = 7600, etf = 23800, btc = 1650, prevD = '0000';
   for(let m = 0; m <= today.getMonth(); m++){
     const date = iso(new Date(today.getFullYear(), m, Math.min(2, today.getDate())));
@@ -1536,9 +1616,9 @@ function demoData(){
 // ---------- stato ----------
 // recurring = regole "ripeti ogni mese": {id, cat, amount, day, tipo, note, trip?, start:'AAAA-MM', since:'AAAA-MM', skip:['AAAA-MM']}
 let tx = [], tomb = [], projects = [], recurring = [];
-let wealth = {accounts: [], snaps: {}, goals: {}}; // iWorth: conti, saldi mese per mese, obiettivi
+let wealth = {accounts: [], snaps: {}, goals: {}, px: {}}; // iWorth: conti, saldi mese per mese, obiettivi, ultimi prezzi degli ETF
 const normWealth = w => ({accounts: Array.isArray(w && w.accounts) ? w.accounts : [], snaps: w && w.snaps && typeof w.snaps === 'object' ? w.snaps : {},
-  goals: w && w.goals && typeof w.goals === 'object' ? w.goals : {}});
+  goals: w && w.goals && typeof w.goals === 'object' ? w.goals : {}, px: w && w.px && typeof w.px === 'object' ? w.px : {}});
 let openTrips = new Set();
 if(DEMO){
   const d = demoData(); tx = d.tx; recurring = d.recurring; wealth = d.wealth;
@@ -1654,6 +1734,9 @@ function mergeCloud(c){
     });
     wealth.snaps = snaps;
     if((cw.goals.ts || 0) >= (wealth.goals.ts || 0)) wealth.goals = cw.goals; // obiettivi: vince il più recente
+    const px = {...wealth.px}; // prezzi degli ETF: per ogni simbolo vince quello scaricato per ultimo
+    for(const [k, x] of Object.entries(cw.px)) if(!px[k] || (x.ts || 0) >= (px[k].ts || 0)) px[k] = x;
+    wealth.px = px;
   }
 }
 
@@ -1722,18 +1805,18 @@ if(!DEMO) onAuthStateChanged(auth, user => {
   if(user){
     setSync(false, 'connessione...');
     unsub = onSnapshot(doc(db, 'users', user.uid), snap => {
-      if(!snap.exists()){ pushCloud(); setSync(true, 'sincronizzato'); render(); return; }
+      if(!snap.exists()){ pushCloud(); setSync(true, 'sincronizzato'); render(); bootPx(); return; }
       const d = snap.data();
-      if(JSON.stringify({tx:d.tx||[], tomb:d.tomb||[], projects:d.projects||[], recurring:d.recurring||[], settings:d.settings||{}, wealth:d.wealth||{accounts:[], snaps:{}, goals:{}}}) === lastPushJson && lastPushJson !== ''){
+      if(JSON.stringify({tx:d.tx||[], tomb:d.tomb||[], projects:d.projects||[], recurring:d.recurring||[], settings:d.settings||{}, wealth:d.wealth||{accounts:[], snaps:{}, goals:{}, px:{}}}) === lastPushJson && lastPushJson !== ''){
         setSync(true, 'sincronizzato'); return;
       }
       mergeCloud(d);
       applyRecurring();
-      saveLocal(); setSync(true, 'sincronizzato'); render(); pushCloud();
+      saveLocal(); setSync(true, 'sincronizzato'); render(); pushCloud(); bootPx();
     }, err => { console.warn(err); setSync(false, 'errore sync'); });
   } else {
     setSync(false, 'solo locale');
-    render();
+    render(); bootPx();
   }
 });
 
@@ -4375,12 +4458,14 @@ function renderWHist(){
 // --- gestione conti ---
 function renderWAcc(){
   const el = document.getElementById('wAccMgr'), last = snapKeys().pop();
-  const row = a => `<div class="w-acc" onclick="openAcc('${a.id}')"><span class="w-ico" style="color:${wColor(a.type)}"><i class="ti ${a.icon || W_TYPES[a.type].icon}"></i></span>
-      <span class="nm">${esc(a.name)}<small>${W_TYPES[a.type].label}</small></span><span class="val"><b>${lastValue(a.id) != null ? mv((a.type === 'debt' ? '−' : '') + fmt0.format(lastValue(a.id))) : '—'}</b></span><i class="ti ti-chevron-right"></i></div>`;
+  const row = a => { const np = wPos(a).length, pv = posValue(a);
+    return `<div class="w-acc" onclick="openAcc('${a.id}')"><span class="w-ico" style="color:${wColor(a.type)}"><i class="ti ${a.icon || W_TYPES[a.type].icon}"></i></span>
+      <span class="nm">${esc(a.name)}<small>${W_TYPES[a.type].label}${np ? ` · ${np} ETF` : ''}</small></span><span class="val"><b>${lastValue(a.id) != null ? mv((a.type === 'debt' ? '−' : '') + fmt0.format(lastValue(a.id))) : '—'}</b>${pv ? `<small class="px">oggi ${mv(fmt0.format(pv.v))}</small>` : ''}</span><i class="ti ti-chevron-right"></i></div>`; };
   const act = wealth.accounts.filter(a => !a.archived), arch = wealth.accounts.filter(a => a.archived);
   el.innerHTML = `<div class="card-head"><h2><i class="ti ti-building-bank"></i> Conti</h2></div>
     ${act.length ? W_ORDER.map(t => { const l = act.filter(a => a.type === t); return l.length ? `<div class="w-grp">${W_TYPES[t].label}</div>` + l.map(row).join('') : ''; }).join('')
       : '<div class="empty">Nessun conto: aggiungine uno per iniziare.</div>'}
+    ${pxLine()}
     <button class="btn" type="button" onclick="openAcc()"><i class="ti ti-plus"></i> Nuovo conto</button>
     <div class="w-imp"><button class="btn ghost" type="button" onclick="document.getElementById('wXlsFile').click()"><i class="ti ti-file-import"></i> Importa saldi da Excel</button>
       <button class="link-btn" type="button" onclick="downloadWorthTemplate()">Scarica il modello</button></div>
@@ -4402,16 +4487,22 @@ window.openUpdate = function(key){
   document.getElementById('wUpList').innerHTML = W_ORDER.map(t => {
     const l = ids.filter(a => a.type === t); if(!l.length) return '';
     return `<div class="w-grp">${W_TYPES[t].label}</div>` + l.map(a => {
-      const v = snap && snap.v[a.id] != null ? snap.v[a.id] : lastValue(a.id, pk), pv = pk ? wealth.snaps[pk].v[a.id] : null;
+      let v = snap && snap.v[a.id] != null ? snap.v[a.id] : lastValue(a.id, pk);
+      const pv = pk ? wealth.snaps[pk].v[a.id] : null;
+      // conto con ETF collegati: se è un aggiornamento nuovo, parto dal valore calcolato con i prezzi
+      const etf = !key && wPos(a).length, cv = etf ? posValue(a) : null, auto = !!(cv && !snap);
+      if(auto) v = cv.v;
       return `<div class="w-up-row"><span class="w-ico" style="color:${wColor(t)}"><i class="ti ${a.icon || W_TYPES[t].icon}"></i></span>
-        <label class="nm" for="wu-${a.id}">${esc(a.name)}${pv != null ? `<small>prima: ${fmt.format(pv)}</small>` : ''}</label>
-        <input type="text" inputmode="decimal" autocomplete="off" id="wu-${a.id}" data-id="${a.id}" placeholder="0,00" value="${v != null ? Number(v).toFixed(2).replace('.', ',') : ''}"></div>`;
+        <label class="nm" for="wu-${a.id}">${esc(a.name)}${pv != null ? `<small>prima: ${fmt.format(pv)}</small>` : ''}${etf ? `<small class="w-up-px" id="wupx-${a.id}"></small>` : ''}</label>
+        <input type="text" inputmode="decimal" autocomplete="off" id="wu-${a.id}" data-id="${a.id}"${auto ? ' data-auto="1"' : ''} placeholder="0,00" value="${v != null ? Number(v).toFixed(2).replace('.', ',') : ''}"></div>`;
     }).join('');
   }).join('');
   document.getElementById('wUpDel').hidden = !(wEditKey && key);
   document.getElementById('wUpMemo').value = snap && snap.note || '';
   document.getElementById('wUpModal').classList.add('show');
-  wUpTotals();
+  wUpPxHints(); wUpTotals();
+  // prezzi vecchi? li aggiorno e, se non hai toccato il campo, aggiorno anche il valore
+  if(!key && wSyms().length) refreshPrices().then(() => { if(document.getElementById('wUpModal').classList.contains('show') && !wEditFromHist) wUpPxRefresh(); });
 };
 window.closeUpdate = function(){ document.getElementById('wUpModal').classList.remove('show'); };
 function wUpRead(){
@@ -4432,7 +4523,7 @@ function wUpTotals(){
   const note = document.getElementById('wUpNote');
   note.textContent = wealth.snaps[k] && k !== wEditKey ? `C'è già un aggiornamento di ${keyLabel(k)}: salvando lo sostituisci.` : '';
 }
-document.getElementById('wUpList').addEventListener('input', wUpTotals);
+document.getElementById('wUpList').addEventListener('input', e => { if(e.target.dataset && e.target.dataset.auto) e.target.dataset.auto = ''; wUpPxHints(); wUpTotals(); });
 document.getElementById('wUpDate').addEventListener('change', wUpTotals);
 window.saveUpdate = function(){
   const date = document.getElementById('wUpDate').value; if(!date){ toast('Scegli la data'); return; }
@@ -4476,23 +4567,26 @@ function renderAccForm(){
   const ic = wAccIcon || W_TYPES[wAccType].icon;
   document.getElementById('wAccIcons').innerHTML = W_ICONS.map(i => `<button type="button" class="${i === ic ? 'on' : ''}" onclick="setAccIcon('${i}')" aria-label="${i.slice(3)}"><i class="ti ${i}"></i></button>`).join('');
   document.getElementById('wAccBalLbl').textContent = wAccType === 'debt' ? 'Quanto devi ancora (facoltativo)' : 'Saldo di oggi (facoltativo)';
+  renderPosList();
 }
 window.setAccType = function(t){ wAccType = t; renderAccForm(); };
 window.setAccIcon = function(i){ wAccIcon = i; renderAccForm(); };
-window.saveAcc = function(){
+// salva i campi della finestra conto; restituisce l'id del conto (null se manca qualcosa)
+function commitAcc(){
   const name = document.getElementById('wAccName').value.trim();
-  if(!name){ toast('Dai un nome al conto'); document.getElementById('wAccName').focus(); return; }
+  if(!name){ toast('Dai un nome al conto'); document.getElementById('wAccName').focus(); return null; }
   if(wAccEdit){
     const a = wAcc(wAccEdit);
     Object.assign(a, {name, type: wAccType, icon: wAccIcon || W_TYPES[wAccType].icon});
     if(document.getElementById('wAccArch').checked) a.archived = true; else delete a.archived;
+    return a.id;
   } else {
     const id = 'w' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
     wealth.accounts.push({id, name, type: wAccType, icon: wAccIcon || W_TYPES[wAccType].icon});
     const bs = document.getElementById('wAccBal').value.trim();
     if(bs){
       const n = parseBig(bs.replace(/^-/, ''));
-      if(!(n >= 0)){ wealth.accounts.pop(); toast('Controlla il saldo'); return; }
+      if(!(n >= 0)){ wealth.accounts.pop(); toast('Controlla il saldo'); return null; }
       // il saldo va nell'aggiornamento di questo mese (se non c'è, lo creo ripartendo dagli ultimi saldi noti degli altri conti)
       const k = curSnapKey();
       if(!wealth.snaps[k]){
@@ -4501,9 +4595,13 @@ window.saveAcc = function(){
       }
       wealth.snaps[k].v[id] = Math.round(n * 100) / 100; wealth.snaps[k].ts = Date.now();
     }
+    return id;
   }
+}
+window.saveAcc = function(){
+  const wasNew = !wAccEdit, id = commitAcc(); if(!id) return;
   saveLocal(); pushCloud(); closeAcc(); render();
-  toast(wAccEdit ? 'Conto aggiornato ✓' : `Conto "${name}" aggiunto ✓`);
+  toast(wasNew ? `Conto "${wAcc(id).name}" aggiunto ✓` : 'Conto aggiornato ✓');
 };
 window.deleteAcc = function(){
   const a = wAcc(wAccEdit); if(!a) return;
@@ -4514,6 +4612,342 @@ window.deleteAcc = function(){
   saveLocal(); pushCloud(); closeAcc(); render(); toast('Conto eliminato');
 };
 document.getElementById('wAccName').addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); saveAcc(); } });
+// ================= iWorth: ETF, prezzi automatici e PAC =================
+// Su un conto "Investimenti" colleghi i tuoi ETF: a.pos = [{id, sym, name, qty, pac?: {amt, day}, pacLast?, buys?: [{d, amt, px, q}]}]
+// Prezzi di chiusura da Alpha Vantage (chiave gratuita, 25 richieste al giorno): wealth.px = {SIMBOLO: {p, d, ts}}.
+// PAC: per ogni mese, nel giorno scelto, aggiungo le quote comprate con l'importo al prezzo di chiusura di quel giorno
+// (o del primo giorno di borsa dopo). pacLast = ultima data già conteggiata: così un mese non si conta mai due volte,
+// nemmeno se lo calcolano sia il telefono sia il PC (la sincronizzazione tiene una sola versione del conto).
+const AV_URL = 'https://www.alphavantage.co/query';
+const PX_ERR = {nokey: 'Serve la chiave per i prezzi', rete: 'Non riesco a raggiungere il servizio prezzi: sei online?',
+  chiave: 'La chiave dei prezzi non è valida', simbolo: 'ETF non trovato: prova con Cerca',
+  limite: 'Troppe richieste al servizio prezzi: riprova tra un po\'', premium: 'Questo dato non è nel piano gratuito'};
+let pxSeries = {}; // chiusure scaricate in questa sessione: {SIMBOLO: {'AAAA-MM-GG': prezzo}}
+let pxBusy = null;
+const wPos = a => a && a.type === 'inv' && Array.isArray(a.pos) ? a.pos : [];
+const wSyms = () => [...new Set(wealth.accounts.filter(a => !a.archived).flatMap(a => wPos(a).map(p => p.sym)).filter(Boolean))];
+const fmtQ = n => (+n || 0).toLocaleString('it-IT', {maximumFractionDigits: 4});
+const normSym = s => String(s || '').trim().toUpperCase().replace(/\s+/g, '');
+// quote: "152,3817" "152.3817" "1.152,38" -> numero (fino a 4 decimali); NaN se non valido
+function parseQty(v){
+  let t = String(v).trim().replace(/\s/g, '');
+  if(t.includes(',')) t = t.replace(/\./g, '').replace(',', '.');
+  return /^(\d+\.?\d*|\.\d+)$/.test(t) ? Math.round(parseFloat(t) * 10000) / 10000 : NaN;
+}
+async function avGet(params){
+  if(!settings.avKey) throw new Error('nokey');
+  let j;
+  try { const r = await fetch(AV_URL + '?' + new URLSearchParams({...params, apikey: settings.avKey})); j = await r.json(); }
+  catch(e){ throw new Error('rete'); }
+  const m = j && (j['Error Message'] || j.Note || j.Information);
+  if(m) throw new Error(/api ?key/i.test(m) && /invalid|missing/i.test(m) ? 'chiave' : /rate limit|per day|per minute|frequency/i.test(m) ? 'limite'
+    : /premium/i.test(m) ? 'premium' : j['Error Message'] ? 'simbolo' : 'limite');
+  return j || {};
+}
+// ultime ~100 chiusure di un ETF (1 richiesta): servono per il prezzo di oggi e per i PAC dei giorni passati
+async function fetchSeries(sym){
+  const t = (await avGet({function: 'TIME_SERIES_DAILY', symbol: sym}))['Time Series (Daily)'];
+  const s = {}; if(t) for(const [d, o] of Object.entries(t)){ const c = +o['4. close']; if(c > 0) s[d] = c; }
+  const last = Object.keys(s).sort().pop(); if(!last) throw new Error('simbolo');
+  pxSeries[sym] = s; wealth.px[sym] = {p: s[last], d: last, ts: Date.now()};
+  return s;
+}
+// valore di oggi degli ETF di un conto (null se manca il prezzo di qualcuno)
+function posValue(a){
+  const l = wPos(a); if(!l.length) return null;
+  let v = 0, d = null;
+  for(const p of l){ const x = wealth.px[p.sym]; if(!x) return null; v += (+p.qty || 0) * x.p; if(!d || x.d < d) d = x.d; }
+  return {v: Math.round(v * 100) / 100, d};
+}
+// date del PAC dopo pacLast e fino a upTo (giorno 31 = ultimo giorno del mese)
+const pacDay = (y, m, day) => { const dt = new Date(y, m, 1); return `${dt.getFullYear()}-${pad2(dt.getMonth() + 1)}-${pad2(Math.min(day, new Date(dt.getFullYear(), dt.getMonth() + 1, 0).getDate()))}`; };
+function pacDates(p, upTo){
+  const out = []; if(!p.pac || !(p.pac.amt > 0) || !p.pacLast) return out;
+  const y = +p.pacLast.slice(0, 4), m = +p.pacLast.slice(5, 7) - 1;
+  for(let i = 0; i < 60; i++){ const d = pacDay(y, m + i, p.pac.day); if(d > upTo) break; if(d > p.pacLast) out.push(d); }
+  return out;
+}
+const nextPac = p => { const y = +p.pacLast.slice(0, 4), m = +p.pacLast.slice(5, 7) - 1; for(let i = 0; i < 3; i++){ const d = pacDay(y, m + i, p.pac.day); if(d > p.pacLast) return d; } };
+// aggiunge le quote dei PAC arrivati (servono le chiusure scaricate); se il prezzo di quel giorno non c'è ancora, aspetta
+function applyPac(){
+  const today = isoDay(new Date()), done = [];
+  wealth.accounts.forEach(a => { if(a.archived) return; wPos(a).forEach(p => {
+    const s = pxSeries[p.sym]; if(!s) return;
+    const days = Object.keys(s).sort();
+    for(const d of pacDates(p, today)){
+      const td = days.find(x => x >= d); if(!td) break; // chiusura di quel giorno non ancora uscita: riprovo più tardi
+      const px = s[td], q = Math.round(p.pac.amt / px * 10000) / 10000;
+      p.qty = Math.round(((+p.qty || 0) + q) * 10000) / 10000;
+      p.buys = [...(p.buys || []), {d: td, amt: p.pac.amt, px, q}].slice(-24);
+      p.pacLast = d; done.push({name: p.name || p.sym, q});
+    }
+  }); });
+  return done;
+}
+// da scaricare: mai scaricato oggi, oppure c'è un PAC in attesa e l'ultimo tentativo è di più di 3 ore fa
+function pxStale(sym){
+  const x = wealth.px[sym]; if(!x || !x.ts) return true;
+  if(isoDay(new Date(x.ts)) !== isoDay(new Date())) return true;
+  const today = isoDay(new Date());
+  const pend = wealth.accounts.some(a => !a.archived && wPos(a).some(p => p.sym === sym && pacDates(p, today).length));
+  return pend && (!pxSeries[sym] || Date.now() - x.ts > 3 * 3600e3);
+}
+function refreshPrices(force){
+  if(pxBusy) return pxBusy;
+  const syms = wSyms().filter(s => force || pxStale(s));
+  if(!settings.avKey || !syms.length) return Promise.resolve({n: 0, err: !settings.avKey && wSyms().length ? 'nokey' : null, pac: []});
+  pxBusy = (async () => {
+    let n = 0, err = null;
+    for(const s of syms){
+      try { await fetchSeries(s); n++; }
+      catch(e){ err = e.message; if(err !== 'simbolo') break; }
+    }
+    const pac = applyPac();
+    if(n || pac.length){ saveLocal(); pushCloud(); render(); }
+    if(pac.length) toast(pac.length === 1 ? `PAC: +${fmtQ(pac[0].q)} quote di ${pac[0].name} ✓` : `PAC: aggiunte le quote di ${pac.map(x => x.name).join(', ')} ✓`, 'ok');
+    return {n, err, pac};
+  })().finally(() => { pxBusy = null; });
+  return pxBusy;
+}
+// in automatico (all'avvio e quando torni sull'app): in silenzio, al massimo una volta al giorno per ETF
+function autoPrices(){ if(settings.avKey && wSyms().length) refreshPrices().catch(() => {}); }
+let pxBoot = false;
+function bootPx(){ if(!pxBoot){ pxBoot = true; setTimeout(autoPrices, 1200); } } // primo giro dopo che i dati sono arrivati dal cloud
+document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible' && pxBoot) autoPrices(); });
+window.manualPx = async function(){
+  const r = await refreshPrices(true);
+  if(r.err) toast(PX_ERR[r.err] || 'Errore', 'warn'); else if(r.n && !r.pac.length) toast('Prezzi aggiornati ✓');
+};
+function pxLine(){
+  const syms = wSyms(); if(!syms.length) return '';
+  if(!settings.avKey){ const a = wealth.accounts.find(x => !x.archived && wPos(x).length);
+    return `<div class="w-px-line"><i class="ti ti-key"></i> Prezzi ETF: manca la chiave · <button class="link-btn" type="button" onclick="openPos('${a.pos[0].id}', '${a.id}')">inseriscila</button></div>`; }
+  const ds = syms.map(s => wealth.px[s] && wealth.px[s].d).filter(Boolean).sort();
+  return `<div class="w-px-line"><i class="ti ti-chart-line"></i> ${ds.length ? `Prezzi ETF del ${shortDate(ds[0])}` : 'Prezzi ETF non ancora scaricati'} · <button class="link-btn" type="button" onclick="manualPx()">aggiorna</button></div>`;
+}
+// --- "Aggiorna i saldi": suggerimento dai prezzi ---
+function wUpPxHints(){
+  document.querySelectorAll('#wUpList .w-up-px').forEach(el => {
+    const id = el.id.slice(5), a = wAcc(id), cv = posValue(a), inp = document.getElementById('wu-' + id);
+    el.innerHTML = !cv ? (settings.avKey ? 'prezzi ETF non ancora scaricati' : 'ETF collegati: manca la chiave dei prezzi')
+      : inp.dataset.auto ? `dai prezzi ETF del ${shortDate(cv.d)}`
+      : `dai prezzi: ${fmt.format(cv.v)} · <button class="link-btn" type="button" onclick="wUpUsePx('${id}')">usa</button>`;
+  });
+}
+window.wUpUsePx = function(id){
+  const cv = posValue(wAcc(id)), inp = document.getElementById('wu-' + id); if(!cv || !inp) return;
+  inp.value = cv.v.toFixed(2).replace('.', ','); inp.dataset.auto = '1'; wUpPxHints(); wUpTotals();
+};
+function wUpPxRefresh(){
+  document.querySelectorAll('#wUpList input[data-auto="1"]').forEach(inp => { const cv = posValue(wAcc(inp.dataset.id)); if(cv) inp.value = cv.v.toFixed(2).replace('.', ','); });
+  wUpPxHints(); wUpTotals();
+}
+// --- elenco ETF nella finestra conto ---
+function renderPosList(){
+  const box = document.getElementById('wPosBox'); box.hidden = wAccType !== 'inv'; if(box.hidden) return;
+  const a = wAccEdit ? wAcc(wAccEdit) : null, l = a ? wPos(a) : [], pv = a ? posValue(a) : null;
+  document.getElementById('wPosList').innerHTML = l.map(p => { const x = wealth.px[p.sym];
+    return `<button type="button" class="w-pos" onclick="openPos('${p.id}')"><span class="nm">${esc(p.name || p.sym)}<small>${esc(p.sym)} · ${fmtQ(p.qty)} quote${p.pac ? ` · PAC ${fmt0.format(p.pac.amt)} il ${p.pac.day}` : ''}</small></span>
+      <b>${x ? mv(fmt0.format((+p.qty || 0) * x.p)) : '—'}</b><i class="ti ti-chevron-right"></i></button>`; }).join('')
+    + (l.length > 1 && pv ? `<div class="w-pos-tot">Valore di oggi <b>${mv(fmt0.format(pv.v))}</b></div>` : '');
+}
+// --- finestra ETF ---
+let wPosAcc = null, wPosEdit = null, wPosHits = [];
+const gid = id => document.getElementById(id);
+window.openPos = function(pid, accId){
+  if(accId){ wAccEdit = accId; wAccType = wAcc(accId).type; }
+  if(!wAccEdit){ // conto nuovo: lo salvo subito, così gli ETF hanno dove stare
+    const id = commitAcc(); if(!id) return;
+    saveLocal(); pushCloud(); wAccEdit = id;
+    gid('wAccTitle').textContent = 'Modifica conto'; gid('wAccBalBox').hidden = true; gid('wAccArchRow').hidden = false; gid('wAccDel').hidden = false;
+    render();
+  }
+  const a = wAcc(wAccEdit); wPosAcc = a.id;
+  const p = pid ? wPos(a).find(x => x.id === pid) : null; wPosEdit = p ? p.id : null;
+  gid('wPosTitle').textContent = p ? 'Modifica ETF' : 'Aggiungi ETF';
+  gid('wPosSym').value = p ? p.sym : ''; gid('wPosName').value = p ? (p.name || '') : '';
+  gid('wPosQty').value = p && p.qty ? fmtQ(p.qty) : '';
+  gid('wPosPac').checked = !!(p && p.pac);
+  gid('wPosAmt').value = p && p.pac ? String(p.pac.amt).replace('.', ',') : ''; gid('wPosDay').value = p && p.pac ? p.pac.day : 10;
+  gid('wPosRes').innerHTML = ''; gid('wPosKey').value = '';
+  gid('wPosDel').hidden = !p;
+  wBuyEdit = null; renderBuys();
+  wPosSyncKey(); wPosSyncPac(); wPosShowPx();
+  gid('wPosModal').classList.add('show');
+  if(!settings.avKey) setTimeout(() => gid('wPosKey').focus(), 50); else if(!p) setTimeout(() => gid('wPosSym').focus(), 50);
+};
+window.closePos = function(){ gid('wPosModal').classList.remove('show'); };
+function wPosSyncKey(edit){
+  gid('wPosKeyBox').hidden = !!settings.avKey && !edit;
+  gid('wPosKeyChg').hidden = !settings.avKey || !!edit;
+  gid('wPosKeyChg').textContent = settings.avKey ? `Chiave prezzi …${settings.avKey.slice(-4)} · cambia` : '';
+}
+window.wPosKeyEdit = function(){ wPosSyncKey(true); gid('wPosKey').value = settings.avKey; gid('wPosKey').focus(); };
+// la chiave scritta nel riquadro viene salvata (e sincronizzata) appena la usi
+function wPosUseKey(){
+  const k = gid('wPosKey').value.trim();
+  if(k && k !== settings.avKey){ settings.avKey = k; saveLocal(); pushCloud(); }
+}
+window.wPosSyncPac = function(){
+  const on = gid('wPosPac').checked; gid('wPosPacBox').hidden = !on; if(!on) return;
+  const p = wPosEdit ? wPos(wAcc(wPosAcc)).find(x => x.id === wPosEdit) : null;
+  const day = Math.min(31, Math.max(1, Math.round(+gid('wPosDay').value || 10)));
+  // stesso giorno di prima: resta il calendario che c'è; altrimenti il primo PAC contato è il prossimo
+  const keep = p && p.pac && p.pac.day === day && p.pacLast;
+  const nx = keep ? nextPac({pacLast: p.pacLast, pac: {day}}) : nextPac({pacLast: isoDay(new Date()), pac: {day}});
+  gid('wPosPacHint').textContent = nx <= isoDay(new Date()) ? `Il PAC del ${shortDate(nx)} lo aggiungo appena esce il prezzo di chiusura.`
+    : `Il prossimo che aggiungo: ${shortDate(nx)}. Le quote di oggi mettile sopra.`;
+};
+gid('wPosDay').addEventListener('input', wPosSyncPac);
+function wPosShowPx(){
+  const sym = normSym(gid('wPosSym').value), x = sym && wealth.px[sym], el = gid('wPosPx'), q = parseQty(gid('wPosQty').value);
+  el.innerHTML = x ? `Prezzo <b>${fmt.format(x.p)}</b> (${x.man ? `scritto a mano il ${shortDate(x.d)}` : `chiusura del ${shortDate(x.d)}`})${q > 0 ? ` · le tue quote valgono <b>${fmt0.format(q * x.p)}</b>` : ''}
+      · <button class="link-btn" type="button" onclick="wPxManual()">modifica</button>`
+    : sym ? `<button class="link-btn" type="button" onclick="wPosTest()">Controlla il prezzo di ${esc(sym)}</button> o <button class="link-btn" type="button" onclick="wPxManual()">scrivilo a mano</button>`
+    : 'Scrivi il ticker (es. EUNL) e premi Cerca: trovi la versione giusta, in euro.';
+}
+gid('wPosQty').addEventListener('input', wPosShowPx);
+gid('wPosSym').addEventListener('input', () => { gid('wPosRes').innerHTML = ''; wPosShowPx(); });
+gid('wPosSym').addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); wPosSearch(); } });
+// prezzo di oggi scritto a mano (vale finché non ne scarico uno più nuovo)
+window.wPxManual = function(){
+  const sym = normSym(gid('wPosSym').value); if(!sym){ toast('Prima scrivi il ticker'); gid('wPosSym').focus(); return; }
+  const x = wealth.px[sym];
+  gid('wPosPx').innerHTML = `<span class="w-px-man">Prezzo di oggi <input type="text" id="wPxIn" inputmode="decimal" value="${x ? String(x.p).replace('.', ',') : ''}" placeholder="0,00"> €
+    <button class="btn" type="button" onclick="wPxManualOk()">OK</button><button class="link-btn" type="button" onclick="wPosShowPx()">annulla</button></span>`;
+  gid('wPxIn').focus(); gid('wPxIn').select();
+  gid('wPxIn').addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); wPxManualOk(); } });
+};
+window.wPxManualOk = function(){
+  const sym = normSym(gid('wPosSym').value), v = parseQty(gid('wPxIn').value);
+  if(!(v > 0)){ toast('Scrivi il prezzo di una quota'); gid('wPxIn').focus(); return; }
+  wealth.px[sym] = {p: v, d: isoDay(new Date()), ts: Date.now(), man: true};
+  saveLocal(); pushCloud(); wPosShowPx(); renderPosList(); render(); toast('Prezzo aggiornato ✓');
+};
+// --- acquisti: quelli del PAC e quelli aggiunti a mano, tutti modificabili ---
+let wBuyEdit = null; // indice in p.buys dell'acquisto aperto (-1 = nuovo, null = nessuno)
+const wPosCur = () => { const a = wAcc(wPosAcc); return a && wPosEdit ? wPos(a).find(x => x.id === wPosEdit) : null; };
+// chiusura di un giorno (o dell'ultimo giorno di borsa prima); per oggi va bene anche l'ultimo prezzo noto
+function priceOn(sym, d){
+  const s = pxSeries[sym];
+  if(s){ const days = Object.keys(s).sort(); if(days.length && d >= days[0]) return s[days.filter(x => x <= d).pop()]; }
+  const x = wealth.px[sym]; return x && d >= x.d ? x.p : null;
+}
+function renderBuys(){
+  const p = wPosCur(), el = gid('wPosBuys');
+  if(!p){ el.innerHTML = ''; return; }
+  const l = (p.buys || []).map((b, i) => ({...b, i})).slice(-5).reverse();
+  const form = b => `<div class="w-buy-ed">
+      <div class="w-buy-row"><input type="date" id="wBuyD" value="${b ? b.d : isoDay(new Date())}" max="${isoDay(new Date())}">
+        <input type="text" id="wBuyAmt" inputmode="decimal" placeholder="importo €" value="${b ? String(b.amt).replace('.', ',') : ''}"></div>
+      <div class="w-buy-row"><span>prezzo</span><input type="text" id="wBuyPx" inputmode="decimal" placeholder="per quota" value="${b ? String(b.px).replace('.', ',') : ''}"${b ? '' : ' data-auto="1"'}><small id="wBuyQ"></small></div>
+      <div class="w-buy-act"><button class="btn" type="button" onclick="saveBuy()"><i class="ti ti-check"></i> Salva acquisto</button>
+        ${b ? '<button class="link-danger" type="button" onclick="delBuy()">Elimina</button>' : ''}<button class="link-btn" type="button" onclick="editBuy(null)">Annulla</button></div></div>`;
+  el.innerHTML = `<div class="w-buys"><span class="w-buys-t">Acquisti</span>${l.map(b => wBuyEdit === b.i ? form(b)
+      : `<button type="button" class="w-buy" onclick="editBuy(${b.i})"><span>${shortDate(b.d)}<small>${b.man ? 'a mano' : 'PAC'}</small></span><span>${fmt0.format(b.amt)} → <b>${fmtQ(b.q)} quote</b> a ${fmt.format(b.px)}</span><i class="ti ti-pencil"></i></button>`).join('')}
+    ${wBuyEdit === -1 ? form(null) : '<button type="button" class="link-btn w-buy-add" onclick="editBuy(-1)"><i class="ti ti-plus"></i> Aggiungi un acquisto</button>'}</div>`;
+  if(wBuyEdit == null) return;
+  gid('wBuyD').addEventListener('change', buyCalc);
+  gid('wBuyAmt').addEventListener('input', buyCalc);
+  gid('wBuyPx').addEventListener('input', () => { gid('wBuyPx').dataset.auto = ''; buyCalc(); });
+  buyCalc();
+}
+// propone il prezzo del giorno scelto (se non l'hai scritto tu) e mostra quante quote sono
+function buyCalc(){
+  const p = wPosCur(), pi = gid('wBuyPx'); if(!p || !pi) return;
+  if(pi.dataset.auto){ const v = priceOn(p.sym, gid('wBuyD').value); pi.value = v ? String(v).replace('.', ',') : ''; }
+  const amt = parseBig(gid('wBuyAmt').value), v = parseQty(pi.value);
+  gid('wBuyQ').textContent = amt > 0 && v > 0 ? `= ${fmtQ(amt / v)} quote` : '';
+}
+window.editBuy = function(i){
+  wBuyEdit = i; renderBuys();
+  if(i === -1){ gid('wBuyAmt').focus(); if(!gid('wBuyPx').value && settings.avKey && !pxSeries[wPosCur().sym]) fetchSeries(wPosCur().sym).then(buyCalc).catch(() => {}); }
+};
+// cambia le quote del conto della differenza (e il campo "Quote che hai oggi", anche se lo stavi modificando)
+function buyQtyShift(p, delta){
+  p.qty = Math.max(0, Math.round(((+p.qty || 0) + delta) * 10000) / 10000);
+  const cur = parseQty(gid('wPosQty').value);
+  gid('wPosQty').value = fmtQ(Math.max(0, Math.round(((cur >= 0 ? cur : 0) + delta) * 10000) / 10000));
+  saveLocal(); pushCloud(); wBuyEdit = null; renderBuys(); renderPosList(); wPosShowPx(); render();
+}
+window.saveBuy = function(){
+  const p = wPosCur(); if(!p) return;
+  const d = gid('wBuyD').value, amt = parseBig(gid('wBuyAmt').value), v = parseQty(gid('wBuyPx').value);
+  if(!d || d > isoDay(new Date())){ toast('Controlla la data'); return; }
+  if(!(amt > 0)){ toast('Scrivi quanto hai investito'); gid('wBuyAmt').focus(); return; }
+  if(!(v > 0)){ toast('Scrivi il prezzo di una quota'); gid('wBuyPx').focus(); return; }
+  const q = Math.round(amt / v * 10000) / 10000, old = wBuyEdit >= 0 ? p.buys[wBuyEdit] : null;
+  const delta = q - (old ? old.q : 0);
+  if(old) Object.assign(old, {d, amt, px: v, q}); else p.buys = [...(p.buys || []), {d, amt, px: v, q, man: true}];
+  p.buys.sort((x, y) => x.d < y.d ? -1 : x.d > y.d ? 1 : 0); p.buys = p.buys.slice(-24);
+  buyQtyShift(p, delta);
+  toast(old ? 'Acquisto corretto ✓' : `Acquisto aggiunto ✓ · +${fmtQ(q)} quote`);
+};
+window.delBuy = function(){
+  const p = wPosCur(), b = p && p.buys[wBuyEdit]; if(!b) return;
+  if(!confirm(`Eliminare l'acquisto del ${shortDate(b.d)}? Le quote scendono di ${fmtQ(b.q)}.`)) return;
+  p.buys.splice(wBuyEdit, 1);
+  buyQtyShift(p, -b.q); toast('Acquisto eliminato');
+};
+window.wPosSearch = async function(){
+  wPosUseKey();
+  const q = gid('wPosSym').value.trim(), box = gid('wPosRes');
+  if(!q){ toast('Scrivi il ticker o il nome, es. EUNL'); gid('wPosSym').focus(); return; }
+  if(!settings.avKey){ toast(PX_ERR.nokey, 'warn'); wPosSyncKey(true); gid('wPosKey').focus(); return; }
+  box.innerHTML = '<div class="w-pos-wait">Cerco…</div>';
+  try {
+    const j = await avGet({function: 'SYMBOL_SEARCH', keywords: q});
+    wPosSyncKey(); // la chiave funziona: il riquadro si chiude
+    wPosHits = (j.bestMatches || []).map(m => ({sym: m['1. symbol'], name: m['2. name'], region: m['4. region'], cur: m['8. currency']})).slice(0, 8);
+    box.innerHTML = wPosHits.length ? wPosHits.map((m, i) => `<button type="button" class="w-pos-hit" onclick="wPosChoose(${i})"><b>${esc(m.sym)}</b><span>${esc(m.name)}</span>
+        <small>${esc(m.region || '')}${m.cur ? ' · ' + esc(m.cur) : ''}${m.cur && m.cur !== 'EUR' ? ' <i>· non in euro</i>' : ''}</small></button>`).join('')
+      : '<div class="w-pos-wait">Nessun risultato: prova con il ticker (es. EUNL) o una parte del nome.</div>';
+  } catch(e){ box.innerHTML = `<div class="w-pos-wait err">${PX_ERR[e.message] || 'Errore'}</div>`; }
+};
+window.wPosChoose = function(i){
+  const m = wPosHits[i]; if(!m) return;
+  gid('wPosSym').value = m.sym; if(!gid('wPosName').value.trim()) gid('wPosName').value = (m.name || '').slice(0, 60);
+  gid('wPosRes').innerHTML = ''; wPosTest();
+};
+window.wPosTest = async function(){
+  wPosUseKey();
+  const sym = normSym(gid('wPosSym').value); if(!sym) return;
+  if(!settings.avKey){ toast(PX_ERR.nokey, 'warn'); wPosSyncKey(true); gid('wPosKey').focus(); return; }
+  gid('wPosPx').textContent = 'Controllo il prezzo…';
+  try { await fetchSeries(sym); saveLocal(); pushCloud(); wPosSyncKey(); wPosShowPx(); }
+  catch(e){ gid('wPosPx').innerHTML = `<span class="err">${PX_ERR[e.message] || 'Errore'}</span>`; }
+};
+window.savePos = function(){
+  wPosUseKey();
+  const a = wAcc(wPosAcc); if(!a) return;
+  const sym = normSym(gid('wPosSym').value);
+  if(!sym){ toast('Scrivi il ticker dell\'ETF'); gid('wPosSym').focus(); return; }
+  const qs = gid('wPosQty').value.trim(), qty = qs ? parseQty(qs) : 0;
+  if(!(qty >= 0)){ toast('Controlla le quote'); gid('wPosQty').focus(); return; }
+  let pac = null;
+  if(gid('wPosPac').checked){
+    const amt = parseBig(gid('wPosAmt').value), day = Math.round(+gid('wPosDay').value);
+    if(!(amt > 0)){ toast('Scrivi quanto investi ogni mese'); gid('wPosAmt').focus(); return; }
+    if(!(day >= 1 && day <= 31)){ toast('Il giorno va da 1 a 31'); gid('wPosDay').focus(); return; }
+    pac = {amt, day};
+  }
+  if(!Array.isArray(a.pos)) a.pos = [];
+  let p = wPosEdit ? a.pos.find(x => x.id === wPosEdit) : null;
+  if(!p){ p = {id: 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5)}; a.pos.push(p); }
+  const sameDay = p.pac && pac && p.pac.day === pac.day && p.pacLast;
+  Object.assign(p, {sym, name: gid('wPosName').value.trim() || sym, qty});
+  if(pac){ p.pac = pac; if(!sameDay) p.pacLast = isoDay(new Date()); } else { delete p.pac; delete p.pacLast; }
+  saveLocal(); pushCloud(); closePos(); renderPosList(); render();
+  toast(wPosEdit ? 'ETF aggiornato ✓' : `${p.name} collegato ✓`);
+  if(!wealth.px[sym] && settings.avKey) refreshPrices().then(r => { renderPosList(); if(r.err) toast(PX_ERR[r.err] || 'Errore', 'warn'); });
+};
+window.deletePos = function(){
+  const a = wAcc(wPosAcc), p = a && wPos(a).find(x => x.id === wPosEdit); if(!p) return;
+  if(!confirm(`Togliere ${p.name || p.sym} da questo conto? I saldi già salvati non cambiano.`)) return;
+  a.pos = a.pos.filter(x => x.id !== p.id);
+  saveLocal(); pushCloud(); closePos(); renderPosList(); render(); toast('ETF tolto');
+};
+
 
 // ================= iWorth: riepilogo dell'anno (finestra + PDF) =================
 // base = l'ultimo aggiornamento dell'anno prima (se c'è), altrimenti il primo dell'anno
