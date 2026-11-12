@@ -582,6 +582,16 @@
   .w-icons button{height:42px; border-radius:11px; border:1px solid var(--line); background:var(--card2); color:var(--muted); font-size:1.15rem; cursor:pointer;}
   .w-icons button.on{border-color:var(--accent); color:var(--accent); background:var(--accent-dk);}
   .hide-money .mv{filter:blur(7px); user-select:none;}
+  .wg{display:grid; gap:7px; padding:6px 0 12px;} .wg + .wg{border-top:1px solid var(--line); padding-top:14px;}
+  .wg-top{display:flex; justify-content:space-between; align-items:baseline; gap:10px; font-size:.88rem;} .wg-top small{color:var(--muted); font-size:.74rem;}
+  .wg-top > b{font-variant-numeric:tabular-nums;}
+  .wg-bar{height:9px; background:var(--card2); border-radius:5px; overflow:hidden;} .wg-bar i{display:block; height:100%; background:var(--grad-worth); border-radius:0 5px 5px 0;}
+  .wg-bar.ok i{background:var(--green);}
+  .wg-s{font-size:.75rem; color:var(--muted); line-height:1.45;} .wg-s b{color:var(--text);}
+  .w-ok{color:var(--green); font-weight:600;}
+  .w-goal-add{display:flex; align-items:center; gap:6px; width:100%; padding:10px 12px; margin-bottom:10px; border-radius:12px; border:1px dashed var(--line);
+    background:none; color:var(--muted); font:inherit; font-size:.84rem; font-weight:600; cursor:pointer;}
+  .wh-note{grid-column:1 / -1; font-size:.74rem; color:var(--text); opacity:.85; margin-top:-4px;} .wh-note .ti{color:#e0952b;}
   @media (min-width:1024px){ .w-ins{margin:0;} .w-ins .card{margin:0 0 20px;} }
   .sum-empty{text-align:center; color:var(--muted); padding:30px 0; font-size:.9rem;} .sum-empty .ti{display:block; font-size:1.8rem; margin-bottom:6px;}
   .sum-link.in-col{margin:0 16px 12px;}
@@ -1021,6 +1031,7 @@
   <div id="wEmpty"></div>
   <div class="cols" id="wMain"><div class="col">
     <div class="card w-hero" id="wHero"></div>
+    <div class="card" id="wGoals"></div>
     <button type="button" class="sum-link in-col" id="wSumLink" onclick="openWorthSummary()"><i class="ti ti-report-analytics"></i><span id="wSumLbl">Riepilogo del patrimonio</span><span class="sum-pdf">PDF</span><i class="ti ti-chevron-right"></i></button>
     <div class="card" id="wMix"></div>
     <div class="w-ins" id="wIns"></div>
@@ -1196,11 +1207,26 @@
     <div class="w-up-date"><label for="wUpDate">Data</label><input type="date" id="wUpDate"></div>
     <div class="w-up-note" id="wUpNote"></div>
     <div id="wUpList"></div>
+    <div><label for="wUpMemo">Nota (facoltativa)</label><input type="text" id="wUpMemo" maxlength="80" placeholder="es. bonus, comprato ETF, spese auto" autocomplete="off"></div>
     <div class="w-up-foot">
       <div class="w-up-tot" id="wUpTot"></div>
       <button class="btn" type="button" onclick="saveUpdate()"><i class="ti ti-check"></i> Salva</button>
       <button class="link-danger" type="button" id="wUpDel" onclick="deleteSnap()" hidden>Elimina questo aggiornamento</button>
     </div>
+  </div>
+</div>
+<!-- iWorth: obiettivi -->
+<div class="modal" id="wGoalModal" onclick="if(event.target===this)closeGoals()">
+  <div class="modal-box w-acc-box">
+    <div class="cmp-top"><h3>Obiettivi</h3>
+      <button class="cmp-x" type="button" onclick="closeGoals()" aria-label="Chiudi"><i class="ti ti-x"></i></button></div>
+    <div><label for="wGoalNet">Patrimonio da raggiungere</label><input type="text" id="wGoalNet" inputmode="decimal" placeholder="es. 50.000" autocomplete="off">
+      <small class="w-hint">Lascia vuoto se non vuoi un obiettivo.</small></div>
+    <div><label>Fondo emergenza</label>
+      <div class="sp-row"><span class="sp-step"><button type="button" onclick="goalEm(-1)" aria-label="Meno"><i class="ti ti-minus"></i></button><b id="wGoalEm">6</b>
+        <button type="button" onclick="goalEm(1)" aria-label="Più"><i class="ti ti-plus"></i></button></span><span>mesi di spese coperti dalla liquidità</span></div>
+      <small class="w-hint" id="wGoalEmHint"></small></div>
+    <button class="btn" type="button" onclick="saveGoals()"><i class="ti ti-check"></i> Salva</button>
   </div>
 </div>
 <!-- iWorth: conto -->
@@ -1375,6 +1401,11 @@ function inMonth(t, y, m){ const [a, b] = periodRange(y, m); return t.date >= a 
 const dayIndex = (iso, y, m) => Math.round((new Date(iso + 'T00:00:00') - new Date(periodRange(y, m)[0] + 'T00:00:00')) / 864e5) + 1;
 const shortDate = iso => { const d = new Date(iso + 'T00:00:00'); return `${d.getDate()} ${MESI[d.getMonth()].slice(0, 3)}`; };
 // "12,50" "12.50" "1.234,50" "€ 7" -> numero; 0 se non valido
+// per saldi e obiettivi: "40.000" o "1.500" sono migliaia (non 40 e 1,5)
+function parseBig(v){
+  const t = String(v).replace(/[^\d.,]/g, '');
+  return /^\d{1,3}(\.\d{3})+$/.test(t) ? parseAmount(t.replace(/\./g, '')) : parseAmount(t);
+}
 function parseAmount(v){
   let t = String(v).replace(/[^\d.,]/g, '');
   if(t.includes(',')) t = t.replace(/\./g, '').replace(',', '.');   // virgola = decimali, punti = migliaia
@@ -1489,7 +1520,7 @@ function demoData(){
     {id: 'wdep', name: 'Conto deposito', type: 'liq', icon: 'ti-pig-money'},
     {id: 'wrev', name: 'Revolut', type: 'liq', icon: 'ti-credit-card'},
     {id: 'wetf', name: 'Broker ETF', type: 'inv', icon: 'ti-chart-line'},
-    {id: 'wbtc', name: 'Crypto', type: 'other', icon: 'ti-currency-bitcoin'}], snaps: {}};
+    {id: 'wbtc', name: 'Crypto', type: 'other', icon: 'ti-currency-bitcoin'}], snaps: {}, goals: {net: 50000, em: 6, ts: 1}};
   let cc = 3900, dep = 7600, etf = 23800, btc = 1650, prevD = '0000';
   for(let m = 0; m <= today.getMonth(); m++){
     const date = iso(new Date(today.getFullYear(), m, Math.min(2, today.getDate())));
@@ -1505,8 +1536,9 @@ function demoData(){
 // ---------- stato ----------
 // recurring = regole "ripeti ogni mese": {id, cat, amount, day, tipo, note, trip?, start:'AAAA-MM', since:'AAAA-MM', skip:['AAAA-MM']}
 let tx = [], tomb = [], projects = [], recurring = [];
-let wealth = {accounts: [], snaps: {}}; // iWorth: conti e saldi mese per mese
-const normWealth = w => ({accounts: Array.isArray(w && w.accounts) ? w.accounts : [], snaps: w && w.snaps && typeof w.snaps === 'object' ? w.snaps : {}});
+let wealth = {accounts: [], snaps: {}, goals: {}}; // iWorth: conti, saldi mese per mese, obiettivi
+const normWealth = w => ({accounts: Array.isArray(w && w.accounts) ? w.accounts : [], snaps: w && w.snaps && typeof w.snaps === 'object' ? w.snaps : {},
+  goals: w && w.goals && typeof w.goals === 'object' ? w.goals : {}});
 let openTrips = new Set();
 if(DEMO){
   const d = demoData(); tx = d.tx; recurring = d.recurring; wealth = d.wealth;
@@ -1621,6 +1653,7 @@ function mergeCloud(c){
       snaps[k] = !l ? r : !r ? l : ((r.ts || 0) >= (l.ts || 0) ? r : l);
     });
     wealth.snaps = snaps;
+    if((cw.goals.ts || 0) >= (wealth.goals.ts || 0)) wealth.goals = cw.goals; // obiettivi: vince il più recente
   }
 }
 
@@ -1691,7 +1724,7 @@ if(!DEMO) onAuthStateChanged(auth, user => {
     unsub = onSnapshot(doc(db, 'users', user.uid), snap => {
       if(!snap.exists()){ pushCloud(); setSync(true, 'sincronizzato'); render(); return; }
       const d = snap.data();
-      if(JSON.stringify({tx:d.tx||[], tomb:d.tomb||[], projects:d.projects||[], recurring:d.recurring||[], settings:d.settings||{}, wealth:d.wealth||{accounts:[], snaps:{}}}) === lastPushJson && lastPushJson !== ''){
+      if(JSON.stringify({tx:d.tx||[], tomb:d.tomb||[], projects:d.projects||[], recurring:d.recurring||[], settings:d.settings||{}, wealth:d.wealth||{accounts:[], snaps:{}, goals:{}}}) === lastPushJson && lastPushJson !== ''){
         setSync(true, 'sincronizzato'); return;
       }
       mergeCloud(d);
@@ -2570,7 +2603,7 @@ function openCmp(){ renderCmpModal(); document.getElementById('cmpModal').classL
 window.closeCmp = function(){ document.getElementById('cmpModal').classList.remove('show'); };
 window.setCmpRef = function(off){ cmpOff = off; renderCmpModal(); renderCompare(); };
 window.setCmpDays = function(v){ cmpDays = v; renderCmpModal(); renderCompare(); };
-document.addEventListener('keydown', e => { if(e.key === 'Escape'){ closeCmp(); closePicker(); closeCatPick(); closeSummary(); closeUpdate(); closeAcc(); closeAppMenu(); } });
+document.addEventListener('keydown', e => { if(e.key === 'Escape'){ closeCmp(); closePicker(); closeCatPick(); closeSummary(); closeUpdate(); closeAcc(); closeGoals(); closeAppMenu(); } });
 
 function renderCmpModal(){
   const c = cmpCtx();
@@ -3292,7 +3325,7 @@ function toAmount(v){
   if(typeof v === 'number') return v;
   const s = String(v ?? '').trim(); if(!s) return NaN;
   const neg = /^\(.*\)$/.test(s) || /^[-−]/.test(s) || /[-−]$/.test(s.replace(/[\s€$£]/g, ''));
-  const a = parseAmount(s.replace(/[()−-]/g, ''));
+  const a = parseBig(s.replace(/[()−-]/g, ''));
   return a ? (neg ? -a : a) : NaN;
 }
 function findCat(v, tp){
@@ -4200,20 +4233,14 @@ function renderWPan(){
         <b>${mv(fmt0.format(last[t]))}</b><small>${Math.round(last[t] / last.assets * 100)}%</small></div>`).join('')}
       ${last.debt > 0 ? `<div class="w-mixrow debt"><span><i class="ti ti-credit-card"></i>Debiti</span><b>${mv('−' + fmt0.format(last.debt))}</b><small></small></div>` : ''}`;
   } else { mix.hidden = true; mix.innerHTML = ''; }
-  // --- le idee: autonomia, crescita del mese, da inizio anno ---
+  renderWGoals(last);
+  // --- da inizio anno e da dove viene la crescita (l'autonomia ora è nel fondo emergenza, tra gli obiettivi) ---
   const ins = [];
-  const avg = avgMonthlySpend();
-  if(last && avg > 0 && last.liq > 0){
-    const mo = last.liq / avg;
-    ins.push(`<div class="card w-ins-card"><div class="w-ins-h"><i class="ti ti-shield-check"></i> Autonomia</div>
-      <div class="w-ins-v">${mo >= 100 ? '99+' : mo.toFixed(1).replace('.', ',')} mesi</div>
-      <div class="w-ins-s">la tua liquidità ÷ la spesa media (${fmt0.format(avg)} al mese, da iSpend)</div></div>`);
-  }
   if(last){
     const y = last.date.slice(0, 4), base = keys.filter(k => k < y + '-01').pop() || keys.find(k => k.startsWith(y));
     if(base && base !== last.key){
       const b = snapTotals(base), d = last.net - b.net;
-      ins.push(`<div class="card w-ins-card"><div class="w-ins-h"><i class="ti ti-calendar-up"></i> Da ${base < y + '-01' ? 'inizio anno' : MESI[+base.slice(5) - 1]}</div>
+      ins.push(`<div class="card w-ins-card wide"><div class="w-ins-h"><i class="ti ti-calendar-up"></i> Da ${base < y + '-01' ? 'inizio anno' : MESI[+base.slice(5) - 1]}</div>
         <div class="w-ins-v ${d >= 0 ? 'up' : 'down'}">${mv(sgn(d) + fmt0.format(Math.abs(d)))}</div>
         <div class="w-ins-s">${b.net ? `${sgn(d)}${(Math.abs(d) / Math.abs(b.net) * 100).toFixed(1).replace('.', ',')}% rispetto a ${keyLabel(base)}` : ''}</div></div>`);
     }
@@ -4270,6 +4297,67 @@ window.toggleHideMoney = function(){
 };
 try { if(localStorage.getItem('speseHideMoney')) document.body.classList.add('hide-money'); } catch(e){}
 
+// --- obiettivi: patrimonio da raggiungere (con previsione) e fondo emergenza (mesi di spese coperti dalla liquidità) ---
+// crescita media al mese negli ultimi 12 mesi, misurata tra gli aggiornamenti
+function worthPace(){
+  const keys = snapKeys(); if(keys.length < 2) return null;
+  const lk = keys[keys.length - 1], [ly, lm] = lk.split('-').map(Number), from = ymKey(ly - 1, lm - 1);
+  const bk = keys.find(k => k >= from && k < lk); if(!bk) return null;
+  const [by, bm] = bk.split('-').map(Number), months = (ly - by) * 12 + (lm - bm);
+  return months >= 1 ? {perMonth: (snapTotals(lk).net - snapTotals(bk).net) / months, months} : null;
+}
+const mesiTxt = m => m >= 100 ? '99+' : m.toFixed(1).replace('.', ',');
+function renderWGoals(last){
+  const el = document.getElementById('wGoals'), g = wealth.goals || {}, avg = avgMonthlySpend();
+  if(!last){ el.hidden = true; el.innerHTML = ''; return; }
+  el.hidden = false;
+  let h = `<div class="card-head"><h2><i class="ti ti-target-arrow"></i> Obiettivi</h2><button class="link-btn" type="button" onclick="openGoals()">Modifica</button></div>`;
+  if(g.net > 0){
+    const pct = Math.max(0, Math.min(100, last.net / g.net * 100)), left = g.net - last.net, pace = worthPace();
+    let when;
+    if(left <= 0) when = '<span class="w-ok"><i class="ti ti-confetti"></i> obiettivo raggiunto</span>';
+    else if(pace && pace.perMonth > 0){
+      const n = Math.ceil(left / pace.perMonth), [ly, lm] = last.key.split('-').map(Number), d = new Date(ly, lm - 1 + n, 1);
+      when = n > 600 ? 'al ritmo attuale ci vogliono più di 50 anni'
+        : `al ritmo degli ultimi ${pace.months} mesi (${mv('+' + fmt0.format(pace.perMonth))} al mese) ci arrivi verso <b>${MESI[d.getMonth()]} ${d.getFullYear()}</b>`;
+    } else if(pace) when = 'negli ultimi mesi il patrimonio non è cresciuto: a questo ritmo non ci arrivi';
+    else when = 'la previsione compare dopo qualche aggiornamento';
+    h += `<div class="wg"><div class="wg-top"><span>Patrimonio <b>${mv(fmt0.format(g.net))}</b></span><b>${Math.floor(pct)}%</b></div>
+      <div class="wg-bar${left <= 0 ? ' ok' : ''}"><i style="width:${pct.toFixed(1)}%"></i></div>
+      <div class="wg-s">${left > 0 ? `mancano ${mv(fmt0.format(left))} · ` : ''}${when}</div></div>`;
+  } else h += `<button class="w-goal-add" type="button" onclick="openGoals()"><i class="ti ti-plus"></i> Imposta un obiettivo di patrimonio</button>`;
+  const em = g.em ?? 6;
+  if(em > 0 && avg > 0){
+    const need = em * avg, mo = last.liq / avg, ok = mo >= em;
+    h += `<div class="wg"><div class="wg-top"><span>Fondo emergenza <b>${em} mesi</b> <small>${mv(fmt0.format(need))}</small></span><b>${mesiTxt(mo)} mesi</b></div>
+      <div class="wg-bar${ok ? ' ok' : ''}"><i style="width:${Math.min(100, last.liq / need * 100).toFixed(1)}%"></i></div>
+      <div class="wg-s">${ok ? `<span class="w-ok"><i class="ti ti-circle-check"></i> ok</span>: con la liquidità copri ${mesiTxt(mo)} mesi di spese`
+        : `ti mancano ${mv(fmt0.format(need - last.liq))} di liquidità per arrivare a ${em} mesi`} · spesa media ${fmt0.format(avg)} al mese (da iSpend)</div></div>`;
+  }
+  el.innerHTML = h;
+}
+let wGoalEm = 6;
+window.openGoals = function(){
+  const g = wealth.goals || {};
+  document.getElementById('wGoalNet').value = g.net > 0 ? fmt0.format(g.net).replace(/\s?€/, '') : '';
+  wGoalEm = g.em ?? 6; goalEmView();
+  document.getElementById('wGoalModal').classList.add('show');
+};
+window.closeGoals = function(){ document.getElementById('wGoalModal').classList.remove('show'); };
+function goalEmView(){
+  const avg = avgMonthlySpend();
+  document.getElementById('wGoalEm').textContent = wGoalEm;
+  document.getElementById('wGoalEmHint').textContent = !wGoalEm ? 'Con 0 il fondo emergenza non compare.'
+    : avg > 0 ? `Con la tua spesa media (${fmt0.format(avg)} al mese) sono ${fmt0.format(wGoalEm * avg)}.` : 'Si calcola sulla tua spesa media in iSpend.';
+}
+window.goalEm = function(d){ wGoalEm = Math.max(0, Math.min(24, wGoalEm + d)); goalEmView(); };
+window.saveGoals = function(){
+  const s = document.getElementById('wGoalNet').value.trim(), n = s ? parseBig(s) : 0;
+  if(s && !(n > 0)){ toast('Controlla la cifra'); return; }
+  wealth.goals = {...(n > 0 ? {net: Math.round(n)} : {}), em: wGoalEm, ts: Date.now()};
+  saveLocal(); pushCloud(); closeGoals(); render(); toast('Obiettivi salvati ✓');
+};
+
 // --- storico: una riga per fotografia ---
 function renderWHist(){
   const keys = snapKeys().reverse(), el = document.getElementById('wHist');
@@ -4280,7 +4368,8 @@ function renderWHist(){
     return `<div class="wh-row" onclick="openUpdate('${k}')"><div><b>${capF(keyLabel(k))}</b><small>aggiornato il ${shortDate(t.date)}</small></div>
       <div class="r"><b>${mv(fmt0.format(t.net))}</b>${d != null ? `<small class="${d >= 0 ? 'up' : 'down'}">${mv(sgn(d) + fmt0.format(Math.abs(d)))}</small>` : '<small>primo aggiornamento</small>'}</div>
       <i class="ti ti-chevron-right"></i>
-      ${d != null ? `<div class="wh-split">risparmio ${mv(sgn(sv) + fmt0.format(Math.abs(sv)))} · mercati e altro ${mv(sgn(d - sv) + fmt0.format(Math.abs(d - sv)))}</div>` : ''}</div>`;
+      ${d != null ? `<div class="wh-split">risparmio ${mv(sgn(sv) + fmt0.format(Math.abs(sv)))} · mercati e altro ${mv(sgn(d - sv) + fmt0.format(Math.abs(d - sv)))}</div>` : ''}
+      ${wealth.snaps[k].note ? `<div class="wh-note"><i class="ti ti-note"></i> ${esc(wealth.snaps[k].note)}</div>` : ''}</div>`;
   }).join('');
 }
 // --- gestione conti ---
@@ -4320,6 +4409,7 @@ window.openUpdate = function(key){
     }).join('');
   }).join('');
   document.getElementById('wUpDel').hidden = !(wEditKey && key);
+  document.getElementById('wUpMemo').value = snap && snap.note || '';
   document.getElementById('wUpModal').classList.add('show');
   wUpTotals();
 };
@@ -4328,7 +4418,7 @@ function wUpRead(){
   const v = {}; let bad = null;
   document.querySelectorAll('#wUpList input').forEach(i => {
     const s = i.value.trim(); if(!s) return;
-    const n = parseAmount(s.replace(/^-/, ''));
+    const n = parseBig(s.replace(/^-/, ''));
     if(!(n >= 0)) bad = i; else v[i.dataset.id] = Math.round(n * 100) / 100;
   });
   return {v, bad};
@@ -4351,7 +4441,8 @@ window.saveUpdate = function(){
   const p = periodOf(date), k = ymKey(p.y, p.m);
   if(wEditKey && wEditFromHist && wEditKey !== k){ delete wealth.snaps[wEditKey]; tomb.push('ws:' + wEditKey); }
   tomb = tomb.filter(x => x !== 'ws:' + k);
-  wealth.snaps[k] = {date, ts: Date.now(), v};
+  const memo = document.getElementById('wUpMemo').value.trim();
+  wealth.snaps[k] = {date, ts: Date.now(), v, ...(memo ? {note: memo} : {})};
   saveLocal(); pushCloud(); closeUpdate(); render();
   const t = snapTotals(k);
   toast(`Saldi di ${MESI[p.m]} salvati ✓ · patrimonio ${fmt0.format(t.net)}`);
@@ -4400,7 +4491,7 @@ window.saveAcc = function(){
     wealth.accounts.push({id, name, type: wAccType, icon: wAccIcon || W_TYPES[wAccType].icon});
     const bs = document.getElementById('wAccBal').value.trim();
     if(bs){
-      const n = parseAmount(bs.replace(/^-/, ''));
+      const n = parseBig(bs.replace(/^-/, ''));
       if(!(n >= 0)){ wealth.accounts.pop(); toast('Controlla il saldo'); return; }
       // il saldo va nell'aggiornamento di questo mese (se non c'è, lo creo ripartendo dagli ultimi saldi noti degli altri conti)
       const k = curSnapKey();
@@ -4475,7 +4566,8 @@ function renderWorthSummary(){
     </div>`}
     <div class="sum-sec"><h4>Mese per mese</h4>${s.months.slice().reverse().map(o => `<div class="wh-row"><div><b>${capF(keyLabel(o.k))}</b><small>al ${shortDate(o.t.date)}</small></div>
       <div class="r"><b>${v(o.t.net)}</b>${o.d != null ? `<small class="${o.d >= 0 ? 'up' : 'down'}">${sv(o.d)}</small>` : '<small>partenza</small>'}</div><span></span>
-      ${o.d != null ? `<div class="wh-split">risparmio ${sv(o.sv)} · mercati e altro ${sv(o.mk)}</div>` : ''}</div>`).join('')}</div>
+      ${o.d != null ? `<div class="wh-split">risparmio ${sv(o.sv)} · mercati e altro ${sv(o.mk)}</div>` : ''}
+      ${wealth.snaps[o.k].note ? `<div class="wh-note"><i class="ti ti-note"></i> ${esc(wealth.snaps[o.k].note)}</div>` : ''}</div>`).join('')}</div>
     <div class="sum-sec"><h4>Come è diviso (${keyLabel(s.startKey)} → ${keyLabel(s.endKey)})</h4>${W_ORDER.filter(t => s.S[t] || s.E[t]).map(t => `<div class="sum-ch">
       <span class="cat"><i class="sw" style="background:${wColor(t)};width:10px;height:10px;border-radius:3px;display:inline-block"></i><span>${W_TYPES[t].label}</span></span>
       <span class="was">${v(s.S[t])} → ${v(s.E[t])}</span><b class="${(t === 'debt' ? -1 : 1) * (s.E[t] - s.S[t]) >= 0 ? 'down' : 'up'}">${sv(s.E[t] - s.S[t])}</b></div>`).join('')}</div>
